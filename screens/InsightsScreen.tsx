@@ -90,11 +90,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 8,
   },
   content: {
     paddingTop: 80,

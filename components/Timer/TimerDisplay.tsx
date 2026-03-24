@@ -64,11 +64,6 @@ const styles = StyleSheet.create({
     aspectRatio: 0.8, // Dynamic height relative to width
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
   },
   timeText: {
     fontSize: 104, // Absolutely massive
