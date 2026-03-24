@@ -5,15 +5,7 @@ import { useThemeStore } from '../store/useThemeStore';
 import { PALETTES } from '../constants/Palettes';
 
 export function SettingsScreen() {
-  const timerSettings = useTimerStore((state) => ({
-    focusDurationMin: state.focusDurationMin,
-    breakDurationMin: state.breakDurationMin,
-    longBreakDurationMin: state.longBreakDurationMin,
-    cyclesBeforeLongBreak: state.cyclesBeforeLongBreak,
-    soundEnabled: state.soundEnabled,
-    hapticEnabled: state.hapticEnabled,
-    updateSettings: state.updateSettings
-  }));
+  const timerSettings = useTimerStore();
   
   const { activePaletteId, palette, setPalette } = useThemeStore();
 
