@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimerStore, SessionRecord } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
+import { Clock, Flame, Target, Tag } from 'lucide-react-native';
 
 export function InsightsScreen() {
   const { labels } = useTimerStore();
@@ -33,12 +34,20 @@ export function InsightsScreen() {
     return `${minutes}m`;
   };
 
-  // Calculate Active Days
   const uniqueDays = new Set(focusHistory.map(r => {
     const d = new Date(r.timestamp);
     return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
   }));
   const activeDaysCount = uniqueDays.size;
+
+  const labelTimes = labels.map(label => ({
+    ...label,
+    seconds: focusHistory
+      .filter(r => r.labelId === label.id)
+      .reduce((acc, r) => acc + r.durationInSeconds, 0)
+  })).filter(l => l.seconds > 0).sort((a,b) => b.seconds - a.seconds);
+
+  const maxLabelTime = labelTimes.length > 0 ? Math.max(...labelTimes.map(l => l.seconds)) : 0;
 
   return (
     <ScrollView 
@@ -48,36 +57,55 @@ export function InsightsScreen() {
     >
       <Text style={[styles.screenTitle, { color: palette.primaryText }]}>Insights</Text>
       
-      <View style={styles.statsContainer}>
-        <View style={[styles.statCard, { backgroundColor: palette.timerBlock }]}>
-          <Text style={[styles.statLabel, { color: palette.secondaryText }]}>Total Focus Time</Text>
-          <Text style={[styles.statValue, { color: palette.timerText }]}>{formatTime(totalFocusSeconds)}</Text>
-          <Text style={[styles.statSub, { color: palette.timerText }]}>{totalFocusSessions} sessions completed</Text>
+      <View style={styles.bentoGrid}>
+        {/* Full-width main card */}
+        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
+          <View style={styles.bentoHeaderRow}>
+            <Clock size={20} color={palette.focusColor} />
+            <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Total Focus Time</Text>
+          </View>
+          <Text style={[styles.bentoHugeValue, { color: palette.timerText }]}>{formatTime(totalFocusSeconds)}</Text>
         </View>
 
-        <View style={[styles.statCard, { backgroundColor: palette.timerBlock }]}>
-          <Text style={[styles.statLabel, { color: palette.secondaryText }]}>Active Days</Text>
-          <Text style={[styles.statValue, { color: palette.timerText }]}>{activeDaysCount}</Text>
-          <Text style={[styles.statSub, { color: palette.timerText }]}>Days with focus sessions</Text>
+        {/* Two-column sub cards */}
+        <View style={styles.bentoSplit}>
+          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: palette.timerBlock }]}>
+            <Target size={24} color={palette.breakColor} style={{ marginBottom: 12 }} />
+            <Text style={[styles.bentoValue, { color: palette.timerText }]}>{totalFocusSessions}</Text>
+            <Text style={[styles.bentoSubLabel, { color: palette.secondaryText }]}>Sessions</Text>
+          </View>
+
+          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: palette.timerBlock }]}>
+            <Flame size={24} color={palette.focusColor} style={{ marginBottom: 12 }} />
+            <Text style={[styles.bentoValue, { color: palette.timerText }]}>{activeDaysCount}</Text>
+            <Text style={[styles.bentoSubLabel, { color: palette.secondaryText }]}>Active Days</Text>
+          </View>
         </View>
 
-        {labels.length > 0 && (
-          <View style={[styles.statCard, { backgroundColor: palette.timerBlock }]}>
-            <Text style={[styles.statLabel, { color: palette.secondaryText, marginBottom: 12 }]}>Time per Label</Text>
-            {labels.map(label => {
-              const seconds = focusHistory
-                .filter(r => r.labelId === label.id)
-                .reduce((acc, r) => acc + r.durationInSeconds, 0);
-              
-              if (seconds === 0) return null;
-
-              return (
-                <View key={label.id} style={styles.labelRow}>
-                  <Text style={[styles.labelName, { color: palette.timerText }]}>{label.name}</Text>
-                  <Text style={[styles.labelTime, { color: palette.accentColor }]}>{formatTime(seconds)}</Text>
-                </View>
-              );
-            })}
+        {/* Labels Block */}
+        {labelTimes.length > 0 && (
+          <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock, marginTop: 16 }]}>
+            <View style={styles.bentoHeaderRow}>
+              <Tag size={20} color={palette.accentColor} />
+              <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Time by Label</Text>
+            </View>
+            
+            <View style={styles.labelsContainer}>
+              {labelTimes.map((label, idx) => {
+                const ratio = maxLabelTime > 0 ? label.seconds / maxLabelTime : 0;
+                return (
+                  <View key={label.id} style={[styles.labelRow, idx !== labelTimes.length - 1 && styles.labelRowMargin]}>
+                    <View style={styles.labelHeader}>
+                      <Text style={[styles.labelName, { color: palette.timerText }]}>{label.name}</Text>
+                      <Text style={[styles.labelTime, { color: palette.secondaryText }]}>{formatTime(label.seconds)}</Text>
+                    </View>
+                    <View style={[styles.progressTrack, { backgroundColor: palette.background + '20' }]}>
+                      <View style={[styles.progressFill, { backgroundColor: palette.focusColor, width: `${ratio * 100}%` }]} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
           </View>
         )}
       </View>
@@ -102,42 +130,81 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     textAlign: 'center',
   },
-  statsContainer: {
+  bentoGrid: {
     gap: 16,
   },
-  statCard: {
-    padding: 24,
+  bentoCard: {
     borderRadius: 24,
+    padding: 24,
   },
-  statLabel: {
+  bentoFull: {
+    width: '100%',
+  },
+  bentoSplit: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  bentoHalf: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  bentoHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  bentoLabel: {
     fontSize: 16,
     fontWeight: '500',
-    marginBottom: 8,
   },
-  statValue: {
-    fontSize: 32,
+  bentoHugeValue: {
+    fontSize: 40,
+    fontWeight: '700',
+    letterSpacing: -1,
+  },
+  bentoValue: {
+    fontSize: 28,
     fontWeight: '700',
     marginBottom: 4,
   },
-  statSub: {
+  bentoSubLabel: {
     fontSize: 14,
-    fontWeight: '400',
-    opacity: 0.8,
+    fontWeight: '500',
+  },
+  labelsContainer: {
+    marginTop: 8,
   },
   labelRow: {
+    // container for a single label
+  },
+  labelRowMargin: {
+    marginBottom: 20,
+  },
+  labelHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 8,
   },
   labelName: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
   },
   labelTime: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    width: '100%',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
   },
 });
