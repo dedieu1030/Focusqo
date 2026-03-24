@@ -242,6 +242,7 @@ const styles = StyleSheet.create({
   modeTitle: {
     fontSize: 20,
     fontWeight: '500',
+    marginBottom: 32,
   },
   modalOverlay: {
     flex: 1,

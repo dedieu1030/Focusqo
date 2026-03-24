@@ -21,10 +21,10 @@ export function TimerDisplay({ timeLeft, onPress, disabled }: TimerDisplayProps)
 
   const getShapeStyles = () => {
     let s: any = { borderRadius: 36 };
-    if (timerShape === 'rounded') s = { borderRadius: 40 };
-    if (timerShape === 'circle') s = { borderRadius: 100 }; // Very round pill
-    if (timerShape === 'arch') s = { borderTopLeftRadius: 100, borderTopRightRadius: 100, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 };
-    if (timerShape === 'leaf') s = { borderTopLeftRadius: 100, borderBottomRightRadius: 100, borderTopRightRadius: 32, borderBottomLeftRadius: 32 };
+    if (timerShape === 'rounded') s = { borderRadius: 44 };
+    if (timerShape === 'circle') s = { borderRadius: 120 }; // Very round pill
+    if (timerShape === 'arch') s = { borderTopLeftRadius: 120, borderTopRightRadius: 120, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 };
+    if (timerShape === 'leaf') s = { borderTopLeftRadius: 120, borderBottomRightRadius: 120, borderTopRightRadius: 36, borderBottomLeftRadius: 36 };
     
     return [styles.timeBlock, { backgroundColor: palette.timerBlock }, s];
   };
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   timeBlock: {
-    width: 154,
-    height: 180,
+    width: 164,
+    height: 190,
     justifyContent: 'center',
     alignItems: 'center',
     // Slight shadow to give it a little pop
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   timeText: {
-    fontSize: 84,
+    fontSize: 96,
     fontWeight: '700',
   },
 });
