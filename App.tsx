@@ -60,7 +60,7 @@ export default function App() {
       </View>
       
       {/* The dark bottom section that stays fixed */}
-      <SafeAreaView style={[styles.bottomSection, { backgroundColor: '#111111' }]}>
+      <SafeAreaView style={[styles.bottomSection, { backgroundColor: '#000000' }]}>
         <TodayRhythm />
         <View style={styles.spacer} />
         <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />
@@ -72,7 +72,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111111', 
+    backgroundColor: '#000000', 
   },
   cardContainer: {
     flex: 1,

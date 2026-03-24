@@ -88,12 +88,12 @@ export const PALETTES: Record<string, ColorPalette> = {
     id: 'monochrome',
     name: 'Monochrome',
     background: '#FFFFFF',
-    timerBlock: '#333333', // Distinct dark gray
+    timerBlock: '#111111',
     timerText: '#FFFFFF',
     primaryText: '#111111',
     secondaryText: '#888888',
-    focusColor: '#666666',
-    breakColor: '#999999',
+    focusColor: '#333333',
+    breakColor: '#666666',
     accentColor: '#CCCCCC',
   },
   forest: {
