@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { TimerDisplay } from '../components/Timer/TimerDisplay';
 import { TimerControls } from '../components/Timer/TimerControls';
 import { useTimerStore } from '../store/useTimerStore';
@@ -11,12 +11,13 @@ export function TimerScreen() {
   const { 
     mode, timerState, timeLeft, startTimer, pauseTimer, skipSession, resetTimer,
     labels, selectedLabelId, selectLabel, addLabel,
-    focusDurationMin, breakDurationMin, longBreakDurationMin, updateSettings
+    focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, updateSettings
   } = useTimerStore();
   
   const { palette } = useThemeStore();
   const [isLabelModalVisible, setLabelModalVisible] = useState(false);
   const [isDurationModalVisible, setDurationModalVisible] = useState(false);
+  const [editingUnit, setEditingUnit] = useState<'min' | 'sec' | null>(null);
   const [customTimeInput, setCustomTimeInput] = useState('');
   const [newLabelText, setNewLabelText] = useState('');
 
@@ -38,9 +39,10 @@ export function TimerScreen() {
   };
 
   const getHeaderModeText = () => {
-    if (mode === 'focus') return `Focus ${focusDurationMin}m`;
-    if (mode === 'break') return `Break ${breakDurationMin}m`;
-    return `Long Brk ${longBreakDurationMin}m`;
+    const m = mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin);
+    const s = mode === 'focus' ? focusDurationSec : (mode === 'break' ? breakDurationSec : longBreakDurationSec);
+    const label = mode === 'focus' ? 'Focus' : (mode === 'break' ? 'Break' : 'Long Brk');
+    return `${label} ${m}m${s > 0 ? ` ${s}s` : ''}`;
   };
 
   const handleCreateLabel = () => {
@@ -50,24 +52,47 @@ export function TimerScreen() {
     }
   };
 
-  const handleOpenDurationModal = () => {
+  const handleOpenDurationModal = (unit: 'min' | 'sec') => {
     if (timerState !== 'running') {
-      const current = mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin);
-      setCustomTimeInput(String(current));
+      let currentVal = 0;
+      
+      let durMin = focusDurationMin; let durSec = focusDurationSec;
+      if (mode === 'break') { durMin = breakDurationMin; durSec = breakDurationSec; }
+      if (mode === 'longBreak') { durMin = longBreakDurationMin; durSec = longBreakDurationSec; }
+      
+      currentVal = unit === 'min' ? durMin : durSec;
+
+      setEditingUnit(unit);
+      setCustomTimeInput(String(currentVal));
       setDurationModalVisible(true);
     }
   };
 
   const handleSaveDuration = () => {
     let val = parseInt(customTimeInput, 10);
-    if (isNaN(val) || val <= 0) val = 1;
-    if (val > 180) val = 180;
+    if (isNaN(val) || val < 0) val = 0;
 
-    let key: 'focusDurationMin' | 'breakDurationMin' | 'longBreakDurationMin' = 'focusDurationMin';
-    if (mode === 'break') key = 'breakDurationMin';
-    if (mode === 'longBreak') key = 'longBreakDurationMin';
+    let keyMin: any = 'focusDurationMin';
+    let keySec: any = 'focusDurationSec';
+    if (mode === 'break') { keyMin = 'breakDurationMin'; keySec = 'breakDurationSec'; }
+    if (mode === 'longBreak') { keyMin = 'longBreakDurationMin'; keySec = 'longBreakDurationSec'; }
+
+    // Cap limits
+    if (editingUnit === 'min' && val > 180) val = 180;
+    if (editingUnit === 'sec' && val > 59) val = 59;
     
-    updateSettings({ [key]: val });
+    // Prevent exactly 0m 0s
+    let newMin = editingUnit === 'min' ? val : (mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin));
+    let newSec = editingUnit === 'sec' ? val : (mode === 'focus' ? focusDurationSec : (mode === 'break' ? breakDurationSec : longBreakDurationSec));
+    
+    if (newMin === 0 && newSec === 0) {
+      if (editingUnit === 'min') newMin = 1;
+      else newSec = 1;
+      val = 1;
+    }
+
+    const keyToUpdate = editingUnit === 'min' ? keyMin : keySec;
+    updateSettings({ [keyToUpdate]: val });
     
     if (timerState === 'paused' || timerState === 'finished') {
       resetTimer();
@@ -101,7 +126,8 @@ export function TimerScreen() {
         
         <TimerDisplay 
           timeLeft={timeLeft} 
-          onPress={handleOpenDurationModal}
+          onPressMin={() => handleOpenDurationModal('min')}
+          onPressSec={() => handleOpenDurationModal('sec')}
           disabled={timerState === 'running'} 
         />
         
@@ -116,44 +142,42 @@ export function TimerScreen() {
 
       {/* Duration Modification Modal */}
       <Modal visible={isDurationModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: palette.background }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: palette.primaryText }]}>Set {getModeTitle()} Time</Text>
+              <Text style={[styles.modalTitle, { color: palette.primaryText }]}>
+                Set {getModeTitle()} {editingUnit === 'min' ? 'Minutes' : 'Seconds'}
+              </Text>
               <TouchableOpacity onPress={() => setDurationModalVisible(false)}>
                 <X color={palette.secondaryText} />
               </TouchableOpacity>
             </View>
             
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24, justifyContent: 'center' }}>
               <TextInput 
-                style={[styles.labelInput, { color: palette.primaryText, borderColor: palette.accentColor, fontSize: 24, textAlign: 'center', height: 64 }]}
-                keyboardType="numeric"
+                style={[styles.labelInput, { color: palette.primaryText, borderColor: palette.accentColor, fontSize: 32, textAlign: 'center', minHeight: 64 }]}
+                keyboardType="number-pad"
                 maxLength={3}
                 value={customTimeInput}
                 onChangeText={setCustomTimeInput}
                 autoFocus
               />
-              <Text style={{ fontSize: 18, color: palette.secondaryText, marginLeft: 16 }}>minutes</Text>
+              <Text style={{ fontSize: 20, color: palette.secondaryText, marginLeft: 16 }}>{editingUnit === 'min' ? 'min' : 'sec'}</Text>
             </View>
             
             <TouchableOpacity 
               style={[styles.saveBtn, { backgroundColor: palette.focusColor }]}
               onPress={handleSaveDuration}
             >
-              <Text style={{ color: palette.background, fontWeight: '600', fontSize: 16, textAlign: 'center' }}>Save Duration</Text>
+              <Text style={{ color: palette.background, fontWeight: '600', fontSize: 16, textAlign: 'center' }}>Save Custom Duration</Text>
             </TouchableOpacity>
-            
-            <Text style={{ color: palette.secondaryText, marginTop: 16, textAlign: 'center' }}>
-              Changes the default duration for {getModeTitle()} sessions.
-            </Text>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Label Selection Modal */}
       <Modal visible={isLabelModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: palette.background }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: palette.primaryText }]}>Select Label</Text>
@@ -198,7 +222,7 @@ export function TimerScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
     </View>

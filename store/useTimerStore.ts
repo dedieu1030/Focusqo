@@ -23,8 +23,11 @@ export interface SessionRecord {
 
 interface TimerSettings {
   focusDurationMin: number;
+  focusDurationSec: number;
   breakDurationMin: number;
+  breakDurationSec: number;
   longBreakDurationMin: number;
+  longBreakDurationSec: number;
   cyclesBeforeLongBreak: number;
   soundEnabled: boolean;
   hapticEnabled: boolean;
@@ -65,8 +68,11 @@ const STORAGE_KEY = '@focusqo_timer_state_v2';
 
 const defaultSettings: TimerSettings = {
   focusDurationMin: 25,
+  focusDurationSec: 0,
   breakDurationMin: 5,
+  breakDurationSec: 0,
   longBreakDurationMin: 15,
+  longBreakDurationSec: 0,
   cyclesBeforeLongBreak: 4,
   soundEnabled: true,
   hapticEnabled: true,
@@ -96,13 +102,15 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   updateSettings: async (newSettings) => {
     set((state) => ({ ...state, ...newSettings }));
     
-    // If timer is idle, immediately apply the new duration to timeLeft
+    // Immediately recaulate timeLeft if idle
     const updatedState = get();
     if (updatedState.timerState === 'idle') {
-      let duration = updatedState.focusDurationMin;
-      if (updatedState.mode === 'break') duration = updatedState.breakDurationMin;
-      if (updatedState.mode === 'longBreak') duration = updatedState.longBreakDurationMin;
-      set({ timeLeft: duration * 60 });
+      let durMin = updatedState.focusDurationMin;
+      let durSec = updatedState.focusDurationSec;
+      if (updatedState.mode === 'break') { durMin = updatedState.breakDurationMin; durSec = updatedState.breakDurationSec; }
+      if (updatedState.mode === 'longBreak') { durMin = updatedState.longBreakDurationMin; durSec = updatedState.longBreakDurationSec; }
+      const totalSec = durMin * 60 + durSec;
+      set({ timeLeft: totalSec > 0 ? totalSec : 60 }); // Prevent 0 time
     }
     
     await get()._persistState();
@@ -110,6 +118,8 @@ export const useTimerStore = create<TimerState>((set, get) => ({
 
   startTimer: async () => {
     const { hapticEnabled, timeLeft } = get();
+    if (timeLeft <= 0) return;
+
     if (hapticEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     set({ 
@@ -144,14 +154,16 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   },
 
   resetTimer: () => {
-    const { mode, focusDurationMin, breakDurationMin, longBreakDurationMin } = get();
-    let duration = focusDurationMin;
-    if (mode === 'break') duration = breakDurationMin;
-    if (mode === 'longBreak') duration = longBreakDurationMin;
+    const { mode, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec } = get();
+    let durMin = focusDurationMin; let durSec = focusDurationSec;
+    if (mode === 'break') { durMin = breakDurationMin; durSec = breakDurationSec; }
+    if (mode === 'longBreak') { durMin = longBreakDurationMin; durSec = longBreakDurationSec; }
+    
+    const totalSec = durMin * 60 + durSec;
     
     set({
       timerState: 'idle',
-      timeLeft: duration * 60,
+      timeLeft: totalSec > 0 ? totalSec : 60,
       expectedEndTime: null
     });
     Notifications.cancelAllScheduledNotificationsAsync();
@@ -191,19 +203,22 @@ export const useTimerStore = create<TimerState>((set, get) => ({
 
   _completeSession: async () => {
     const { 
-      mode, focusDurationMin, breakDurationMin, longBreakDurationMin, 
+      mode, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, 
       todayHistory, currentCycleCount, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, selectedLabelId
     } = get();
     
     if (hapticEnabled) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (soundEnabled) playChime();
 
-    const duration = mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin);
+    let completedDurMin = focusDurationMin; let completedDurSec = focusDurationSec;
+    if (mode === 'break') { completedDurMin = breakDurationMin; completedDurSec = breakDurationSec; }
+    if (mode === 'longBreak') { completedDurMin = longBreakDurationMin; completedDurSec = longBreakDurationSec; }
+    const duration = completedDurMin * 60 + completedDurSec;
     
     const newRecord: SessionRecord = {
       id: Date.now().toString(),
       mode,
-      durationInSeconds: duration * 60,
+      durationInSeconds: duration,
       timestamp: Date.now(),
       labelId: selectedLabelId
     };
@@ -224,14 +239,15 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       nextMode = 'focus';
     }
 
-    let nextDuration = focusDurationMin;
-    if (nextMode === 'break') nextDuration = breakDurationMin;
-    if (nextMode === 'longBreak') nextDuration = longBreakDurationMin;
+    let nextDurMin = focusDurationMin; let nextDurSec = focusDurationSec;
+    if (nextMode === 'break') { nextDurMin = breakDurationMin; nextDurSec = breakDurationSec; }
+    if (nextMode === 'longBreak') { nextDurMin = longBreakDurationMin; nextDurSec = longBreakDurationSec; }
+    const nextTotalSec = nextDurMin * 60 + nextDurSec;
 
     set({
       mode: nextMode,
       timerState: 'finished',
-      timeLeft: nextDuration * 60,
+      timeLeft: nextTotalSec > 0 ? nextTotalSec : 60,
       expectedEndTime: null,
       todayHistory: newHistory,
       currentCycleCount: nextCycleCount
@@ -262,9 +278,9 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   },
 
   _persistState: async () => {
-    const { focusDurationMin, breakDurationMin, longBreakDurationMin, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, timerShape, labels, selectedLabelId } = get();
+    const { focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, timerShape, labels, selectedLabelId } = get();
     await AsyncStorage.setItem(STORAGE_KEY + '_settings', JSON.stringify({
-      focusDurationMin, breakDurationMin, longBreakDurationMin, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, timerShape, labels, selectedLabelId
+      focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, timerShape, labels, selectedLabelId
     }));
   },
   
@@ -277,9 +293,15 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       const settingsStr = await AsyncStorage.getItem(STORAGE_KEY + '_settings');
       if (settingsStr) {
         const parsed = JSON.parse(settingsStr);
-        // Clean missing properties
         const toLoad = { ...parsed };
         if (!toLoad.timerShape || toLoad.timerShape === 'leaf') toLoad.timerShape = 'rounded';
+
+        // Add defaults for sec fields to support older saves
+        if (toLoad.focusDurationSec === undefined) {
+          toLoad.focusDurationSec = 0;
+          toLoad.breakDurationSec = 0;
+          toLoad.longBreakDurationSec = 0;
+        }
         set(toLoad);
       }
 
@@ -292,14 +314,15 @@ export const useTimerStore = create<TimerState>((set, get) => ({
         set({ todayHistory });
       }
       
-      const { mode, focusDurationMin, breakDurationMin, longBreakDurationMin } = get();
-      let duration = focusDurationMin;
-      if (mode === 'break') duration = breakDurationMin;
-      if (mode === 'longBreak') duration = longBreakDurationMin;
+      const { mode, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec } = get();
+      let durMin = focusDurationMin; let durSec = focusDurationSec;
+      if (mode === 'break') { durMin = breakDurationMin; durSec = breakDurationSec; }
+      if (mode === 'longBreak') { durMin = longBreakDurationMin; durSec = longBreakDurationSec; }
       
-      set({ timeLeft: duration * 60 });
+      const totalSec = durMin * 60 + durSec;
+      set({ timeLeft: totalSec > 0 ? totalSec : 60 });
     } catch (e) {
       console.error('Failed to load timer state', e);
     }
   }
-}));
+})); 

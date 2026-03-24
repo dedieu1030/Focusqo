@@ -5,11 +5,12 @@ import { useTimerStore, TimerShape } from '../../store/useTimerStore';
 
 interface TimerDisplayProps {
   timeLeft: number;
-  onPress?: () => void;
+  onPressMin?: () => void;
+  onPressSec?: () => void;
   disabled?: boolean;
 }
 
-export function TimerDisplay({ timeLeft, onPress, disabled }: TimerDisplayProps) {
+export function TimerDisplay({ timeLeft, onPressMin, onPressSec, disabled }: TimerDisplayProps) {
   const { palette } = useThemeStore();
   const { timerShape } = useTimerStore();
 
@@ -29,23 +30,28 @@ export function TimerDisplay({ timeLeft, onPress, disabled }: TimerDisplayProps)
   };
 
   return (
-    <TouchableOpacity 
-      style={styles.container} 
-      activeOpacity={0.8} 
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <View style={getShapeStyles()}>
+    <View style={styles.container}>
+      <TouchableOpacity 
+        style={getShapeStyles()} 
+        activeOpacity={0.8} 
+        onPress={onPressMin}
+        disabled={disabled}
+      >
         <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
           {minStr}
         </Text>
-      </View>
-      <View style={getShapeStyles()}>
+      </TouchableOpacity>
+      <TouchableOpacity 
+        style={getShapeStyles()} 
+        activeOpacity={0.8} 
+        onPress={onPressSec}
+        disabled={disabled}
+      >
         <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
           {secStr}
         </Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -55,8 +61,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
-    marginBottom: 64, // Pulled away from controls significantly
-    width: '100%', // Take full width
+    marginBottom: 64,
+    width: '100%',
     paddingHorizontal: 8,
   },
   timeBlock: {
@@ -66,7 +72,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeText: {
-    fontSize: 104, // Absolutely massive
+    fontSize: 104,
     fontWeight: '700',
   },
 });
