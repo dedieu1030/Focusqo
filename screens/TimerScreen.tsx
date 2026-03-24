@@ -5,7 +5,7 @@ import { TimerControls } from '../components/Timer/TimerControls';
 import { useTimerStore } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { Tag, X, Plus } from 'lucide-react-native';
-import { useKeepAwake } from 'expo-keep-awake';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 export function TimerScreen() {
   const { 
@@ -20,9 +20,13 @@ export function TimerScreen() {
   const [newLabelText, setNewLabelText] = useState('');
 
   // Keep screen awake if timer is running and it's a focus mode
-  if (timerState === 'running' && mode === 'focus') {
-    useKeepAwake();
-  }
+  React.useEffect(() => {
+    if (timerState === 'running' && mode === 'focus') {
+      activateKeepAwakeAsync().catch(() => {});
+    } else {
+      deactivateKeepAwake();
+    }
+  }, [timerState, mode]);
 
   const selectedLabel = labels.find(l => l.id === selectedLabelId);
 
