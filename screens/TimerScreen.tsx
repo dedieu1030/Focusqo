@@ -211,13 +211,13 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 8,
     paddingTop: 60,
-    paddingHorizontal: 24,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 40,
+    paddingHorizontal: 24,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -238,11 +238,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingBottom: 60,
+    paddingHorizontal: 16,
+    width: '100%',
   },
   modeTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '500',
-    marginBottom: 32,
+    marginBottom: 50,
   },
   modalOverlay: {
     flex: 1,

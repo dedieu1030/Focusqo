@@ -20,11 +20,11 @@ export function TimerDisplay({ timeLeft, onPress, disabled }: TimerDisplayProps)
   const secStr = seconds.toString().padStart(2, '0');
 
   const getShapeStyles = () => {
-    let s: any = { borderRadius: 36 };
-    if (timerShape === 'rounded') s = { borderRadius: 44 };
-    if (timerShape === 'circle') s = { borderRadius: 120 }; // Very round pill
-    if (timerShape === 'arch') s = { borderTopLeftRadius: 120, borderTopRightRadius: 120, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 };
-    if (timerShape === 'leaf') s = { borderTopLeftRadius: 120, borderBottomRightRadius: 120, borderTopRightRadius: 36, borderBottomLeftRadius: 36 };
+    let s: any = { borderRadius: 48 };
+    if (timerShape === 'rounded') s = { borderRadius: 54 };
+    if (timerShape === 'circle') s = { borderRadius: 999 }; // Pill
+    if (timerShape === 'arch') s = { borderTopLeftRadius: 999, borderTopRightRadius: 999, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 };
+    if (timerShape === 'leaf') s = { borderTopLeftRadius: 999, borderBottomRightRadius: 999, borderTopRightRadius: 36, borderBottomLeftRadius: 36 };
     
     return [styles.timeBlock, { backgroundColor: palette.timerBlock }, s];
   };
@@ -37,10 +37,14 @@ export function TimerDisplay({ timeLeft, onPress, disabled }: TimerDisplayProps)
       disabled={disabled}
     >
       <View style={getShapeStyles()}>
-        <Text style={[styles.timeText, { color: palette.timerText }]}>{minStr}</Text>
+        <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
+          {minStr}
+        </Text>
       </View>
       <View style={getShapeStyles()}>
-        <Text style={[styles.timeText, { color: palette.timerText }]}>{secStr}</Text>
+        <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
+          {secStr}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -52,22 +56,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
-    marginBottom: 48,
+    marginBottom: 64, // Pulled away from controls significantly
+    width: '100%', // Take full width
+    paddingHorizontal: 8,
   },
   timeBlock: {
-    width: 164,
-    height: 190,
+    flex: 1, // Expand dynamically
+    aspectRatio: 0.8, // Dynamic height relative to width
     justifyContent: 'center',
     alignItems: 'center',
-    // Slight shadow to give it a little pop
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
   },
   timeText: {
-    fontSize: 96,
+    fontSize: 104, // Absolutely massive
     fontWeight: '700',
   },
 });
