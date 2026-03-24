@@ -19,7 +19,7 @@ export function TodayRhythm() {
 
   return (
     <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
-      <Text style={[styles.title, { color: palette.background }]}>Today's rhythm</Text>
+      <Text style={[styles.title, { color: palette.timerText }]}>Today's rhythm</Text>
       
       <ScrollView 
         horizontal 
@@ -44,12 +44,12 @@ export function TodayRhythm() {
       <View style={styles.statsContainer}>
         <View style={styles.statRow}>
           <View style={[styles.statDot, { backgroundColor: palette.focusColor }]} />
-          <Text style={[styles.statText, { color: palette.background }]}>
+          <Text style={[styles.statText, { color: palette.timerText }]}>
             {formatMinutes(totalFocusSeconds)}
           </Text>
         </View>
         <View style={styles.statRow}>
-          <Text style={[styles.statText, { color: palette.background }]}>
+          <Text style={[styles.statText, { color: palette.timerText }]}>
             {formatMinutes(totalBreakSeconds)}
           </Text>
           <View style={[styles.statDot, { backgroundColor: palette.breakColor }]} />

@@ -51,14 +51,14 @@ export function InsightsScreen() {
       <View style={styles.statsContainer}>
         <View style={[styles.statCard, { backgroundColor: palette.timerBlock }]}>
           <Text style={[styles.statLabel, { color: palette.secondaryText }]}>Total Focus Time</Text>
-          <Text style={[styles.statValue, { color: palette.background }]}>{formatTime(totalFocusSeconds)}</Text>
-          <Text style={[styles.statSub, { color: palette.background }]}>{totalFocusSessions} sessions completed</Text>
+          <Text style={[styles.statValue, { color: palette.timerText }]}>{formatTime(totalFocusSeconds)}</Text>
+          <Text style={[styles.statSub, { color: palette.timerText }]}>{totalFocusSessions} sessions completed</Text>
         </View>
 
         <View style={[styles.statCard, { backgroundColor: palette.timerBlock }]}>
           <Text style={[styles.statLabel, { color: palette.secondaryText }]}>Active Days</Text>
-          <Text style={[styles.statValue, { color: palette.background }]}>{activeDaysCount}</Text>
-          <Text style={[styles.statSub, { color: palette.background }]}>Days with focus sessions</Text>
+          <Text style={[styles.statValue, { color: palette.timerText }]}>{activeDaysCount}</Text>
+          <Text style={[styles.statSub, { color: palette.timerText }]}>Days with focus sessions</Text>
         </View>
 
         {labels.length > 0 && (
@@ -73,7 +73,7 @@ export function InsightsScreen() {
 
               return (
                 <View key={label.id} style={styles.labelRow}>
-                  <Text style={[styles.labelName, { color: palette.background }]}>{label.name}</Text>
+                  <Text style={[styles.labelName, { color: palette.timerText }]}>{label.name}</Text>
                   <Text style={[styles.labelTime, { color: palette.accentColor }]}>{formatTime(seconds)}</Text>
                 </View>
               );

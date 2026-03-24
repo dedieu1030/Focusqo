@@ -18,10 +18,10 @@ export function TimerDisplay({ timeLeft }: TimerDisplayProps) {
   return (
     <View style={styles.container}>
       <View style={[styles.timeBlock, { backgroundColor: palette.timerBlock }]}>
-        <Text style={[styles.timeText, { color: palette.background }]}>{minStr}</Text>
+        <Text style={[styles.timeText, { color: palette.timerText }]}>{minStr}</Text>
       </View>
       <View style={[styles.timeBlock, { backgroundColor: palette.timerBlock }]}>
-        <Text style={[styles.timeText, { color: palette.background }]}>{secStr}</Text>
+        <Text style={[styles.timeText, { color: palette.timerText }]}>{secStr}</Text>
       </View>
     </View>
   );
