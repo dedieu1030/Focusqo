@@ -17,6 +17,7 @@ export function TimerScreen() {
   const { palette } = useThemeStore();
   const [isLabelModalVisible, setLabelModalVisible] = useState(false);
   const [isDurationModalVisible, setDurationModalVisible] = useState(false);
+  const [customTimeInput, setCustomTimeInput] = useState('');
   const [newLabelText, setNewLabelText] = useState('');
 
   // Keep screen awake if timer is running and it's a focus mode
@@ -49,21 +50,30 @@ export function TimerScreen() {
     }
   };
 
-  const handleAdjustTime = (delta: number) => {
-    let current = focusDurationMin;
-    let key: 'focusDurationMin' | 'breakDurationMin' | 'longBreakDurationMin' = 'focusDurationMin';
-    if (mode === 'break') {
-      current = breakDurationMin;
-      key = 'breakDurationMin';
-    } else if (mode === 'longBreak') {
-      current = longBreakDurationMin;
-      key = 'longBreakDurationMin';
+  const handleOpenDurationModal = () => {
+    if (timerState !== 'running') {
+      const current = mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin);
+      setCustomTimeInput(String(current));
+      setDurationModalVisible(true);
     }
-    const newValue = Math.max(1, Math.min(120, current + delta));
-    updateSettings({ [key]: newValue });
   };
 
-  const currentDurationValue = mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin);
+  const handleSaveDuration = () => {
+    let val = parseInt(customTimeInput, 10);
+    if (isNaN(val) || val <= 0) val = 1;
+    if (val > 180) val = 180;
+
+    let key: 'focusDurationMin' | 'breakDurationMin' | 'longBreakDurationMin' = 'focusDurationMin';
+    if (mode === 'break') key = 'breakDurationMin';
+    if (mode === 'longBreak') key = 'longBreakDurationMin';
+    
+    updateSettings({ [key]: val });
+    
+    if (timerState === 'paused' || timerState === 'finished') {
+      resetTimer();
+    }
+    setDurationModalVisible(false);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background }]}>
@@ -91,12 +101,8 @@ export function TimerScreen() {
         
         <TimerDisplay 
           timeLeft={timeLeft} 
-          onPress={() => {
-            if (timerState === 'idle') {
-              setDurationModalVisible(true);
-            }
-          }}
-          disabled={timerState !== 'idle'} 
+          onPress={handleOpenDurationModal}
+          disabled={timerState === 'running'} 
         />
         
         <TimerControls 
@@ -111,33 +117,32 @@ export function TimerScreen() {
       {/* Duration Modification Modal */}
       <Modal visible={isDurationModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: palette.background, alignItems: 'center' }]}>
-            <View style={[styles.modalHeader, { width: '100%' }]}>
+          <View style={[styles.modalContent, { backgroundColor: palette.background }]}>
+            <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: palette.primaryText }]}>Set {getModeTitle()} Time</Text>
-              <TouchableOpacity onPress={() => setDurationModalVisible(false)} style={{ padding: 4 }}>
+              <TouchableOpacity onPress={() => setDurationModalVisible(false)}>
                 <X color={palette.secondaryText} />
               </TouchableOpacity>
             </View>
             
-            <View style={styles.stepperContainer}>
-              <TouchableOpacity 
-                style={[styles.stepperBtnCenter, { backgroundColor: palette.timerBlock }]}
-                onPress={() => handleAdjustTime(-5)}
-              >
-                <Text style={{ fontSize: 32, fontWeight: '400', color: palette.timerText, marginTop: -4 }}>-</Text>
-              </TouchableOpacity>
-              
-              <Text style={[styles.stepperValueText, { color: palette.primaryText }]}>
-                {currentDurationValue}
-              </Text>
-              
-              <TouchableOpacity 
-                style={[styles.stepperBtnCenter, { backgroundColor: palette.timerBlock }]}
-                onPress={() => handleAdjustTime(5)}
-              >
-                <Text style={{ fontSize: 32, fontWeight: '400', color: palette.timerText, marginTop: -4 }}>+</Text>
-              </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
+              <TextInput 
+                style={[styles.labelInput, { color: palette.primaryText, borderColor: palette.accentColor, fontSize: 24, textAlign: 'center', height: 64 }]}
+                keyboardType="numeric"
+                maxLength={3}
+                value={customTimeInput}
+                onChangeText={setCustomTimeInput}
+                autoFocus
+              />
+              <Text style={{ fontSize: 18, color: palette.secondaryText, marginLeft: 16 }}>minutes</Text>
             </View>
+            
+            <TouchableOpacity 
+              style={[styles.saveBtn, { backgroundColor: palette.focusColor }]}
+              onPress={handleSaveDuration}
+            >
+              <Text style={{ color: palette.background, fontWeight: '600', fontSize: 16, textAlign: 'center' }}>Save Duration</Text>
+            </TouchableOpacity>
             
             <Text style={{ color: palette.secondaryText, marginTop: 16, textAlign: 'center' }}>
               Changes the default duration for {getModeTitle()} sessions.
@@ -287,24 +292,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
   },
-  stepperContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 32,
-    marginVertical: 24,
-  },
-  stepperBtnCenter: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepperValueText: {
-    fontSize: 48,
-    fontWeight: '700',
-    width: 80,
-    textAlign: 'center',
+  saveBtn: {
+    padding: 18,
+    borderRadius: 16,
   },
 });
