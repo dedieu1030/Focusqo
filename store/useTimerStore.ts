@@ -95,6 +95,16 @@ export const useTimerStore = create<TimerState>((set, get) => ({
 
   updateSettings: async (newSettings) => {
     set((state) => ({ ...state, ...newSettings }));
+    
+    // If timer is idle, immediately apply the new duration to timeLeft
+    const updatedState = get();
+    if (updatedState.timerState === 'idle') {
+      let duration = updatedState.focusDurationMin;
+      if (updatedState.mode === 'break') duration = updatedState.breakDurationMin;
+      if (updatedState.mode === 'longBreak') duration = updatedState.longBreakDurationMin;
+      set({ timeLeft: duration * 60 });
+    }
+    
     await get()._persistState();
   },
 

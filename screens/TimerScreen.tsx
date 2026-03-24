@@ -10,11 +10,13 @@ import { useKeepAwake } from 'expo-keep-awake';
 export function TimerScreen() {
   const { 
     mode, timerState, timeLeft, startTimer, pauseTimer, skipSession, resetTimer,
-    labels, selectedLabelId, selectLabel, addLabel 
+    labels, selectedLabelId, selectLabel, addLabel,
+    focusDurationMin, breakDurationMin, longBreakDurationMin, updateSettings
   } = useTimerStore();
   
   const { palette } = useThemeStore();
   const [isLabelModalVisible, setLabelModalVisible] = useState(false);
+  const [isDurationModalVisible, setDurationModalVisible] = useState(false);
   const [newLabelText, setNewLabelText] = useState('');
 
   // Keep screen awake if timer is running and it's a focus mode
@@ -31,9 +33,9 @@ export function TimerScreen() {
   };
 
   const getHeaderModeText = () => {
-    if (mode === 'focus') return 'Focus 25m';
-    if (mode === 'break') return 'Break 5m';
-    return 'Long Brk 15m'; // Simplified
+    if (mode === 'focus') return `Focus ${focusDurationMin}m`;
+    if (mode === 'break') return `Break ${breakDurationMin}m`;
+    return `Long Brk ${longBreakDurationMin}m`;
   };
 
   const handleCreateLabel = () => {
@@ -42,6 +44,22 @@ export function TimerScreen() {
       setNewLabelText('');
     }
   };
+
+  const handleAdjustTime = (delta: number) => {
+    let current = focusDurationMin;
+    let key: 'focusDurationMin' | 'breakDurationMin' | 'longBreakDurationMin' = 'focusDurationMin';
+    if (mode === 'break') {
+      current = breakDurationMin;
+      key = 'breakDurationMin';
+    } else if (mode === 'longBreak') {
+      current = longBreakDurationMin;
+      key = 'longBreakDurationMin';
+    }
+    const newValue = Math.max(1, Math.min(120, current + delta));
+    updateSettings({ [key]: newValue });
+  };
+
+  const currentDurationValue = mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin);
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background }]}>
@@ -67,7 +85,15 @@ export function TimerScreen() {
           {getModeTitle()}
         </Text>
         
-        <TimerDisplay timeLeft={timeLeft} />
+        <TimerDisplay 
+          timeLeft={timeLeft} 
+          onPress={() => {
+            if (timerState === 'idle') {
+              setDurationModalVisible(true);
+            }
+          }}
+          disabled={timerState !== 'idle'} 
+        />
         
         <TimerControls 
           timerState={timerState} 
@@ -77,6 +103,44 @@ export function TimerScreen() {
           onReset={resetTimer}
         />
       </View>
+
+      {/* Duration Modification Modal */}
+      <Modal visible={isDurationModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: palette.background, alignItems: 'center' }]}>
+            <View style={[styles.modalHeader, { width: '100%' }]}>
+              <Text style={[styles.modalTitle, { color: palette.primaryText }]}>Set {getModeTitle()} Time</Text>
+              <TouchableOpacity onPress={() => setDurationModalVisible(false)} style={{ padding: 4 }}>
+                <X color={palette.secondaryText} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.stepperContainer}>
+              <TouchableOpacity 
+                style={[styles.stepperBtnCenter, { backgroundColor: palette.timerBlock }]}
+                onPress={() => handleAdjustTime(-5)}
+              >
+                <Text style={{ fontSize: 32, fontWeight: '400', color: palette.timerText, marginTop: -4 }}>-</Text>
+              </TouchableOpacity>
+              
+              <Text style={[styles.stepperValueText, { color: palette.primaryText }]}>
+                {currentDurationValue}
+              </Text>
+              
+              <TouchableOpacity 
+                style={[styles.stepperBtnCenter, { backgroundColor: palette.timerBlock }]}
+                onPress={() => handleAdjustTime(5)}
+              >
+                <Text style={{ fontSize: 32, fontWeight: '400', color: palette.timerText, marginTop: -4 }}>+</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={{ color: palette.secondaryText, marginTop: 16, textAlign: 'center' }}>
+              Changes the default duration for {getModeTitle()} sessions.
+            </Text>
+          </View>
+        </View>
+      </Modal>
 
       {/* Label Selection Modal */}
       <Modal visible={isLabelModalVisible} transparent animationType="fade">
@@ -121,7 +185,7 @@ export function TimerScreen() {
                 style={[styles.createBtn, { backgroundColor: palette.timerBlock }]}
                 onPress={handleCreateLabel}
               >
-                <Plus color={palette.background} size={20} />
+                <Plus color={palette.timerText} size={20} />
               </TouchableOpacity>
             </View>
           </View>
@@ -220,5 +284,25 @@ const styles = StyleSheet.create({
   createBtn: {
     padding: 12,
     borderRadius: 12,
+  },
+  stepperContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 32,
+    marginVertical: 24,
+  },
+  stepperBtnCenter: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepperValueText: {
+    fontSize: 48,
+    fontWeight: '700',
+    width: 80,
+    textAlign: 'center',
   },
 });

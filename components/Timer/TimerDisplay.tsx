@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 
 interface TimerDisplayProps {
   timeLeft: number;
+  onPress?: () => void;
+  disabled?: boolean;
 }
 
-export function TimerDisplay({ timeLeft }: TimerDisplayProps) {
+export function TimerDisplay({ timeLeft, onPress, disabled }: TimerDisplayProps) {
   const { palette } = useThemeStore();
-  
+
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
@@ -16,14 +18,19 @@ export function TimerDisplay({ timeLeft }: TimerDisplayProps) {
   const secStr = seconds.toString().padStart(2, '0');
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity 
+      style={styles.container} 
+      activeOpacity={0.8} 
+      onPress={onPress}
+      disabled={disabled}
+    >
       <View style={[styles.timeBlock, { backgroundColor: palette.timerBlock }]}>
         <Text style={[styles.timeText, { color: palette.timerText }]}>{minStr}</Text>
       </View>
       <View style={[styles.timeBlock, { backgroundColor: palette.timerBlock }]}>
         <Text style={[styles.timeText, { color: palette.timerText }]}>{secStr}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -32,25 +39,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 40,
-    marginBottom: 40,
+    gap: 16,
+    marginBottom: 48,
   },
   timeBlock: {
     width: 140,
-    height: 140,
+    height: 160,
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 24,
-    elevation: 5,
   },
   timeText: {
     fontSize: 72,
     fontWeight: '700',
-    fontVariant: ['tabular-nums'],
   },
 });
