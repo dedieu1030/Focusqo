@@ -76,15 +76,9 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     flex: 1,
-    // Leaves room at the bottom for rhythm + nav
-    marginBottom: 0,
     zIndex: 10,
   },
   bottomSection: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     zIndex: 1,
   },
   spacer: {

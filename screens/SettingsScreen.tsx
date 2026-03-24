@@ -9,6 +9,7 @@ export function SettingsScreen() {
     focusDurationMin: state.focusDurationMin,
     breakDurationMin: state.breakDurationMin,
     longBreakDurationMin: state.longBreakDurationMin,
+    cyclesBeforeLongBreak: state.cyclesBeforeLongBreak,
     soundEnabled: state.soundEnabled,
     hapticEnabled: state.hapticEnabled,
     updateSettings: state.updateSettings
@@ -16,7 +17,8 @@ export function SettingsScreen() {
   
   const { activePaletteId, palette, setPalette } = useThemeStore();
 
-  const handleDurationChange = (key: keyof typeof timerSettings, current: number, delta: number) => {
+  const handleDurationChange = (key: keyof typeof timerSettings, current: any, delta: number) => {
+    if (typeof current !== 'number') return;
     const newValue = Math.max(1, Math.min(60, current + delta));
     timerSettings.updateSettings({ [key]: newValue });
   };
@@ -30,10 +32,10 @@ export function SettingsScreen() {
       <Text style={[styles.screenTitle, { color: palette.primaryText }]}>Settings</Text>
       
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: palette.secondaryText }]}>Durations (minutes)</Text>
+        <Text style={[styles.sectionTitle, { color: palette.secondaryText }]}>Durations & Cycles</Text>
         
         <View style={styles.settingRow}>
-          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Focus</Text>
+          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Focus (min)</Text>
           <View style={styles.stepper}>
             <TouchableOpacity onPress={() => handleDurationChange('focusDurationMin', timerSettings.focusDurationMin, -1)}>
               <Text style={[styles.stepperBtn, { color: palette.accentColor }]}>-</Text>
@@ -46,7 +48,7 @@ export function SettingsScreen() {
         </View>
 
         <View style={styles.settingRow}>
-          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Short Break</Text>
+          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Short Break (min)</Text>
           <View style={styles.stepper}>
             <TouchableOpacity onPress={() => handleDurationChange('breakDurationMin', timerSettings.breakDurationMin, -1)}>
               <Text style={[styles.stepperBtn, { color: palette.accentColor }]}>-</Text>
@@ -59,7 +61,7 @@ export function SettingsScreen() {
         </View>
 
         <View style={styles.settingRow}>
-          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Long Break</Text>
+          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Long Break (min)</Text>
           <View style={styles.stepper}>
             <TouchableOpacity onPress={() => handleDurationChange('longBreakDurationMin', timerSettings.longBreakDurationMin, -1)}>
               <Text style={[styles.stepperBtn, { color: palette.accentColor }]}>-</Text>
@@ -70,13 +72,26 @@ export function SettingsScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        <View style={styles.settingRow}>
+          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Cycles before Long Break</Text>
+          <View style={styles.stepper}>
+            <TouchableOpacity onPress={() => handleDurationChange('cyclesBeforeLongBreak', timerSettings.cyclesBeforeLongBreak, -1)}>
+              <Text style={[styles.stepperBtn, { color: palette.accentColor }]}>-</Text>
+            </TouchableOpacity>
+            <Text style={[styles.stepperValue, { color: palette.primaryText }]}>{timerSettings.cyclesBeforeLongBreak}</Text>
+            <TouchableOpacity onPress={() => handleDurationChange('cyclesBeforeLongBreak', timerSettings.cyclesBeforeLongBreak, 1)}>
+              <Text style={[styles.stepperBtn, { color: palette.accentColor }]}>+</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: palette.secondaryText }]}>Preferences</Text>
         
         <View style={styles.settingRow}>
-          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Sound</Text>
+          <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Sound Notifications</Text>
           <Switch 
             value={timerSettings.soundEnabled} 
             onValueChange={(v) => timerSettings.updateSettings({ soundEnabled: v })}

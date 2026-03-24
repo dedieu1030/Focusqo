@@ -1,33 +1,60 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { TimerDisplay } from '../components/Timer/TimerDisplay';
 import { TimerControls } from '../components/Timer/TimerControls';
 import { useTimerStore } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Tag } from 'lucide-react-native';
+import { Tag, X, Plus } from 'lucide-react-native';
+import { useKeepAwake } from 'expo-keep-awake';
 
 export function TimerScreen() {
-  const { mode, timeLeft, isRunning, startTimer, pauseTimer, skipSession } = useTimerStore();
+  const { 
+    mode, timerState, timeLeft, startTimer, pauseTimer, skipSession, resetTimer,
+    labels, selectedLabelId, selectLabel, addLabel 
+  } = useTimerStore();
+  
   const { palette } = useThemeStore();
+  const [isLabelModalVisible, setLabelModalVisible] = useState(false);
+  const [newLabelText, setNewLabelText] = useState('');
 
-  const handleToggle = () => {
-    if (isRunning) {
-      pauseTimer();
-    } else {
-      startTimer();
+  // Keep screen awake if timer is running and it's a focus mode
+  if (timerState === 'running' && mode === 'focus') {
+    useKeepAwake();
+  }
+
+  const selectedLabel = labels.find(l => l.id === selectedLabelId);
+
+  const getModeTitle = () => {
+    if (mode === 'focus') return 'Focus';
+    if (mode === 'break') return 'Break';
+    return 'Long Break';
+  };
+
+  const getHeaderModeText = () => {
+    if (mode === 'focus') return 'Focus 25m';
+    if (mode === 'break') return 'Break 5m';
+    return 'Long Brk 15m'; // Simplified
+  };
+
+  const handleCreateLabel = () => {
+    if (newLabelText.trim().length > 0) {
+      addLabel(newLabelText.trim());
+      setNewLabelText('');
     }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background }]}>
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
+        <TouchableOpacity style={styles.headerLeft} onPress={() => setLabelModalVisible(true)}>
           <Tag size={16} color={palette.secondaryText} style={{ marginRight: 6 }} />
-          <Text style={[styles.headerLabelText, { color: palette.secondaryText }]}>No Label</Text>
-        </View>
+          <Text style={[styles.headerLabelText, { color: palette.secondaryText }]}>
+            {selectedLabel ? selectedLabel.name : 'No Label'}
+          </Text>
+        </TouchableOpacity>
         <View style={styles.headerRight}>
           <Text style={[styles.headerModeText, { color: mode === 'focus' ? palette.secondaryText : palette.breakColor }]}>
-            {mode === 'focus' ? 'Focus 25m' : 'Break 5m'}
+            {getHeaderModeText()}
           </Text>
         </View>
       </View>
@@ -37,17 +64,70 @@ export function TimerScreen() {
           styles.modeTitle, 
           { color: mode === 'focus' ? palette.primaryText : palette.breakColor }
         ]}>
-          {mode === 'focus' ? 'Focus' : 'Break'}
+          {getModeTitle()}
         </Text>
         
         <TimerDisplay timeLeft={timeLeft} />
         
         <TimerControls 
-          isRunning={isRunning} 
-          onToggleTimer={handleToggle} 
+          timerState={timerState} 
+          onStart={startTimer}
+          onPause={pauseTimer}
           onSkip={skipSession} 
+          onReset={resetTimer}
         />
       </View>
+
+      {/* Label Selection Modal */}
+      <Modal visible={isLabelModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: palette.background }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: palette.primaryText }]}>Select Label</Text>
+              <TouchableOpacity onPress={() => setLabelModalVisible(false)}>
+                <X color={palette.secondaryText} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.labelsList}>
+              <TouchableOpacity 
+                style={[styles.labelItem, selectedLabelId === null && { backgroundColor: palette.timerBlock + '20' }]}
+                onPress={() => { selectLabel(null); setLabelModalVisible(false); }}
+              >
+                <Text style={{ color: palette.primaryText }}>None</Text>
+              </TouchableOpacity>
+              
+              {labels.map(label => (
+                <TouchableOpacity 
+                  key={label.id}
+                  style={[styles.labelItem, selectedLabelId === label.id && { backgroundColor: palette.timerBlock + '20' }]}
+                  onPress={() => { selectLabel(label.id); setLabelModalVisible(false); }}
+                >
+                  <Text style={{ color: palette.primaryText }}>{label.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.createLabelRow}>
+              <TextInput 
+                style={[styles.labelInput, { color: palette.primaryText, borderColor: palette.accentColor }]}
+                placeholder="New label..."
+                placeholderTextColor={palette.secondaryText}
+                value={newLabelText}
+                onChangeText={setNewLabelText}
+                onSubmitEditing={handleCreateLabel}
+              />
+              <TouchableOpacity 
+                style={[styles.createBtn, { backgroundColor: palette.timerBlock }]}
+                onPress={handleCreateLabel}
+              >
+                <Plus color={palette.background} size={20} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -62,7 +142,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 20,
     elevation: 8,
-    paddingTop: 60, // Safe area roughly
+    paddingTop: 60,
     paddingHorizontal: 24,
   },
   header: {
@@ -74,6 +154,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 8,
   },
   headerLabelText: {
     fontSize: 15,
@@ -93,5 +174,51 @@ const styles = StyleSheet.create({
   modeTitle: {
     fontSize: 20,
     fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    minHeight: 300,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  labelsList: {
+    gap: 8,
+    marginBottom: 24,
+  },
+  labelItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+  },
+  createLabelRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
+  labelInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  createBtn: {
+    padding: 12,
+    borderRadius: 12,
   },
 });

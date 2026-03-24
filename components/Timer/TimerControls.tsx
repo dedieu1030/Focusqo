@@ -1,22 +1,29 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Play, Pause, SkipForward } from 'lucide-react-native';
+import { Play, Pause, SkipForward, Square } from 'lucide-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
+import { TimerStateEnum } from '../../store/useTimerStore';
 
 interface TimerControlsProps {
-  isRunning: boolean;
-  onToggleTimer: () => void;
+  timerState: TimerStateEnum;
+  onStart: () => void;
+  onPause: () => void;
   onSkip: () => void;
+  onReset: () => void;
 }
 
-export function TimerControls({ isRunning, onToggleTimer, onSkip }: TimerControlsProps) {
+export function TimerControls({ timerState, onStart, onPause, onSkip, onReset }: TimerControlsProps) {
   const { palette } = useThemeStore();
+
+  const isRunning = timerState === 'running';
+  const isFinished = timerState === 'finished';
 
   return (
     <View style={styles.container}>
+      {/* Primary Action Button */}
       <TouchableOpacity 
-        style={[styles.button, { backgroundColor: palette.accentColor + '33' }]} // 20% opacity
-        onPress={onToggleTimer}
+        style={[styles.button, { backgroundColor: palette.accentColor + '33' }]}
+        onPress={isRunning ? onPause : onStart}
       >
         {isRunning ? (
           <Pause size={28} color={palette.timerBlock} fill={palette.timerBlock} />
@@ -25,11 +32,16 @@ export function TimerControls({ isRunning, onToggleTimer, onSkip }: TimerControl
         )}
       </TouchableOpacity>
       
+      {/* Secondary Action Button (Skip / Reset) */}
       <TouchableOpacity 
         style={[styles.button, { backgroundColor: palette.accentColor + '33' }]}
-        onPress={onSkip}
+        onPress={isFinished ? onReset : onSkip}
       >
-        <SkipForward size={28} color={palette.timerBlock} fill={palette.timerBlock} />
+        {isFinished ? (
+          <Square size={24} color={palette.timerBlock} fill={palette.timerBlock} />
+        ) : (
+          <SkipForward size={28} color={palette.timerBlock} fill={palette.timerBlock} />
+        )}
       </TouchableOpacity>
     </View>
   );
