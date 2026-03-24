@@ -6,6 +6,7 @@ import { Audio } from 'expo-av';
 
 export type SessionMode = 'focus' | 'break' | 'longBreak';
 export type TimerStateEnum = 'idle' | 'running' | 'paused' | 'finished';
+export type TimerShape = 'rounded' | 'circle' | 'arch' | 'leaf';
 
 export interface Label {
   id: string;
@@ -27,6 +28,7 @@ interface TimerSettings {
   cyclesBeforeLongBreak: number;
   soundEnabled: boolean;
   hapticEnabled: boolean;
+  timerShape: TimerShape;
 }
 
 interface TimerState extends TimerSettings {
@@ -68,18 +70,16 @@ const defaultSettings: TimerSettings = {
   cyclesBeforeLongBreak: 4,
   soundEnabled: true,
   hapticEnabled: true,
+  timerShape: 'rounded'
 };
 
 async function playChime() {
   try {
     const { sound } = await Audio.Sound.createAsync(
-      require('../assets/favicon.png') // Fallback if no audio asset exists right now, but we should handle nicely
+      require('../assets/favicon.png') 
     );
-    // Realistically this needs a real sound file. We'll catch the error if it fails.
     await sound.playAsync();
-  } catch (e) {
-    // console.log("Audio not yet set up properly");
-  }
+  } catch (e) {}
 }
 
 export const useTimerStore = create<TimerState>((set, get) => ({
@@ -117,7 +117,6 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       expectedEndTime: Date.now() + timeLeft * 1000 
     });
 
-    // Schedule local notification
     await Notifications.cancelAllScheduledNotificationsAsync();
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -141,7 +140,6 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       expectedEndTime: null 
     });
     
-    // Cancel notification since timer is paused
     await Notifications.cancelAllScheduledNotificationsAsync();
   },
 
@@ -232,7 +230,7 @@ export const useTimerStore = create<TimerState>((set, get) => ({
 
     set({
       mode: nextMode,
-      timerState: 'finished', // UI can detect this to auto-start or require user input
+      timerState: 'finished',
       timeLeft: nextDuration * 60,
       expectedEndTime: null,
       todayHistory: newHistory,
@@ -263,11 +261,10 @@ export const useTimerStore = create<TimerState>((set, get) => ({
     await get()._persistState();
   },
 
-  // Helpers
   _persistState: async () => {
-    const { focusDurationMin, breakDurationMin, longBreakDurationMin, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, labels, selectedLabelId } = get();
+    const { focusDurationMin, breakDurationMin, longBreakDurationMin, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, timerShape, labels, selectedLabelId } = get();
     await AsyncStorage.setItem(STORAGE_KEY + '_settings', JSON.stringify({
-      focusDurationMin, breakDurationMin, longBreakDurationMin, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, labels, selectedLabelId
+      focusDurationMin, breakDurationMin, longBreakDurationMin, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, timerShape, labels, selectedLabelId
     }));
   },
   
@@ -280,7 +277,10 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       const settingsStr = await AsyncStorage.getItem(STORAGE_KEY + '_settings');
       if (settingsStr) {
         const parsed = JSON.parse(settingsStr);
-        set({ ...parsed });
+        // Clean missing properties
+        const toLoad = { ...parsed };
+        if (!toLoad.timerShape) toLoad.timerShape = 'rounded';
+        set(toLoad);
       }
 
       const historyStr = await AsyncStorage.getItem(STORAGE_KEY + '_history');
