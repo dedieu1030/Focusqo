@@ -103,11 +103,10 @@ export function SettingsScreen() {
         <View style={styles.settingRow}>
           <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Timer Shape</Text>
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            {(['rounded', 'circle', 'arch', 'leaf'] as const).map(shape => {
+            {(['rounded', 'circle', 'arch'] as const).map(shape => {
               let s: any = { borderRadius: 8 };
               if (shape === 'circle') s = { borderRadius: 16 };
               if (shape === 'arch') s = { borderTopLeftRadius: 16, borderTopRightRadius: 16, borderBottomLeftRadius: 4, borderBottomRightRadius: 4 };
-              if (shape === 'leaf') s = { borderTopLeftRadius: 16, borderBottomRightRadius: 16, borderTopRightRadius: 4, borderBottomLeftRadius: 4 };
               
               const isActive = timerSettings.timerShape === shape;
               

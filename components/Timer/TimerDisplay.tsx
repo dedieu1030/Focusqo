@@ -24,7 +24,6 @@ export function TimerDisplay({ timeLeft, onPress, disabled }: TimerDisplayProps)
     if (timerShape === 'rounded') s = { borderRadius: 54 };
     if (timerShape === 'circle') s = { borderRadius: 999 }; // Pill
     if (timerShape === 'arch') s = { borderTopLeftRadius: 999, borderTopRightRadius: 999, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 };
-    if (timerShape === 'leaf') s = { borderTopLeftRadius: 999, borderBottomRightRadius: 999, borderTopRightRadius: 36, borderBottomLeftRadius: 36 };
     
     return [styles.timeBlock, { backgroundColor: palette.timerBlock }, s];
   };

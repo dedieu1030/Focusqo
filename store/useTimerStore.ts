@@ -6,7 +6,7 @@ import { Audio } from 'expo-av';
 
 export type SessionMode = 'focus' | 'break' | 'longBreak';
 export type TimerStateEnum = 'idle' | 'running' | 'paused' | 'finished';
-export type TimerShape = 'rounded' | 'circle' | 'arch' | 'leaf';
+export type TimerShape = 'rounded' | 'circle' | 'arch';
 
 export interface Label {
   id: string;
@@ -279,7 +279,7 @@ export const useTimerStore = create<TimerState>((set, get) => ({
         const parsed = JSON.parse(settingsStr);
         // Clean missing properties
         const toLoad = { ...parsed };
-        if (!toLoad.timerShape) toLoad.timerShape = 'rounded';
+        if (!toLoad.timerShape || toLoad.timerShape === 'leaf') toLoad.timerShape = 'rounded';
         set(toLoad);
       }
 
