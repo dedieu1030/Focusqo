@@ -19,23 +19,23 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
         style={[styles.navItem, currentScreen === 'insights' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('insights')}
       >
-        <BarChart2 size={20} color={currentScreen === 'insights' ? palette.background : palette.secondaryText} />
-        <Text style={[styles.navText, { color: currentScreen === 'insights' ? palette.background : palette.secondaryText }]}>Insights</Text>
+        <BarChart2 size={20} color={currentScreen === 'insights' ? palette.timerText : palette.secondaryText} />
+        <Text style={[styles.navText, { color: currentScreen === 'insights' ? palette.timerText : palette.secondaryText }]}>Insights</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
         style={[styles.navItem, styles.centerItem, currentScreen === 'timer' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('timer')}
       >
-        <Timer size={20} color={currentScreen === 'timer' ? palette.background : palette.secondaryText} />
+        <Timer size={20} color={currentScreen === 'timer' ? palette.timerText : palette.secondaryText} />
       </TouchableOpacity>
 
       <TouchableOpacity 
         style={[styles.navItem, currentScreen === 'settings' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('settings')}
       >
-        <Settings size={20} color={currentScreen === 'settings' ? palette.background : palette.secondaryText} />
-        <Text style={[styles.navText, { color: currentScreen === 'settings' ? palette.background : palette.secondaryText }]}>Settings</Text>
+        <Settings size={20} color={currentScreen === 'settings' ? palette.timerText : palette.secondaryText} />
+        <Text style={[styles.navText, { color: currentScreen === 'settings' ? palette.timerText : palette.secondaryText }]}>Settings</Text>
       </TouchableOpacity>
     </View>
   );

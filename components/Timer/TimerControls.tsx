@@ -26,9 +26,9 @@ export function TimerControls({ timerState, onStart, onPause, onSkip, onReset }:
         onPress={isRunning ? onPause : onStart}
       >
         {isRunning ? (
-          <Pause size={28} color={palette.timerBlock} fill={palette.timerBlock} />
+          <Pause size={28} color={palette.primaryText} fill={palette.primaryText} />
         ) : (
-          <Play size={28} color={palette.timerBlock} fill={palette.timerBlock} style={{ marginLeft: 4 }} />
+          <Play size={28} color={palette.primaryText} fill={palette.primaryText} style={{ marginLeft: 4 }} />
         )}
       </TouchableOpacity>
       
@@ -38,9 +38,9 @@ export function TimerControls({ timerState, onStart, onPause, onSkip, onReset }:
         onPress={isFinished ? onReset : onSkip}
       >
         {isFinished ? (
-          <Square size={24} color={palette.timerBlock} fill={palette.timerBlock} />
+          <Square size={24} color={palette.primaryText} fill={palette.primaryText} />
         ) : (
-          <SkipForward size={28} color={palette.timerBlock} fill={palette.timerBlock} />
+          <SkipForward size={28} color={palette.primaryText} fill={palette.primaryText} />
         )}
       </TouchableOpacity>
     </View>
