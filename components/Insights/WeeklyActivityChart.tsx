@@ -51,16 +51,21 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     return Math.round(weekSessions.reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
   };
 
-  const currentWeekMinutes = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(mondayOffset);
-    d.setDate(mondayOffset.getDate() + i);
+  // Re-align the week start to Sunday for the visual to match reference screenshot
+  const displayMondayOffset = new Date(mondayOffset);
+  displayMondayOffset.setDate(mondayOffset.getDate() - 1); // Start from Sunday
+
+  const displayMinutes = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(displayMondayOffset);
+    d.setDate(displayMondayOffset.getDate() + i);
     const start = d.getTime();
     const end = start + 86400000;
     return Math.round(history.filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end).reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
   });
 
-  const thisWeekTotal = currentWeekMinutes.reduce((acc, m) => acc + m, 0);
+  const thisWeekTotal = displayMinutes.reduce((acc, m) => acc + m, 0);
   const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday);
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
   // Daily Average
   const dailyAverage = Math.round(thisWeekTotal / 7);
@@ -73,26 +78,17 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     diffPercent = 100;
   }
 
-  const maxMinutes = Math.max(...currentWeekMinutes, 720); // Scale to 12h if less
-  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // Switched to match reference order starting Sunday? 
-  // Wait, the screenshot shows S M T W T F S. Sunday is 0. 
-  // Let's re-align the week start to Sunday for the visual.
-  
-  const displayMondayOffset = new Date(mondayOffset);
-  displayMondayOffset.setDate(mondayOffset.getDate() - 1); // Start from Sunday
+  // DYNAMIC SCALING: Base is 12h (720m), but scales up if data is larger
+  const trueMax = Math.max(...displayMinutes);
+  const maxMinutes = Math.max(trueMax, 720); 
 
-  const displayMinutes = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(displayMondayOffset);
-    d.setDate(displayMondayOffset.getDate() + i);
-    const start = d.getTime();
-    const end = start + 86400000;
-    return Math.round(history.filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end).reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
-  });
+  // Dynamic Y-axis labels calculation
+  const yLabels = [0, Math.round(maxMinutes / 2), maxMinutes];
 
   const handleTouch = (evt: GestureResponderEvent) => {
     const x = evt.nativeEvent.locationX;
     const step = barWidth + gap;
-    const index = Math.round(x / step);
+    const index = Math.round(x / (step > 0 ? step : 1));
     const clampedIndex = Math.max(0, Math.min(6, index));
     setActiveDayIndex(clampedIndex);
   };
@@ -105,7 +101,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
   return (
     <View className="mt-2">
-      {/* Header Info - Matching reference layout */}
+      {/* Header Info */}
       <View className="flex-row justify-between items-start mb-4">
         <View>
           <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Daily Average</Text>
@@ -140,7 +136,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               width: 48,
               height: 24,
               borderRadius: 12,
-              backgroundColor: "#22D3EE", // Cyan like reference
+              backgroundColor: "#22D3EE",
               justifyContent: 'center',
               alignItems: 'center',
               zIndex: 10,
@@ -161,8 +157,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           </Defs>
 
           <G transform={`translate(0, ${tooltipHeight})`}>
-            {/* Grid Lines & Y-Axis Labels */}
-            {[0, 360, 720].map((val) => {
+            {/* Dynamic Grid Lines & Y-Axis Labels */}
+            {yLabels.map((val) => {
               const y = chartHeight - (val / maxMinutes) * chartHeight;
               return (
                 <G key={val}>
@@ -174,14 +170,14 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     x={chartWidth + 8} y={y + 4}
                     fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600"
                   >
-                    {val === 0 ? '0' : `${Math.floor(val/60)}h`}
+                    {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
                   </SvgText>
                 </G>
               );
             })}
 
             {/* Average Line */}
-            {dailyAverage > 0 && (
+            {dailyAverage > 0 && dailyAverage <= maxMinutes && (
                <G>
                   <Line 
                     x1={0} y1={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
@@ -197,7 +193,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                </G>
             )}
 
-            {/* Bars */}
             {displayMinutes.map((mins, i) => {
               const barHeight = Math.max((mins / maxMinutes) * chartHeight, mins > 0 ? 8 : 2);
               const x = i * (barWidth + gap);
@@ -207,17 +202,14 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
               return (
                 <G key={i}>
-                  {/* Background Track */}
                   <Rect
                     x={x} y={0} width={barWidth} height={chartHeight}
-                    rx={4} fill={palette.secondaryText} opacity="0.03"
+                    rx={4} fill={palette.secondaryText} opacity={isActive ? "0.08" : "0.03"}
                   />
-                  {/* Fill Bar */}
                   <Rect
                     x={x} y={y} width={barWidth} height={barHeight}
                     rx={2} fill="url(#barGradient)" opacity={isActive ? 1 : 0.9}
                   />
-                  {/* Day Label */}
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
                     fontSize="12" fill={palette.secondaryText}
