@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Text, Dimensions, Pressable } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Line } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
@@ -18,16 +18,15 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const tooltipHeight = 40; 
   const barWidth = 24;
   
-  // Spacing: Expand to fill the container width 
+  // Spacing
   const chartInnerPadding = 48; 
   const chartWidth = windowWidth - chartInnerPadding - 32; 
   const totalBarWidth = barWidth * 7;
   const gap = (chartWidth - totalBarWidth) / 6;
 
-  // Week calculation (Monday to Sunday)
+  // Week calculation
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 is Sun, 1 is Mon
-  const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  const dayOfWeek = today.getDay(); 
   const mondayOffset = new Date(today.getTime());
   mondayOffset.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
   mondayOffset.setHours(0, 0, 0, 0);
@@ -56,7 +55,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
   return (
     <View className="items-center mt-2">
-      <View className="flex-row items-end justify-between w-full mb-6">
+      <View className="flex-row items-end justify-between w-full mb-6 max-w-full">
         <View>
           <Text style={{ color: palette.secondaryText }} className="text-[10px] uppercase font-bold tracking-widest opacity-60">WEEKLY TOTAL</Text>
           <Text style={{ color: palette.timerText }} className="text-3xl font-extrabold -mt-1 tracking-tight">
@@ -65,7 +64,30 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
         </View>
       </View>
 
-      <View style={{ width: chartWidth, height: chartHeight + tooltipHeight + 40 }}>
+      <View style={{ width: chartWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
+        {/* Tooltip Layer using absolute View for PERFECT centering and stability */}
+        {activeDayIndex !== null && (
+          <View 
+            style={{ 
+              position: 'absolute',
+              // Center it horizontally over the active bar
+              left: activeDayIndex * (barWidth + gap) + barWidth / 2 - 24,
+              top: 5, // Match our y = -32 logic in the shifted group
+              width: 48,
+              height: 24,
+              borderRadius: 12,
+              backgroundColor: palette.focusColor,
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 10,
+            }}
+          >
+            <Text style={{ color: 'white', fontWeight: '900', fontSize: 11 }}>
+              {dailyMinutes[activeDayIndex]}m
+            </Text>
+          </View>
+        )}
+
         <Svg height={chartHeight + tooltipHeight + 40} width={chartWidth}>
           <Defs>
             <LinearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
@@ -75,28 +97,25 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           </Defs>
 
           <G transform={`translate(0, ${tooltipHeight})`}>
+            {maxMinutes >= 60 && (
+              <Line 
+                x1={0} y1={chartHeight - (60 / maxMinutes) * chartHeight} 
+                x2={chartWidth} y2={chartHeight - (60 / maxMinutes) * chartHeight} 
+                stroke={palette.secondaryText} 
+                strokeWidth="0.5" 
+                strokeDasharray="4 4" 
+                opacity="0.1" 
+              />
+            )}
+
             {dailyMinutes.map((mins, i) => {
               const barHeight = Math.max((mins / maxMinutes) * chartHeight, mins > 0 ? 8 : 2);
               const x = i * (barWidth + gap);
-              const centerX = x + barWidth / 2;
               const y = chartHeight - barHeight;
               const isToday = i === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
-              const isActive = activeDayIndex === i;
 
               return (
-                <G 
-                  key={i}
-                  onPressIn={() => setActiveDayIndex(i)}
-                  onPressOut={() => setActiveDayIndex(null)}
-                >
-                  <Rect
-                    x={x - gap/2}
-                    y={-tooltipHeight}
-                    width={barWidth + gap}
-                    height={chartHeight + 60}
-                    fill="transparent"
-                  />
-
+                <G key={i}>
                   <Rect
                     x={x}
                     y={0}
@@ -104,7 +123,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     height={chartHeight}
                     rx={6}
                     fill={palette.secondaryText}
-                    opacity={isActive ? "0.15" : "0.08"}
+                    opacity="0.08"
                   />
                   
                   <Rect
@@ -114,11 +133,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     height={barHeight}
                     rx={6}
                     fill="url(#barGradient)"
-                    opacity={isActive ? 1 : 0.9}
+                    opacity="0.9"
                   />
                   
                   <SvgText
-                    x={centerX}
+                    x={x + barWidth / 2}
                     y={chartHeight + 25}
                     fontSize="11"
                     fill={isToday ? palette.timerText : palette.secondaryText}
@@ -128,36 +147,38 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                   >
                     {dayNames[i]}
                   </SvgText>
-
-                  {isActive && (
-                    <G>
-                      {/* Tooltip Background - FIXED TO BLUE (focusColor) */}
-                      <Rect 
-                        x={centerX - 24}
-                        y={-32}
-                        width={48}
-                        height={24}
-                        rx={12}
-                        fill={palette.focusColor}
-                      />
-                      {/* Text explicitly centered */}
-                      <SvgText
-                        x={centerX}
-                        y={-17}
-                        fontSize="11"
-                        fill="white"
-                        textAnchor="middle"
-                        fontWeight="900"
-                      >
-                        {mins}m
-                      </SvgText>
-                    </G>
-                  )}
                 </G>
               );
             })}
           </G>
         </Svg>
+
+        {/* Interaction Layer: Transparent Pressables for 100% stability */}
+        <View 
+          style={{ 
+            position: 'absolute', 
+            top: tooltipHeight, 
+            left: 0, 
+            width: chartWidth, 
+            height: chartHeight, 
+            flexDirection: 'row',
+            pointerEvents: 'box-none'
+          }}
+        >
+          {dailyMinutes.map((_, i) => (
+            <Pressable 
+              key={i}
+              onPressIn={() => setActiveDayIndex(i)}
+              onPressOut={() => setActiveDayIndex(null)}
+              style={{ 
+                width: barWidth, 
+                height: chartHeight,
+                marginRight: i < 6 ? gap : 0,
+                backgroundColor: 'transparent'
+              }}
+            />
+          ))}
+        </View>
       </View>
     </View>
   );
