@@ -51,11 +51,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     return Math.round(weekSessions.reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
   };
 
-  // Re-align the week start to Sunday for the visual to match reference screenshot
   const displayMondayOffset = new Date(mondayOffset);
-  displayMondayOffset.setDate(mondayOffset.getDate() - 1); // Start from Sunday
+  displayMondayOffset.setDate(mondayOffset.getDate() - 1); 
 
-  const displayMinutes = Array.from({ length: 7 }, (_, i) => {
+  // DATA FETCHING + DUMMY DATA INJECTION for testing scaling
+  const realMinutes = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(displayMondayOffset);
     d.setDate(displayMondayOffset.getDate() + i);
     const start = d.getTime();
@@ -63,26 +63,31 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     return Math.round(history.filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end).reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
   });
 
+  // Injecting some dummy data to show 12h+ scaling: Sunday (14h), Monday (8h), Tuesday (16h)
+  const displayMinutes = realMinutes.map((mins, i) => {
+    if (mins > 0) return mins; // Keep real data if exists
+    if (i === 0) return 840;   // 14h on Sunday
+    if (i === 1) return 480;   // 8h on Monday
+    if (i === 2) return 960;   // 16h on Tuesday
+    return mins;
+  });
+
   const thisWeekTotal = displayMinutes.reduce((acc, m) => acc + m, 0);
-  const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday);
+  const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday) || 1200; // Dummy baseline
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
-  // Daily Average
   const dailyAverage = Math.round(thisWeekTotal / 7);
   
-  // Trend calculation
   let diffPercent = 0;
   if (lastWeekTotal > 0) {
     diffPercent = Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
-  } else if (thisWeekTotal > 0) {
-    diffPercent = 100;
   }
 
   // DYNAMIC SCALING: Base is 12h (720m), but scales up if data is larger
   const trueMax = Math.max(...displayMinutes);
   const maxMinutes = Math.max(trueMax, 720); 
 
-  // Dynamic Y-axis labels calculation
+  // Dynamic Y-axis labels
   const yLabels = [0, Math.round(maxMinutes / 2), maxMinutes];
 
   const handleTouch = (evt: GestureResponderEvent) => {
@@ -101,7 +106,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
   return (
     <View className="mt-2">
-      {/* Header Info */}
       <View className="flex-row justify-between items-start mb-4">
         <View>
           <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Daily Average</Text>
@@ -125,21 +129,13 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
-        
-        {/* Tooltip */}
         {activeDayIndex !== null && (
           <View 
             style={{ 
               position: 'absolute',
               left: activeDayIndex * (barWidth + gap) + (barWidth / 2) - 24,
-              top: 5, 
-              width: 48,
-              height: 24,
-              borderRadius: 12,
-              backgroundColor: "#22D3EE",
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: 10,
+              top: 5, width: 48, height: 24, borderRadius: 12,
+              backgroundColor: "#22D3EE", justifyContent: 'center', alignItems: 'center', zIndex: 10,
             }}
           >
             <Text style={{ color: 'white', fontWeight: '900', fontSize: 11 }}>
@@ -157,26 +153,18 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           </Defs>
 
           <G transform={`translate(0, ${tooltipHeight})`}>
-            {/* Dynamic Grid Lines & Y-Axis Labels */}
             {yLabels.map((val) => {
               const y = chartHeight - (val / maxMinutes) * chartHeight;
               return (
                 <G key={val}>
-                  <Line 
-                    x1={0} y1={y} x2={chartWidth} y2={y} 
-                    stroke={palette.secondaryText} strokeWidth="1" opacity="0.05" 
-                  />
-                  <SvgText
-                    x={chartWidth + 8} y={y + 4}
-                    fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600"
-                  >
+                  <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.05" />
+                  <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
                     {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
                   </SvgText>
                 </G>
               );
             })}
 
-            {/* Average Line */}
             {dailyAverage > 0 && dailyAverage <= maxMinutes && (
                <G>
                   <Line 
@@ -184,12 +172,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     x2={chartWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
                     stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
                   />
-                  <SvgText
-                    x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4}
-                    fontSize="10" fill="#4ADE80" fontWeight="bold"
-                  >
-                    avg
-                  </SvgText>
+                  <SvgText x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
                </G>
             )}
 
@@ -202,9 +185,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
               return (
                 <G key={i}>
+                  {/* BACKGROUND TRACK: More visible light grey contrast */}
                   <Rect
                     x={x} y={0} width={barWidth} height={chartHeight}
-                    rx={4} fill={palette.secondaryText} opacity={isActive ? "0.08" : "0.03"}
+                    rx={6} fill={palette.secondaryText} 
+                    opacity={isActive ? "0.15" : "0.1"} // Increased from 0.03
                   />
                   <Rect
                     x={x} y={y} width={barWidth} height={barHeight}
@@ -231,12 +216,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           onResponderMove={handleTouch}
           onResponderRelease={() => setActiveDayIndex(null)}
           onResponderTerminate={() => setActiveDayIndex(null)}
-          style={{ 
-            position: 'absolute', 
-            top: tooltipHeight, left: 0, 
-            width: chartWidth, height: chartHeight, 
-            backgroundColor: 'transparent', zIndex: 5
-          }}
+          style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
         />
       </View>
     </View>
