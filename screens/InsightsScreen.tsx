@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimerStore, SessionRecord } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Clock, Flame, Target, Tag } from 'lucide-react-native';
+import { Clock, Flame, Target, Tag, BarChart3 } from 'lucide-react-native';
+import { WeeklyActivityChart } from '../components/Insights/WeeklyActivityChart';
 
 export function InsightsScreen() {
   const { labels } = useTimerStore();
@@ -58,6 +59,15 @@ export function InsightsScreen() {
       <Text style={[styles.screenTitle, { color: palette.primaryText }]}>Insights</Text>
       
       <View style={styles.bentoGrid}>
+        {/* Weekly Activity Chart */}
+        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
+          <View style={styles.bentoHeaderRow}>
+            <BarChart3 size={20} color={palette.focusColor} />
+            <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Weekly Activity</Text>
+          </View>
+          <WeeklyActivityChart history={history} palette={palette} />
+        </View>
+
         {/* Full-width main card */}
         <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
           <View style={styles.bentoHeaderRow}>

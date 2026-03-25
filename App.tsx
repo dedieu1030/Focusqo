@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import "./global.css";
 import { View, StyleSheet, SafeAreaView, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { TimerScreen } from './screens/TimerScreen';
