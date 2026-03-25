@@ -3,6 +3,7 @@ import { View, Text, Dimensions, GestureResponderEvent } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Line } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
+import { TrendingUp, TrendingDown } from 'lucide-react-native';
 
 interface WeeklyActivityChartProps {
   history: SessionRecord[];
@@ -14,148 +15,214 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const windowWidth = Dimensions.get('window').width;
   
   // Layout constants
-  const chartHeight = 150;
+  const chartHeight = 160;
   const tooltipHeight = 40; 
-  const barWidth = 24;
+  const barWidth = 22;
+  const yAxisWidth = 35;
   
   // Spacing
   const chartInnerPadding = 48; 
-  const chartWidth = windowWidth - chartInnerPadding - 32; 
+  const availableWidth = windowWidth - chartInnerPadding - 32; 
+  const chartWidth = availableWidth - yAxisWidth; 
   const totalBarWidth = barWidth * 7;
   const gap = (chartWidth - totalBarWidth) / 6;
 
-  // Week calculation
+  // Week calculation (Current Monday - Sunday)
   const today = new Date();
   const dayOfWeek = today.getDay(); 
   const mondayOffset = new Date(today.getTime());
   mondayOffset.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
   mondayOffset.setHours(0, 0, 0, 0);
 
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
+  // Previous Week calculation (for comparison)
+  const prevMonday = new Date(mondayOffset);
+  prevMonday.setDate(mondayOffset.getDate() - 7);
+  const prevSunday = new Date(mondayOffset);
+  prevSunday.setMilliseconds(-1);
+
+  const getWeekMinutes = (start: Date, end: Date) => {
+    const startTime = start.getTime();
+    const endTime = end.getTime();
+    const weekSessions = history.filter(r => 
+      r.mode === 'focus' && 
+      r.timestamp >= startTime && 
+      r.timestamp <= endTime
+    );
+    return Math.round(weekSessions.reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
+  };
+
+  const currentWeekMinutes = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(mondayOffset);
     d.setDate(mondayOffset.getDate() + i);
-    return d;
-  });
-
-  const dailyMinutes = weekDays.map(day => {
-    const start = day.getTime();
+    const start = d.getTime();
     const end = start + 86400000;
-    const daySessions = history.filter(r => 
-      r.mode === 'focus' && 
-      r.timestamp >= start && 
-      r.timestamp < end
-    );
-    const totalSeconds = daySessions.reduce((acc, r) => acc + r.durationInSeconds, 0);
-    return Math.round(totalSeconds / 60);
+    return Math.round(history.filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end).reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
   });
 
-  const maxMinutes = Math.max(...dailyMinutes, 60);
-  const dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  const totalWeeklyMinutes = dailyMinutes.reduce((acc, m) => acc + m, 0);
+  const thisWeekTotal = currentWeekMinutes.reduce((acc, m) => acc + m, 0);
+  const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday);
+  
+  // Daily Average
+  const dailyAverage = Math.round(thisWeekTotal / 7);
+  
+  // Trend calculation
+  let diffPercent = 0;
+  if (lastWeekTotal > 0) {
+    diffPercent = Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
+  } else if (thisWeekTotal > 0) {
+    diffPercent = 100;
+  }
 
-  // Interaction helper
+  const maxMinutes = Math.max(...currentWeekMinutes, 720); // Scale to 12h if less
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // Switched to match reference order starting Sunday? 
+  // Wait, the screenshot shows S M T W T F S. Sunday is 0. 
+  // Let's re-align the week start to Sunday for the visual.
+  
+  const displayMondayOffset = new Date(mondayOffset);
+  displayMondayOffset.setDate(mondayOffset.getDate() - 1); // Start from Sunday
+
+  const displayMinutes = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(displayMondayOffset);
+    d.setDate(displayMondayOffset.getDate() + i);
+    const start = d.getTime();
+    const end = start + 86400000;
+    return Math.round(history.filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end).reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
+  });
+
   const handleTouch = (evt: GestureResponderEvent) => {
     const x = evt.nativeEvent.locationX;
-    // Calculate index based on touch position
     const step = barWidth + gap;
     const index = Math.round(x / step);
     const clampedIndex = Math.max(0, Math.min(6, index));
     setActiveDayIndex(clampedIndex);
   };
 
+  const formatHours = (mins: number) => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${h}h ${m}m`;
+  };
+
   return (
-    <View className="items-center mt-2">
-      <View className="flex-row items-end justify-between w-full mb-6">
+    <View className="mt-2">
+      {/* Header Info - Matching reference layout */}
+      <View className="flex-row justify-between items-start mb-4">
         <View>
-          <Text style={{ color: palette.secondaryText }} className="text-[10px] uppercase font-bold tracking-widest opacity-60">WEEKLY TOTAL</Text>
-          <Text style={{ color: palette.timerText }} className="text-3xl font-extrabold -mt-1 tracking-tight">
-            {Math.floor(totalWeeklyMinutes / 60)}h {totalWeeklyMinutes % 60}m
+          <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Daily Average</Text>
+          <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
+            {formatHours(dailyAverage)}
           </Text>
         </View>
+        
+        {diffPercent !== 0 && (
+          <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
+            {diffPercent > 0 ? (
+              <TrendingUp size={14} color="#4ADE80" />
+            ) : (
+              <TrendingDown size={14} color="#F87171" />
+            )}
+            <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold ml-1">
+              {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last week</Text>
+            </Text>
+          </View>
+        )}
       </View>
 
-      <View style={{ width: chartWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
+      <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         
-        {/* Tooltip Layer - Always perfectly centered over its corresponding bar x-position */}
+        {/* Tooltip */}
         {activeDayIndex !== null && (
           <View 
             style={{ 
               position: 'absolute',
-              // Use the exact x calculation of the bar, then offset to center the bubble
               left: activeDayIndex * (barWidth + gap) + (barWidth / 2) - 24,
               top: 5, 
               width: 48,
               height: 24,
               borderRadius: 12,
-              backgroundColor: palette.focusColor,
+              backgroundColor: "#22D3EE", // Cyan like reference
               justifyContent: 'center',
               alignItems: 'center',
               zIndex: 10,
             }}
           >
             <Text style={{ color: 'white', fontWeight: '900', fontSize: 11 }}>
-              {dailyMinutes[activeDayIndex]}m
+              {displayMinutes[activeDayIndex]}m
             </Text>
           </View>
         )}
 
-        <Svg height={chartHeight + tooltipHeight + 40} width={chartWidth}>
+        <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
           <Defs>
             <LinearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor={palette.focusColor} stopOpacity="1" />
-              <Stop offset="100%" stopColor={palette.focusColor} stopOpacity="0.8" />
+              <Stop offset="0%" stopColor="#22D3EE" stopOpacity="1" />
+              <Stop offset="100%" stopColor="#22D3EE" stopOpacity="0.8" />
             </LinearGradient>
           </Defs>
 
           <G transform={`translate(0, ${tooltipHeight})`}>
-            {maxMinutes >= 60 && (
-              <Line 
-                x1={0} y1={chartHeight - (60 / maxMinutes) * chartHeight} 
-                x2={chartWidth} y2={chartHeight - (60 / maxMinutes) * chartHeight} 
-                stroke={palette.secondaryText} 
-                strokeWidth="0.5" 
-                strokeDasharray="4 4" 
-                opacity="0.1" 
-              />
+            {/* Grid Lines & Y-Axis Labels */}
+            {[0, 360, 720].map((val) => {
+              const y = chartHeight - (val / maxMinutes) * chartHeight;
+              return (
+                <G key={val}>
+                  <Line 
+                    x1={0} y1={y} x2={chartWidth} y2={y} 
+                    stroke={palette.secondaryText} strokeWidth="1" opacity="0.05" 
+                  />
+                  <SvgText
+                    x={chartWidth + 8} y={y + 4}
+                    fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600"
+                  >
+                    {val === 0 ? '0' : `${Math.floor(val/60)}h`}
+                  </SvgText>
+                </G>
+              );
+            })}
+
+            {/* Average Line */}
+            {dailyAverage > 0 && (
+               <G>
+                  <Line 
+                    x1={0} y1={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
+                    x2={chartWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
+                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
+                  />
+                  <SvgText
+                    x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4}
+                    fontSize="10" fill="#4ADE80" fontWeight="bold"
+                  >
+                    avg
+                  </SvgText>
+               </G>
             )}
 
-            {dailyMinutes.map((mins, i) => {
+            {/* Bars */}
+            {displayMinutes.map((mins, i) => {
               const barHeight = Math.max((mins / maxMinutes) * chartHeight, mins > 0 ? 8 : 2);
               const x = i * (barWidth + gap);
               const y = chartHeight - barHeight;
-              const isToday = i === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+              const isToday = i === today.getDay(); 
               const isActive = activeDayIndex === i;
 
               return (
                 <G key={i}>
+                  {/* Background Track */}
                   <Rect
-                    x={x}
-                    y={0}
-                    width={barWidth}
-                    height={chartHeight}
-                    rx={6}
-                    fill={palette.secondaryText}
-                    opacity={isActive ? "0.15" : "0.08"}
+                    x={x} y={0} width={barWidth} height={chartHeight}
+                    rx={4} fill={palette.secondaryText} opacity="0.03"
                   />
-                  
+                  {/* Fill Bar */}
                   <Rect
-                    x={x}
-                    y={y}
-                    width={barWidth}
-                    height={barHeight}
-                    rx={6}
-                    fill="url(#barGradient)"
-                    opacity="0.9"
+                    x={x} y={y} width={barWidth} height={barHeight}
+                    rx={2} fill="url(#barGradient)" opacity={isActive ? 1 : 0.9}
                   />
-                  
+                  {/* Day Label */}
                   <SvgText
-                    x={x + barWidth / 2}
-                    y={chartHeight + 25}
-                    fontSize="11"
-                    fill={isToday ? palette.timerText : palette.secondaryText}
-                    textAnchor="middle"
-                    fontWeight={isToday ? "900" : "600"}
-                    opacity={isToday ? 1 : 0.6}
+                    x={x + barWidth / 2} y={chartHeight + 25}
+                    fontSize="12" fill={palette.secondaryText}
+                    textAnchor="middle" fontWeight={isToday ? "900" : "500"}
+                    opacity={isToday ? 1 : 0.3}
                   >
                     {dayNames[i]}
                   </SvgText>
@@ -165,7 +232,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           </G>
         </Svg>
 
-        {/* SCRUBBING Interaction Layer: Single view responding to touches/moves across the entire chart */}
         <View 
           onStartShouldSetResponder={() => true}
           onMoveShouldSetResponder={() => true}
@@ -175,12 +241,9 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           onResponderTerminate={() => setActiveDayIndex(null)}
           style={{ 
             position: 'absolute', 
-            top: tooltipHeight, 
-            left: 0, 
-            width: chartWidth, 
-            height: chartHeight, 
-            backgroundColor: 'transparent',
-            zIndex: 5
+            top: tooltipHeight, left: 0, 
+            width: chartWidth, height: chartHeight, 
+            backgroundColor: 'transparent', zIndex: 5
           }}
         />
       </View>

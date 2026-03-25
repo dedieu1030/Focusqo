@@ -61,10 +61,6 @@ export function InsightsScreen() {
       <View style={styles.bentoGrid}>
         {/* Weekly Activity Chart */}
         <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
-          <View style={styles.bentoHeaderRow}>
-            <BarChart3 size={20} color={palette.focusColor} />
-            <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Weekly Activity</Text>
-          </View>
           <WeeklyActivityChart history={history} palette={palette} />
         </View>
 
