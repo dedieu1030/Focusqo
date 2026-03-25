@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useTimerStore } from '../../store/useTimerStore';
 
@@ -35,7 +36,7 @@ export function TimerDisplay({
     if (timerShape === 'circle') s = { borderRadius: 999 }; // Pill
     if (timerShape === 'arch') s = { borderTopLeftRadius: 999, borderTopRightRadius: 999, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 };
     
-    return [styles.timeBlock, { backgroundColor: palette.timerBlock }, s];
+    return [styles.timeBlock, { backgroundColor: palette.timerBlock, overflow: 'hidden' }, s];
   };
 
   return (
@@ -47,23 +48,29 @@ export function TimerDisplay({
         onPress={onPressMin}
         disabled={disabled}
       >
-        {editingUnit === 'min' ? (
-          <TextInput
-            ref={minInputRef}
-            style={[styles.timeText, { color: palette.timerText, textAlign: 'center', width: '100%', padding: 0, margin: 0, includeFontPadding: false }]}
-            value={tempVal}
-            onChangeText={onTempValChange}
-            keyboardType="number-pad"
-            maxLength={3}
-            onBlur={onSubmitEdit}
-            autoFocus
-            selectTextOnFocus
-          />
-        ) : (
-          <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
-            {minStr}
-          </Text>
-        )}
+        <LinearGradient
+          colors={[palette.timerBlock, palette.timerBlock + 'CC']}
+          style={styles.gradient}
+        >
+          <View style={styles.reflectiveEdge} />
+          {editingUnit === 'min' ? (
+            <TextInput
+              ref={minInputRef}
+              style={[styles.timeText, { color: palette.timerText, textAlign: 'center', width: '100%', padding: 0, margin: 0, includeFontPadding: false }]}
+              value={tempVal}
+              onChangeText={onTempValChange}
+              keyboardType="number-pad"
+              maxLength={3}
+              onBlur={onSubmitEdit}
+              autoFocus
+              selectTextOnFocus
+            />
+          ) : (
+            <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
+              {minStr}
+            </Text>
+          )}
+        </LinearGradient>
       </TouchableOpacity>
 
       {/* Seconds Block */}
@@ -73,23 +80,29 @@ export function TimerDisplay({
         onPress={onPressSec}
         disabled={disabled}
       >
-        {editingUnit === 'sec' ? (
-          <TextInput
-            ref={secInputRef}
-            style={[styles.timeText, { color: palette.timerText, textAlign: 'center', width: '100%', padding: 0, margin: 0, includeFontPadding: false }]}
-            value={tempVal}
-            onChangeText={onTempValChange}
-            keyboardType="number-pad"
-            maxLength={2}
-            onBlur={onSubmitEdit}
-            autoFocus
-            selectTextOnFocus
-          />
-        ) : (
-          <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
-            {secStr}
-          </Text>
-        )}
+        <LinearGradient
+          colors={[palette.timerBlock, palette.timerBlock + 'CC']}
+          style={styles.gradient}
+        >
+          <View style={styles.reflectiveEdge} />
+          {editingUnit === 'sec' ? (
+            <TextInput
+              ref={secInputRef}
+              style={[styles.timeText, { color: palette.timerText, textAlign: 'center', width: '100%', padding: 0, margin: 0, includeFontPadding: false }]}
+              value={tempVal}
+              onChangeText={onTempValChange}
+              keyboardType="number-pad"
+              maxLength={2}
+              onBlur={onSubmitEdit}
+              autoFocus
+              selectTextOnFocus
+            />
+          ) : (
+            <Text style={[styles.timeText, { color: palette.timerText }]} allowFontScaling={false} adjustsFontSizeToFit numberOfLines={1}>
+              {secStr}
+            </Text>
+          )}
+        </LinearGradient>
       </TouchableOpacity>
     </View>
   );
@@ -108,8 +121,19 @@ const styles = StyleSheet.create({
   timeBlock: {
     flex: 1, 
     aspectRatio: 0.8,
+  },
+  gradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  reflectiveEdge: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   timeText: {
     fontSize: 104,
