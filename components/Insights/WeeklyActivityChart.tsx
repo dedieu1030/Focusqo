@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Dimensions, Pressable } from 'react-native';
+import { View, Text, Dimensions, GestureResponderEvent } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Line } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
@@ -53,9 +53,19 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const totalWeeklyMinutes = dailyMinutes.reduce((acc, m) => acc + m, 0);
 
+  // Interaction helper
+  const handleTouch = (evt: GestureResponderEvent) => {
+    const x = evt.nativeEvent.locationX;
+    // Calculate index based on touch position
+    const step = barWidth + gap;
+    const index = Math.round(x / step);
+    const clampedIndex = Math.max(0, Math.min(6, index));
+    setActiveDayIndex(clampedIndex);
+  };
+
   return (
     <View className="items-center mt-2">
-      <View className="flex-row items-end justify-between w-full mb-6 max-w-full">
+      <View className="flex-row items-end justify-between w-full mb-6">
         <View>
           <Text style={{ color: palette.secondaryText }} className="text-[10px] uppercase font-bold tracking-widest opacity-60">WEEKLY TOTAL</Text>
           <Text style={{ color: palette.timerText }} className="text-3xl font-extrabold -mt-1 tracking-tight">
@@ -65,14 +75,15 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
       </View>
 
       <View style={{ width: chartWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
-        {/* Tooltip Layer using absolute View for PERFECT centering and stability */}
+        
+        {/* Tooltip Layer - Always perfectly centered over its corresponding bar x-position */}
         {activeDayIndex !== null && (
           <View 
             style={{ 
               position: 'absolute',
-              // Center it horizontally over the active bar
-              left: activeDayIndex * (barWidth + gap) + barWidth / 2 - 24,
-              top: 5, // Match our y = -32 logic in the shifted group
+              // Use the exact x calculation of the bar, then offset to center the bubble
+              left: activeDayIndex * (barWidth + gap) + (barWidth / 2) - 24,
+              top: 5, 
               width: 48,
               height: 24,
               borderRadius: 12,
@@ -113,6 +124,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               const x = i * (barWidth + gap);
               const y = chartHeight - barHeight;
               const isToday = i === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+              const isActive = activeDayIndex === i;
 
               return (
                 <G key={i}>
@@ -123,7 +135,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     height={chartHeight}
                     rx={6}
                     fill={palette.secondaryText}
-                    opacity="0.08"
+                    opacity={isActive ? "0.15" : "0.08"}
                   />
                   
                   <Rect
@@ -153,32 +165,24 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           </G>
         </Svg>
 
-        {/* Interaction Layer: Transparent Pressables for 100% stability */}
+        {/* SCRUBBING Interaction Layer: Single view responding to touches/moves across the entire chart */}
         <View 
+          onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
+          onResponderGrant={handleTouch}
+          onResponderMove={handleTouch}
+          onResponderRelease={() => setActiveDayIndex(null)}
+          onResponderTerminate={() => setActiveDayIndex(null)}
           style={{ 
             position: 'absolute', 
             top: tooltipHeight, 
             left: 0, 
             width: chartWidth, 
             height: chartHeight, 
-            flexDirection: 'row',
-            pointerEvents: 'box-none'
+            backgroundColor: 'transparent',
+            zIndex: 5
           }}
-        >
-          {dailyMinutes.map((_, i) => (
-            <Pressable 
-              key={i}
-              onPressIn={() => setActiveDayIndex(i)}
-              onPressOut={() => setActiveDayIndex(null)}
-              style={{ 
-                width: barWidth, 
-                height: chartHeight,
-                marginRight: i < 6 ? gap : 0,
-                backgroundColor: 'transparent'
-              }}
-            />
-          ))}
-        </View>
+        />
       </View>
     </View>
   );
