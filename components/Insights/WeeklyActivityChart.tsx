@@ -15,11 +15,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   
   // Layout constants
   const chartHeight = 150;
-  const tooltipHeight = 40; // Space for tooltip at the top
+  const tooltipHeight = 40; 
   const barWidth = 24;
   
-  // Spacing: Expand to fill the container width (consistent with header padding)
-  const chartInnerPadding = 48; // Space from card edges
+  // Spacing: Expand to fill the container width 
+  const chartInnerPadding = 48; 
   const chartWidth = windowWidth - chartInnerPadding - 32; 
   const totalBarWidth = barWidth * 7;
   const gap = (chartWidth - totalBarWidth) / 6;
@@ -27,6 +27,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   // Week calculation (Monday to Sunday)
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0 is Sun, 1 is Mon
+  const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
   const mondayOffset = new Date(today.getTime());
   mondayOffset.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
   mondayOffset.setHours(0, 0, 0, 0);
@@ -73,24 +74,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
             </LinearGradient>
           </Defs>
 
-          {/* Core Chart Group (Shifted down to avoid clipping tooltips) */}
           <G transform={`translate(0, ${tooltipHeight})`}>
-            
-            {/* Y-Axis Guideline (60m) */}
-            {maxMinutes >= 60 && (
-              <Line 
-                x1={0} y1={chartHeight - (60 / maxMinutes) * chartHeight} 
-                x2={chartWidth} y2={chartHeight - (60 / maxMinutes) * chartHeight} 
-                stroke={palette.secondaryText} 
-                strokeWidth="0.5" 
-                strokeDasharray="4 4" 
-                opacity="0.1" 
-              />
-            )}
-
             {dailyMinutes.map((mins, i) => {
               const barHeight = Math.max((mins / maxMinutes) * chartHeight, mins > 0 ? 8 : 2);
               const x = i * (barWidth + gap);
+              const centerX = x + barWidth / 2;
               const y = chartHeight - barHeight;
               const isToday = i === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
               const isActive = activeDayIndex === i;
@@ -101,7 +89,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                   onPressIn={() => setActiveDayIndex(i)}
                   onPressOut={() => setActiveDayIndex(null)}
                 >
-                  {/* Hit area for interaction - spans the whole area */}
                   <Rect
                     x={x - gap/2}
                     y={-tooltipHeight}
@@ -110,7 +97,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     fill="transparent"
                   />
 
-                  {/* Background bar (Slot) */}
                   <Rect
                     x={x}
                     y={0}
@@ -121,7 +107,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     opacity={isActive ? "0.15" : "0.08"}
                   />
                   
-                  {/* Data bar */}
                   <Rect
                     x={x}
                     y={y}
@@ -132,9 +117,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     opacity={isActive ? 1 : 0.9}
                   />
                   
-                  {/* Day Label */}
                   <SvgText
-                    x={x + barWidth / 2}
+                    x={centerX}
                     y={chartHeight + 25}
                     fontSize="11"
                     fill={isToday ? palette.timerText : palette.secondaryText}
@@ -145,22 +129,23 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                     {dayNames[i]}
                   </SvgText>
 
-                  {/* Tooltip on hold ABOVE THE SLOT */}
                   {isActive && (
                     <G>
+                      {/* Tooltip Background - FIXED TO BLUE (focusColor) */}
                       <Rect 
-                        x={x + barWidth / 2 - 22}
+                        x={centerX - 24}
                         y={-32}
-                        width={44}
+                        width={48}
                         height={24}
-                        rx={8}
-                        fill={palette.primaryText}
+                        rx={12}
+                        fill={palette.focusColor}
                       />
+                      {/* Text explicitly centered */}
                       <SvgText
-                        x={x + barWidth / 2}
-                        y={-16}
+                        x={centerX}
+                        y={-17}
                         fontSize="11"
-                        fill={palette.background}
+                        fill="white"
                         textAnchor="middle"
                         fontWeight="900"
                       >
