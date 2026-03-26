@@ -126,7 +126,7 @@ export function InsightsScreen() {
       
       <View style={styles.bentoGrid}>
         {/* Main "Combo" Card */}
-        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
+        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: '#111111' }]}>
            {/* Detail Charts based on View */}
            {activeView === 'day' && (
              <>
@@ -146,9 +146,9 @@ export function InsightsScreen() {
         </View>
 
         {/* Total Focus Time Card */}
-        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
+        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: '#111111' }]}>
           <View style={styles.bentoHeaderRow}>
-            <Clock size={18} color={palette.focusColor} />
+            <Clock size={14} color={palette.focusColor} />
             <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Total focus time</Text>
           </View>
           <Text style={[styles.bentoHugeValue, { color: palette.timerText }]}>{formatTime(totalFocusSeconds)}</Text>
@@ -156,14 +156,14 @@ export function InsightsScreen() {
 
         {/* Stats Grid */}
         <View style={styles.bentoSplit}>
-          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: palette.timerBlock }]}>
-            <Target size={22} color={palette.breakColor} style={{ marginBottom: 10 }} />
+          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: '#111111' }]}>
+            <Target size={18} color={palette.breakColor} style={{ marginBottom: 10 }} />
             <Text style={[styles.bentoValue, { color: palette.timerText }]}>{focusHistory.length}</Text>
             <Text style={[styles.bentoSubLabel, { color: palette.secondaryText }]}>Sessions</Text>
           </View>
 
-          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: palette.timerBlock }]}>
-            <Flame size={22} color={palette.focusColor} style={{ marginBottom: 10 }} />
+          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: '#111111' }]}>
+            <Flame size={18} color={palette.focusColor} style={{ marginBottom: 10 }} />
             <Text style={[styles.bentoValue, { color: palette.timerText }]}>{activeDaysCount}</Text>
             <Text style={[styles.bentoSubLabel, { color: palette.secondaryText }]}>Active days</Text>
           </View>
@@ -171,7 +171,7 @@ export function InsightsScreen() {
 
         {/* Labels Content */}
         {labelTimes.length > 0 && (
-          <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
+          <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: '#111111' }]}>
             <View style={styles.bentoHeaderRow}>
               <Tag size={18} color={palette.accentColor} />
               <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Labels distribution</Text>
