@@ -145,15 +145,18 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           </Defs>
 
           <G transform={`translate(0, ${tooltipHeight})`}>
-            {/* HORIZONTAL GRID LINES - Increased to 4 levels */}
-            {yLabels.map((val) => {
+            {/* HORIZONTAL GRID LINES - 5 levels, but only 0, mid, and top show labels */}
+            {yLabels.map((val, idx) => {
               const y = chartHeight - (val / maxMinutes) * chartHeight;
+              const shouldShowLabel = idx === 0 || idx === 2 || idx === 4;
               return (
                 <G key={val}>
                   <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.05" />
-                  <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
-                    {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
-                  </SvgText>
+                  {shouldShowLabel && (
+                    <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
+                      {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
+                    </SvgText>
+                  )}
                 </G>
               );
             })}
