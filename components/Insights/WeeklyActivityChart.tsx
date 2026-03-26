@@ -189,17 +189,21 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               const isToday = i === today.getDay(); 
               const isActive = activeDayIndex === i;
 
+              // Radius for the bottom only
+              const r = 4;
+
               return (
                 <G key={i}>
-                  {/* BACKGROUND TRACK */}
+                  {/* BACKGROUND TRACK - Square top, slightly rounded bottom */}
                   <Rect
                     x={x} y={0} width={barWidth} height={chartHeight}
-                    rx={6} fill={palette.secondaryText} 
+                    rx={0} fill={palette.secondaryText} 
                     opacity={isActive ? "0.15" : "0.08"}
                   />
+                  {/* DATA BAR - Square top, rounded bottom */}
                   <Rect
                     x={x} y={y} width={barWidth} height={barHeight}
-                    rx={2} fill="url(#barGradient)" opacity={isActive ? 1 : 0.9}
+                    rx={0} fill="url(#barGradient)" opacity={isActive ? 1 : 0.9}
                   />
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
