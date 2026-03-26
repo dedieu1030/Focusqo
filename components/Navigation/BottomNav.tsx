@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 40, // Base bottom padding for rounded screens
+    paddingTop: 4,
+    paddingBottom: 24, // Optimized for more space above
     gap: 8,
   },
   navItem: {
