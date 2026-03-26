@@ -55,15 +55,22 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   displayMondayOffset.setDate(mondayOffset.getDate() - 1); 
 
   // DATA FETCHING: Clean data (no dummy injection)
-  const displayMinutes = Array.from({ length: 7 }, (_, i) => {
+  const daysData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(displayMondayOffset);
     d.setDate(displayMondayOffset.getDate() + i);
     const start = d.getTime();
     const end = start + 86400000;
-    return Math.round(history.filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end).reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
+    const daySessions = history.filter(r => r.timestamp >= start && r.timestamp < end);
+    const focusSecs = daySessions.filter(s => s.mode === 'focus').reduce((acc, s) => acc + s.durationInSeconds, 0);
+    const breakSecs = daySessions.filter(s => s.mode === 'break').reduce((acc, s) => acc + s.durationInSeconds, 0);
+    return { 
+      focus: Math.round(focusSecs / 60), 
+      break: Math.round(breakSecs / 60),
+      total: Math.round((focusSecs + breakSecs) / 60)
+    };
   });
 
-  const thisWeekTotal = displayMinutes.reduce((acc, m) => acc + m, 0);
+  const thisWeekTotal = daysData.reduce((acc, d) => acc + d.focus, 0);
   const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday) || 180; // Default baseline 3h
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
@@ -75,7 +82,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   }
 
   // DYNAMIC SCALING: Base is 30 minutes, but scales up if data is larger
-  const trueMax = Math.max(...displayMinutes);
+  const trueMax = Math.max(...daysData.map(d => d.total));
   const maxMinutes = Math.max(trueMax, 30); 
 
   // Dynamic Y-axis labels: Increased to 5 lines (0, 25%, 50%, 75%, 100%)
@@ -131,21 +138,14 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
             }}
           >
             <Text style={{ color: 'white', fontWeight: '900', fontSize: 11 }}>
-              {displayMinutes[activeDayIndex]}m
+              {daysData[activeDayIndex].focus}m
             </Text>
           </View>
         )}
 
         <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
-          <Defs>
-            <LinearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0%" stopColor="#22D3EE" stopOpacity="1" />
-              <Stop offset="100%" stopColor="#22D3EE" stopOpacity="0.8" />
-            </LinearGradient>
-          </Defs>
-
           <G transform={`translate(0, ${tooltipHeight})`}>
-            {/* HORIZONTAL GRID LINES - 5 levels, but only 0, mid, and top show labels */}
+            {/* HORIZONTAL GRID LINES */}
             {yLabels.map((val, idx) => {
               const y = chartHeight - (val / maxMinutes) * chartHeight;
               const shouldShowLabel = idx === 0 || idx === 2 || idx === 4;
@@ -161,50 +161,37 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               );
             })}
 
-            {/* VERTICAL DIVIDER LINES - Subtle separators */}
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Line 
-                key={i}
-                x1={(i + 1) * (barWidth + gap) - gap/2} y1={0}
-                x2={(i + 1) * (barWidth + gap) - gap/2} y2={chartHeight}
-                stroke={palette.secondaryText} strokeWidth="1" opacity="0.03"
-              />
-            ))}
-
-            {dailyAverage > 0 && dailyAverage <= maxMinutes && (
-               <G>
-                  <Line 
-                    x1={0} y1={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
-                    x2={chartWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
-                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
-                  />
-                  <SvgText x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
-               </G>
-            )}
-
-            {displayMinutes.map((mins, i) => {
-              const barHeight = Math.max((mins / maxMinutes) * chartHeight, mins > 0 ? 8 : 2);
+            {/* Bars */}
+            {daysData.map((d, i) => {
+              const focusH = (d.focus / maxMinutes) * chartHeight;
+              const breakH = (d.break / maxMinutes) * chartHeight;
+              const totalH = focusH + breakH;
               const x = i * (barWidth + gap);
-              const y = chartHeight - barHeight;
               const isToday = i === today.getDay(); 
               const isActive = activeDayIndex === i;
 
-              // Radius for the bottom only
-              const r = 4;
-
               return (
                 <G key={i}>
-                  {/* BACKGROUND TRACK - Square top, slightly rounded bottom */}
+                  {/* BACKGROUND TRACK */}
                   <Rect
                     x={x} y={0} width={barWidth} height={chartHeight}
                     rx={0} fill={palette.secondaryText} 
                     opacity={isActive ? "0.15" : "0.08"}
                   />
-                  {/* DATA BAR - Square top, rounded bottom */}
-                  <Rect
-                    x={x} y={y} width={barWidth} height={barHeight}
-                    rx={0} fill="url(#barGradient)" opacity={isActive ? 1 : 0.9}
-                  />
+                  {/* FOCUS BAR (Blue) */}
+                  {d.focus > 0 && (
+                    <Rect
+                      x={x} y={chartHeight - focusH} width={barWidth} height={focusH}
+                      rx={0} fill="#3B82F6" opacity={isActive ? 1 : 0.9}
+                    />
+                  )}
+                  {/* BREAK BAR (Cyan) */}
+                  {d.break > 0 && (
+                    <Rect
+                      x={x} y={chartHeight - focusH - breakH} width={barWidth} height={breakH}
+                      rx={0} fill="#22D3EE" opacity={isActive ? 1 : 0.9}
+                    />
+                  )}
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
                     fontSize="12" fill={palette.secondaryText}
