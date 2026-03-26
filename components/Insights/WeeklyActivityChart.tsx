@@ -54,8 +54,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const displayMondayOffset = new Date(mondayOffset);
   displayMondayOffset.setDate(mondayOffset.getDate() - 1); 
 
-  // DATA FETCHING + DUMMY DATA INJECTION for testing scaling
-  const realMinutes = Array.from({ length: 7 }, (_, i) => {
+  // DATA FETCHING: Clean data (no dummy injection)
+  const displayMinutes = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(displayMondayOffset);
     d.setDate(displayMondayOffset.getDate() + i);
     const start = d.getTime();
@@ -63,17 +63,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     return Math.round(history.filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end).reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
   });
 
-  // Injecting some dummy data to show 12h+ scaling: Sunday (14h), Monday (8h), Tuesday (16h)
-  const displayMinutes = realMinutes.map((mins, i) => {
-    if (mins > 0) return mins; // Keep real data if exists
-    if (i === 0) return 840;   // 14h on Sunday
-    if (i === 1) return 480;   // 8h on Monday
-    if (i === 2) return 960;   // 16h on Tuesday
-    return mins;
-  });
-
   const thisWeekTotal = displayMinutes.reduce((acc, m) => acc + m, 0);
-  const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday) || 1200; // Dummy baseline
+  const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday) || 180; // Default baseline 3h
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
   const dailyAverage = Math.round(thisWeekTotal / 7);
@@ -83,9 +74,9 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     diffPercent = Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
   }
 
-  // DYNAMIC SCALING: Base is 12h (720m), but scales up if data is larger
+  // DYNAMIC SCALING: Base is 30 minutes, but scales up if data is larger
   const trueMax = Math.max(...displayMinutes);
-  const maxMinutes = Math.max(trueMax, 720); 
+  const maxMinutes = Math.max(trueMax, 30); 
 
   // Dynamic Y-axis labels
   const yLabels = [0, Math.round(maxMinutes / 2), maxMinutes];
@@ -99,6 +90,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   };
 
   const formatHours = (mins: number) => {
+    if (mins < 60) return `${mins}m`;
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     return `${h}h ${m}m`;
