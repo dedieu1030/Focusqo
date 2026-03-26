@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimerStore, SessionRecord } from '../store/useTimerStore';
@@ -102,6 +102,37 @@ export function InsightsScreen() {
 
   const maxLabelTime = labelTimes.length > 0 ? Math.max(...labelTimes.map(l => l.seconds)) : 0;
 
+
+  const renderChart = useMemo(() => {
+    switch (activeView) {
+      case 'day':
+        return (
+          <>
+            <WeeklyActivityChart 
+              history={history} 
+              palette={palette} 
+              selectedDayIndex={selectedDayIndex}
+              onSelectDay={setSelectedDayIndex}
+              hideTooltip={true}
+            />
+            <DailyActivityChart 
+              history={history} 
+              palette={palette} 
+              date={selectedDate}
+            />
+          </>
+        );
+      case 'week':
+        return <WeeklyActivityChart history={history} palette={palette} />;
+      case 'month':
+        return <MonthlyActivityChart history={history} palette={palette} />;
+      case 'year':
+        return <YearlyActivityChart history={history} palette={palette} />;
+      default:
+        return null;
+    }
+  }, [activeView, history, palette, selectedDayIndex, selectedDate]);
+
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: palette.background }]}
@@ -140,32 +171,7 @@ export function InsightsScreen() {
       <View style={styles.bentoGrid}>
         {/* Main "Combo" Card */}
         <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: '#111111' }]}>
-           {/* Detail Charts based on View */}
-           {activeView === 'day' && (
-             <>
-               <WeeklyActivityChart 
-                 history={history} 
-                 palette={palette} 
-                 selectedDayIndex={selectedDayIndex}
-                 onSelectDay={setSelectedDayIndex}
-                 hideTooltip={true}
-               />
-               <DailyActivityChart 
-                 history={history} 
-                 palette={palette} 
-                 date={selectedDate}
-               />
-             </>
-           )}
-           {activeView === 'week' && (
-             <WeeklyActivityChart history={history} palette={palette} />
-           )}
-           {activeView === 'month' && (
-             <MonthlyActivityChart history={history} palette={palette} />
-           )}
-           {activeView === 'year' && (
-             <YearlyActivityChart history={history} palette={palette} />
-           )}
+           {renderChart}
         </View>
 
         {/* Total Focus Time Card */}

@@ -109,12 +109,15 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
   const handleTouch = (evt: GestureResponderEvent) => {
     const x = evt.nativeEvent.locationX;
     const index = Math.floor(x / slotWidth);
-    const clampedIndex = Math.max(0, Math.min(slots - 1, index));
+    const clampedIndex = Math.max(0, Math.min(6, index));
     
-    if (onSelectDay) {
-      onSelectDay(clampedIndex);
-    } else {
-      setInternalActiveIndex(clampedIndex);
+    // Only allow selection if the day has data (focus or break > 0)
+    if (daysData[clampedIndex].total > 0) {
+      if (onSelectDay) {
+        onSelectDay(clampedIndex);
+      } else {
+        setInternalActiveIndex(clampedIndex);
+      }
     }
   };
 
@@ -264,8 +267,12 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
           onMoveShouldSetResponder={() => true}
           onResponderGrant={handleTouch}
           onResponderMove={handleTouch}
-          onResponderRelease={() => !onSelectDay && setInternalActiveIndex(null)}
-          onResponderTerminate={() => !onSelectDay && setInternalActiveIndex(null)}
+          onResponderRelease={() => {
+            if (!onSelectDay) setInternalActiveIndex(null);
+          }}
+          onResponderTerminate={() => {
+            if (!onSelectDay) setInternalActiveIndex(null);
+          }}
           style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
         />
       </View>
