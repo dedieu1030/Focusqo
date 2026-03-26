@@ -161,9 +161,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               );
             })}
 
-            {/* VERTICAL DIVIDER LINES (Superimposed - 5 lines total) */}
+            {/* VERTICAL DIVIDER LINES (Superimposed) */}
             {Array.from({ length: slots + 1 }).map((_, i) => { // 7 slots means 8 dividers (0 to 7)
-              if (i === 0 || i === slots) return null; // Don't draw at 0 or end, as chart boundaries serve this
               const x = i * slotWidth;
               return (
                 <Line 

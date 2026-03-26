@@ -98,7 +98,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
                   key={hour}
                   x1={x} y1={0}
                   x2={x} y2={chartHeight}
-                  stroke={palette.secondaryText} strokeWidth="1" opacity="0.1"
+                  stroke={palette.secondaryText} strokeWidth="1" opacity="0.12"
                 />
               );
             })}
