@@ -19,7 +19,7 @@ export function TodayRhythm() {
   const totalSec = totalFocusSec + totalBreakSec;
   const formatMins = (sec: number) => Math.floor(sec / 60) + 'm';
 
-  const TOTAL_PILLS = 28;
+  const TOTAL_PILLS = 18;
   // If no sessions, show default state (maybe all gray or all focus template)
   const focusRatio = totalSec > 0 ? totalFocusSec / totalSec : 1;
   const focusPillsCount = totalSec > 0 ? Math.round(TOTAL_PILLS * focusRatio) : 0;
@@ -62,32 +62,34 @@ export function TodayRhythm() {
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    padding: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: 28,
-    marginTop: 24,
+    marginTop: 16,
   },
   title: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
-    marginBottom: 16,
+    marginBottom: 8,
+    opacity: 0.8,
   },
   barsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 20,
-    marginBottom: 12,
+    height: 44,
+    marginBottom: 8,
   },
   pill: {
-    width: 4.5,
-    height: 16,
-    borderRadius: 2.5,
+    width: 10,
+    height: 42,
+    borderRadius: 5,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
   statItem: {
     flexDirection: 'row',
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.2,
   },
