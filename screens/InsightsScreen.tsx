@@ -16,6 +16,19 @@ export function InsightsScreen() {
   const { palette } = useThemeStore();
   const [history, setHistory] = useState<SessionRecord[]>([]);
   const [activeView, setActiveView] = useState<InsightsView>('day');
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(new Date().getDay());
+
+  // Sunday-start logic matching WeeklyActivityChart
+  const today = new Date();
+  const dayOfWeek = today.getDay(); 
+  const mondayOffset = new Date(today.getTime());
+  mondayOffset.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  mondayOffset.setHours(0, 0, 0, 0);
+  const displaySundayOffset = new Date(mondayOffset);
+  displaySundayOffset.setDate(mondayOffset.getDate() - 1);
+
+  const selectedDate = new Date(displaySundayOffset);
+  selectedDate.setDate(displaySundayOffset.getDate() + selectedDayIndex);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -130,8 +143,18 @@ export function InsightsScreen() {
            {/* Detail Charts based on View */}
            {activeView === 'day' && (
              <>
-               <WeeklyActivityChart history={history} palette={palette} />
-               <DailyActivityChart history={history} palette={palette} />
+               <WeeklyActivityChart 
+                 history={history} 
+                 palette={palette} 
+                 selectedDayIndex={selectedDayIndex}
+                 onSelectDay={setSelectedDayIndex}
+                 hideTooltip={true}
+               />
+               <DailyActivityChart 
+                 history={history} 
+                 palette={palette} 
+                 date={selectedDate}
+               />
              </>
            )}
            {activeView === 'week' && (

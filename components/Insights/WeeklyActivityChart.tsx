@@ -8,10 +8,13 @@ import { TrendingUp, TrendingDown } from 'lucide-react-native';
 interface WeeklyActivityChartProps {
   history: SessionRecord[];
   palette: ColorPalette;
+  selectedDayIndex?: number | null;
+  onSelectDay?: (index: number) => void;
+  hideTooltip?: boolean;
 }
 
-export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartProps) {
-  const [activeDayIndex, setActiveDayIndex] = useState<number | null>(null);
+export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSelectDay, hideTooltip }: WeeklyActivityChartProps) {
+  const [internalActiveIndex, setInternalActiveIndex] = useState<number | null>(null);
   const windowWidth = Dimensions.get('window').width;
   
   // Layout constants
@@ -107,7 +110,12 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     const x = evt.nativeEvent.locationX;
     const index = Math.floor(x / slotWidth);
     const clampedIndex = Math.max(0, Math.min(slots - 1, index));
-    setActiveDayIndex(clampedIndex);
+    
+    if (onSelectDay) {
+      onSelectDay(clampedIndex);
+    } else {
+      setInternalActiveIndex(clampedIndex);
+    }
   };
 
   const formatHours = (mins: number) => {
@@ -116,6 +124,10 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     const m = mins % 60;
     return `${h}h ${m}m`;
   };
+
+  const activeIdx = onSelectDay 
+    ? (selectedDayIndex ?? null) 
+    : (internalActiveIndex ?? null);
 
   return (
     <View className="mt-2">
@@ -142,17 +154,17 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
-        {activeDayIndex !== null && (
+        {activeIdx !== null && !hideTooltip && (
           <View 
             style={{ 
               position: 'absolute',
-              left: (activeDayIndex * slotWidth) + (slotWidth / 2) - 24,
+              left: (activeIdx * slotWidth) + (slotWidth / 2) - 24,
               top: 5, width: 48, height: 24, borderRadius: 12,
               backgroundColor: "#22D3EE", justifyContent: 'center', alignItems: 'center', zIndex: 10,
             }}
           >
             <Text style={{ color: 'white', fontWeight: '900', fontSize: 11 }}>
-              {daysData[activeDayIndex].focus}m
+              {daysData[activeIdx].focus}m
             </Text>
           </View>
         )}
@@ -176,7 +188,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
             })}
 
             {/* VERTICAL DIVIDER LINES (Superimposed) */}
-            {Array.from({ length: slots + 1 }).map((_, i) => { // 7 slots means 8 dividers (0 to 7)
+            {Array.from({ length: slots + 1 }).map((_, i) => { 
               const x = i * slotWidth;
               return (
                 <Line 
@@ -192,34 +204,39 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
             {daysData.map((d, i) => {
               const focusH = (d.focus / maxMinutes) * chartHeight;
               const breakH = (d.break / maxMinutes) * chartHeight;
-              const x = i * slotWidth + barWidthHorizontalOffset; // Re-calculate x using the new slotWidth and barWidthHorizontalOffset
+              const x = i * slotWidth + barWidthHorizontalOffset;
               const isToday = i === today.getDay(); 
-              const isActive = activeDayIndex === i;
+              const isActive = activeIdx === i;
+
+              // Selection color for bars
+              let focusColor = isActive && onSelectDay ? "#22D3EE" : "#3B82F6";
+              let focusOpacity = isActive ? 1 : 0.9;
+              if (onSelectDay && !isActive) focusOpacity = 0.4; // Fade non-selected in selection mode
 
               return (
                 <G key={i}>
-                  {/* FOCUS BAR (Blue) */}
+                  {/* FOCUS BAR */}
                   {d.focus > 0 && (
                     <Path
                       d={d.break > 0 
                         ? `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
                         : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH+2} Q${x+barWidth},${chartHeight-focusH} ${x+barWidth-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
                       }
-                      fill="#3B82F6" opacity={isActive ? 1 : 0.9}
+                      fill={focusColor} opacity={focusOpacity}
                     />
                   )}
-                  {/* BREAK BAR (Orange) */}
+                  {/* BREAK BAR */}
                   {d.break > 0 && (
                     <Path
                       d={`M${x},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH-breakH+2} Q${x+barWidth},${chartHeight-focusH-breakH} ${x+barWidth-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
-                      fill={palette.breakColor} opacity={isActive ? 1 : 0.9}
+                      fill={palette.breakColor} opacity={isActive ? 1 : (onSelectDay ? 0.4 : 0.9)}
                     />
                   )}
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
                     fontSize="12" fill={palette.secondaryText}
-                    textAnchor="middle" fontWeight={isToday ? "900" : "500"}
-                    opacity={isToday ? 1 : 0.3}
+                    textAnchor="middle" fontWeight={isActive || isToday ? "900" : "500"}
+                    opacity={isActive || isToday ? 1 : 0.3}
                   >
                     {dayNames[i]}
                   </SvgText>
@@ -227,7 +244,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               );
             })}
 
-            {/* AVERAGE LINE (Superimposed) */}
+            {/* AVERAGE LINE */}
             {dailyAverage > 0 && dailyAverage <= maxMinutes && (
                <G>
                   <Line 
@@ -246,8 +263,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           onMoveShouldSetResponder={() => true}
           onResponderGrant={handleTouch}
           onResponderMove={handleTouch}
-          onResponderRelease={() => setActiveDayIndex(null)}
-          onResponderTerminate={() => setActiveDayIndex(null)}
+          onResponderRelease={() => !onSelectDay && setInternalActiveIndex(null)}
+          onResponderTerminate={() => !onSelectDay && setInternalActiveIndex(null)}
           style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
         />
       </View>

@@ -7,9 +7,10 @@ import { ColorPalette } from '../../constants/Palettes';
 interface DailyActivityChartProps {
   history: SessionRecord[];
   palette: ColorPalette;
+  date?: Date;
 }
 
-export function DailyActivityChart({ history, palette }: DailyActivityChartProps) {
+export function DailyActivityChart({ history, palette, date }: DailyActivityChartProps) {
   const windowWidth = Dimensions.get('window').width;
   const chartHeight = 120;
   const chartInnerPadding = 48;
@@ -22,11 +23,12 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
   const barW = 7;
   const barWidthHorizontalOffset = (slotWidth - barW) / 2;
 
-  // Today's data (24 slots)
-  const startOfToday = new Date().setHours(0, 0, 0, 0);
+  // Selected day's data (24 slots)
+  const baseDate = date || new Date();
+  const startOfSelectedDay = new Date(baseDate).setHours(0, 0, 0, 0);
   
   const hourlyData = Array.from({ length: 24 }, (_, hour) => {
-    const start = startOfToday + hour * 3600000;
+    const start = startOfSelectedDay + hour * 3600000;
     const end = start + 3600000;
     
     let focusMins = 0;
