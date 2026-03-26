@@ -161,7 +161,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               );
             })}
 
-            {/* VERTICAL DIVIDER LINES */}
+            {/* VERTICAL DIVIDER LINES (Behind) */}
             {Array.from({ length: 6 }).map((_, i) => (
               <Line 
                 key={i}
@@ -170,18 +170,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                 stroke={palette.secondaryText} strokeWidth="1" opacity="0.08"
               />
             ))}
-
-            {/* AVERAGE LINE */}
-            {dailyAverage > 0 && dailyAverage <= maxMinutes && (
-               <G>
-                  <Line 
-                    x1={0} y1={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
-                    x2={chartWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
-                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
-                  />
-                  <SvgText x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
-               </G>
-            )}
 
             {/* Bars */}
             {daysData.map((d, i) => {
@@ -219,6 +207,18 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                 </G>
               );
             })}
+
+            {/* AVERAGE LINE (Superimposed) */}
+            {dailyAverage > 0 && dailyAverage <= maxMinutes && (
+               <G>
+                  <Line 
+                    x1={0} y1={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
+                    x2={chartWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
+                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
+                  />
+                  <SvgText x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
+               </G>
+            )}
           </G>
         </Svg>
 

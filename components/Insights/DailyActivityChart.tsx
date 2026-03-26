@@ -86,13 +86,13 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
               );
             })}
 
-            {/* VERTICAL DIVIDER LINES */}
+            {/* VERTICAL DIVIDER LINES (Superimposed in gaps) */}
             {Array.from({ length: 23 }).map((_, i) => (
               <Line 
                 key={i}
                 x1={(i + 1) * (barW + gap) - gap/2} y1={0}
                 x2={(i + 1) * (barW + gap) - gap/2} y2={chartHeight}
-                stroke={palette.secondaryText} strokeWidth="1" opacity="0.08"
+                stroke={palette.secondaryText} strokeWidth="1" opacity="0.1"
               />
             ))}
 
