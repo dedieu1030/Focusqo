@@ -70,9 +70,9 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
           <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
        </View>
 
-      <View style={{ width: availableWidth, height: chartHeight + 30 }}>
-        <Svg height={chartHeight + 30} width={availableWidth}>
-          <G>
+      <View style={{ width: availableWidth, height: chartHeight + 50 }}>
+        <Svg height={chartHeight + 50} width={availableWidth}>
+          <G transform="translate(0, 15)">
             {/* Grid */}
             {yLabels.map((val) => {
               const y = chartHeight - (val / maxMins) * chartHeight;
@@ -94,12 +94,10 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
               
               return (
                 <G key={i}>
-                  {/* Background track */}
-                  <Rect x={x} y={0} width={barW} height={chartHeight} fill={palette.secondaryText} opacity="0.06" rx={0} />
                   {/* Focus bar (Blue) */}
                   {d.focus > 0 && <Rect x={x} y={chartHeight - focusH} width={barW} height={focusH} fill="#3B82F6" rx={0} />}
-                  {/* Break bar (Cyan) */}
-                  {d.break > 0 && <Rect x={x} y={chartHeight - focusH - breakH} width={barW} height={breakH} fill="#22D3EE" rx={0} />}
+                  {/* Break bar (Orange) */}
+                  {d.break > 0 && <Rect x={x} y={chartHeight - focusH - breakH} width={barW} height={breakH} fill={palette.breakColor} rx={0} />}
                   
                   {/* Time labels (selected hours) */}
                   {(i === 0 || i === 6 || i === 12 || i === 18) && (
@@ -121,7 +119,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
           <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold opacity-60">Focus</Text>
         </View>
         <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#22D3EE" }} />
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.breakColor }} />
           <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold opacity-60">Break</Text>
         </View>
       </View>

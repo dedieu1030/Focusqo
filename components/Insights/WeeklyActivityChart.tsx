@@ -172,12 +172,6 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
               return (
                 <G key={i}>
-                  {/* BACKGROUND TRACK */}
-                  <Rect
-                    x={x} y={0} width={barWidth} height={chartHeight}
-                    rx={0} fill={palette.secondaryText} 
-                    opacity={isActive ? "0.15" : "0.08"}
-                  />
                   {/* FOCUS BAR (Blue) */}
                   {d.focus > 0 && (
                     <Rect
@@ -185,11 +179,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                       rx={0} fill="#3B82F6" opacity={isActive ? 1 : 0.9}
                     />
                   )}
-                  {/* BREAK BAR (Cyan) */}
+                  {/* BREAK BAR (Orange) */}
                   {d.break > 0 && (
                     <Rect
                       x={x} y={chartHeight - focusH - breakH} width={barWidth} height={breakH}
-                      rx={0} fill="#22D3EE" opacity={isActive ? 1 : 0.9}
+                      rx={0} fill={palette.breakColor} opacity={isActive ? 1 : 0.9}
                     />
                   )}
                   <SvgText
