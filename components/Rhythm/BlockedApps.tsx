@@ -13,6 +13,8 @@ const BLOCKED_APPS = [
   { id: '4', name: 'Reddit', icon: require('../../assets/app-logos/reddit.png') },
   { id: '5', name: 'X', icon: require('../../assets/app-logos/x.png') },
   { id: '6', name: 'Pinterest', icon: require('../../assets/app-logos/pinterest.png') },
+  { id: '7', name: 'Facebook', icon: require('../../assets/app-logos/facebook.png') },
+  { id: '8', name: 'LinkedIn', icon: require('../../assets/app-logos/linkedin.png') },
 ];
 
 export function BlockedApps() {
@@ -34,7 +36,7 @@ export function BlockedApps() {
         
         {/* Overflow Indicator */}
         <View style={[styles.overflowCircle, { backgroundColor: palette.secondaryText + '20' }]}>
-          <Text style={[styles.overflowText, { color: palette.timerText }]}>+8</Text>
+          <Text style={[styles.overflowText, { color: palette.timerText }]}>+5</Text>
         </View>
       </View>
 
@@ -48,11 +50,11 @@ export function BlockedApps() {
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12, // More air for 8 icons
     paddingVertical: 10,
     borderRadius: 28,
     marginTop: 16,
-    minHeight: 108, // Match TodayRhythm precisely
+    minHeight: 108, // Standardized height for pagination
     justifyContent: 'space-between',
   },
   header: {
@@ -70,7 +72,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 52,
-    gap: 8,
+    gap: 4, // Optimized for 8 icons at 36px
     justifyContent: 'center',
   },
   appIconWrapper: {
