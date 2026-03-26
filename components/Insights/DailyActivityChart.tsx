@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Dimensions } from 'react-native';
-import Svg, { Rect, G, Text as SvgText, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Rect, G, Text as SvgText, Line, Defs, LinearGradient, Stop, Path } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
 
@@ -112,9 +112,22 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
               return (
                 <G key={i}>
                   {/* Focus bar (Blue) */}
-                  {d.focus > 0 && <Rect x={x} y={chartHeight - focusH} width={barW} height={focusH} fill="#3B82F6" rx={0} />}
+                  {d.focus > 0 && (
+                    <Path
+                      d={d.break > 0 
+                        ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
+                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+2} Q${x+barW},${chartHeight-focusH} ${x+barW-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
+                      }
+                      fill="#3B82F6"
+                    />
+                  )}
                   {/* Break bar (Orange) */}
-                  {d.break > 0 && <Rect x={x} y={chartHeight - focusH - breakH} width={barW} height={breakH} fill={palette.breakColor} rx={0} />}
+                  {d.break > 0 && (
+                    <Path
+                      d={`M${x},${chartHeight-focusH} L${x+barW},${chartHeight-focusH} L${x+barW},${chartHeight-focusH-breakH+2} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
+                      fill={palette.breakColor}
+                    />
+                  )}
                   
                   {/* Time labels (selected hours) */}
                   {(i === 0 || i === 6 || i === 12 || i === 18) && (

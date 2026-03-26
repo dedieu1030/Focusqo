@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Dimensions, GestureResponderEvent } from 'react-native';
-import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Line } from 'react-native-svg';
+import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Line, Path } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
 import { TrendingUp, TrendingDown } from 'lucide-react-native';
@@ -186,16 +186,19 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                 <G key={i}>
                   {/* FOCUS BAR (Blue) */}
                   {d.focus > 0 && (
-                    <Rect
-                      x={x} y={chartHeight - focusH} width={barWidth} height={focusH}
-                      rx={0} fill="#3B82F6" opacity={isActive ? 1 : 0.9}
+                    <Path
+                      d={d.break > 0 
+                        ? `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
+                        : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH+2} Q${x+barWidth},${chartHeight-focusH} ${x+barWidth-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
+                      }
+                      fill="#3B82F6" opacity={isActive ? 1 : 0.9}
                     />
                   )}
                   {/* BREAK BAR (Orange) */}
                   {d.break > 0 && (
-                    <Rect
-                      x={x} y={chartHeight - focusH - breakH} width={barWidth} height={breakH}
-                      rx={0} fill={palette.breakColor} opacity={isActive ? 1 : 0.9}
+                    <Path
+                      d={`M${x},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH-breakH+2} Q${x+barWidth},${chartHeight-focusH-breakH} ${x+barWidth-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
+                      fill={palette.breakColor} opacity={isActive ? 1 : 0.9}
                     />
                   )}
                   <SvgText
