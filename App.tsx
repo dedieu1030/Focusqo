@@ -65,7 +65,7 @@ export default function App() {
         <TodayRhythm />
         
         {/* Pagination Dots (as seen in reference) */}
-        <View className="flex-row justify-center gap-2 mt-6 mb-2">
+        <View className="flex-row justify-center gap-2 mt-6 mb-6">
            <View className="h-1.5 w-6 rounded-full" style={{ backgroundColor: 'white', opacity: 0.9 }} />
            <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: 'white', opacity: 0.2 }} />
         </View>

@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 24, // Optimized for more space above
+    paddingBottom: 16, // Shifted even lower for maximum space above
     gap: 8,
   },
   navItem: {
