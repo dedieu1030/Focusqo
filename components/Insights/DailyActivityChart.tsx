@@ -76,25 +76,33 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
             {/* Grid */}
             {yLabels.map((val) => {
               const y = chartHeight - (val / maxMins) * chartHeight;
+              const isSignificant = val === 0 || val === 30 || val === 60;
               return (
                 <G key={val}>
                    <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
-                   <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
-                     {val}m
-                   </SvgText>
+                   {isSignificant && (
+                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
+                       {val}m
+                     </SvgText>
+                   )}
                 </G>
               );
             })}
 
-            {/* VERTICAL DIVIDER LINES (Superimposed in gaps) */}
-            {Array.from({ length: 23 }).map((_, i) => (
-              <Line 
-                key={i}
-                x1={(i + 1) * (barW + gap) - gap/2} y1={0}
-                x2={(i + 1) * (barW + gap) - gap/2} y2={chartHeight}
-                stroke={palette.secondaryText} strokeWidth="1" opacity="0.1"
-              />
-            ))}
+            {/* VERTICAL DIVIDER LINES (Superimposed - 5 lines total) */}
+            {[0, 6, 12, 18, 24].map((hour) => {
+              const x = hour * (barW + gap);
+              // Handle the last line specifically (ends at the end of the 23rd bar)
+              const finalX = hour === 24 ? 24 * (barW + gap) - gap : x;
+              return (
+                <Line 
+                  key={hour}
+                  x1={finalX} y1={0}
+                  x2={finalX} y2={chartHeight}
+                  stroke={palette.secondaryText} strokeWidth="1" opacity="0.1"
+                />
+              );
+            })}
 
             {/* Bars */}
             {hourlyData.map((d, i) => {
