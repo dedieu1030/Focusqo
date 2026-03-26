@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Settings, Pause } from 'lucide-react-native';
 import { useTimerStore } from '../../store/useTimerStore';
 import { useThemeStore } from '../../store/useThemeStore';
 
@@ -7,52 +8,51 @@ export function TodayRhythm() {
   const { todayHistory } = useTimerStore();
   const { palette } = useThemeStore();
 
-  const totalFocusSeconds = todayHistory
+  const totalFocusSec = todayHistory
     .filter(r => r.mode === 'focus')
     .reduce((acc, r) => acc + r.durationInSeconds, 0);
   
-  const totalBreakSeconds = todayHistory
+  const totalBreakSec = todayHistory
     .filter(r => r.mode === 'break')
     .reduce((acc, r) => acc + r.durationInSeconds, 0);
 
-  const formatMinutes = (seconds: number) => Math.floor(seconds / 60) + 'm';
+  const totalSec = totalFocusSec + totalBreakSec;
+  const formatMins = (sec: number) => Math.floor(sec / 60) + 'm';
+
+  const TOTAL_PILLS = 28;
+  // If no sessions, show default state (maybe all gray or all focus template)
+  const focusRatio = totalSec > 0 ? totalFocusSec / totalSec : 1;
+  const focusPillsCount = totalSec > 0 ? Math.round(TOTAL_PILLS * focusRatio) : 0;
 
   return (
     <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
       <Text style={[styles.title, { color: palette.timerText }]}>Today's rhythm</Text>
       
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
-        contentContainerStyle={styles.barsContainer}
-      >
-        {todayHistory.length === 0 ? (
-          <View style={[styles.emptyBar, { backgroundColor: palette.accentColor + '40' }]} />
-        ) : (
-          todayHistory.map((session, index) => (
+      <View style={styles.barsContainer}>
+        {Array.from({ length: TOTAL_PILLS }).map((_, i) => {
+          let pillColor = palette.secondaryText + '20'; // Gray by default
+          if (totalSec > 0) {
+            pillColor = i < focusPillsCount ? '#3B82F6' : palette.breakColor;
+          }
+          return (
             <View 
-              key={session.id} 
-              style={[
-                styles.bar, 
-                { backgroundColor: session.mode === 'focus' ? palette.focusColor : palette.breakColor }
-              ]} 
+              key={i} 
+              style={[styles.pill, { backgroundColor: pillColor }]} 
             />
-          ))
-        )}
-      </ScrollView>
+          );
+        })}
+      </View>
 
-      <View style={styles.statsContainer}>
-        <View style={styles.statRow}>
-          <View style={[styles.statDot, { backgroundColor: palette.focusColor }]} />
-          <Text style={[styles.statText, { color: palette.timerText }]}>
-            {formatMinutes(totalFocusSeconds)}
-          </Text>
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Settings size={14} color="#3B82F6" strokeWidth={3} />
+          <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalFocusSec)}</Text>
         </View>
-        <View style={styles.statRow}>
-          <Text style={[styles.statText, { color: palette.timerText }]}>
-            {formatMinutes(totalBreakSeconds)}
-          </Text>
-          <View style={[styles.statDot, { backgroundColor: palette.breakColor }]} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalBreakSec)}</Text>
+          <View style={[styles.iconContainer, { backgroundColor: palette.breakColor }]}>
+            <Pause size={10} color="white" strokeWidth={4} />
+          </View>
         </View>
       </View>
     </View>
@@ -62,48 +62,48 @@ export function TodayRhythm() {
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    padding: 16,
-    borderRadius: 20,
+    padding: 24,
+    borderRadius: 28,
     marginTop: 24,
   },
   title: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 16,
   },
   barsContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    height: 24,
-    gap: 4,
+    height: 20,
+    marginBottom: 12,
   },
-  bar: {
-    width: 6,
+  pill: {
+    width: 4.5,
     height: 16,
-    borderRadius: 3,
+    borderRadius: 2.5,
   },
-  emptyBar: {
-    width: 40,
-    height: 16,
-    borderRadius: 3,
-  },
-  statsContainer: {
+  statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 12,
+    alignItems: 'center',
+    marginTop: 8,
   },
-  statRow: {
+  statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
-  statDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 4, // Hexagon-like icon in the reference
+  statValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
-  statText: {
-    fontSize: 14,
-    fontWeight: '700',
+  iconContainer: {
+    width: 14,
+    height: 14,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

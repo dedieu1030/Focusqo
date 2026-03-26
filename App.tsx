@@ -63,7 +63,13 @@ export default function App() {
       {/* The dark bottom section that stays fixed */}
       <SafeAreaView style={[styles.bottomSection, { backgroundColor: '#111111' }]}>
         <TodayRhythm />
-        <View style={styles.spacer} />
+        
+        {/* Pagination Dots (as seen in reference) */}
+        <View className="flex-row justify-center gap-2 mt-2 mb-4">
+           <View className="h-1.5 w-6 rounded-full" style={{ backgroundColor: 'white', opacity: 0.9 }} />
+           <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: 'white', opacity: 0.2 }} />
+        </View>
+
         <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />
       </SafeAreaView>
     </View>
