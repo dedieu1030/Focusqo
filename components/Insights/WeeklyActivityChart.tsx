@@ -208,10 +208,11 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               const isToday = i === today.getDay(); 
               const isActive = activeIdx === i;
 
-              // Selection color for bars
-              let focusColor = isActive && onSelectDay ? "#22D3EE" : "#3B82F6";
-              let focusOpacity = isActive ? 1 : 0.9;
-              if (onSelectDay && !isActive) focusOpacity = 0.4; // Fade non-selected in selection mode
+              // Selection styling (Vibrant Cyan)
+              const isSelected = isActive && onSelectDay;
+              const focusColor = isSelected ? "#22D3EE" : "#3B82F6";
+              const breakColor = isSelected ? "#06B6D4" : palette.breakColor; // Darker Cyan for the break part if selected
+              const opacity = 0.9;
 
               return (
                 <G key={i}>
@@ -222,14 +223,14 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                         ? `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
                         : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH+2} Q${x+barWidth},${chartHeight-focusH} ${x+barWidth-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
                       }
-                      fill={focusColor} opacity={focusOpacity}
+                      fill={focusColor} opacity={opacity}
                     />
                   )}
                   {/* BREAK BAR */}
                   {d.break > 0 && (
                     <Path
                       d={`M${x},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH-breakH+2} Q${x+barWidth},${chartHeight-focusH-breakH} ${x+barWidth-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
-                      fill={palette.breakColor} opacity={isActive ? 1 : (onSelectDay ? 0.4 : 0.9)}
+                      fill={breakColor} opacity={opacity}
                     />
                   )}
                   <SvgText
