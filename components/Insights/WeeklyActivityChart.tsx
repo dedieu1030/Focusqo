@@ -24,8 +24,9 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const chartInnerPadding = 48; 
   const availableWidth = windowWidth - chartInnerPadding - 32; 
   const chartWidth = availableWidth - yAxisWidth; 
-  const totalBarWidth = barWidth * 7;
-  const gap = (chartWidth - totalBarWidth) / 6;
+  const slots = 7; // For weekly chart, 7 days
+  const slotWidth = chartWidth / slots;
+  const barWidthHorizontalOffset = (slotWidth - barWidth) / 2;
 
   // Week calculation (Current Monday - Sunday)
   const today = new Date();
@@ -90,9 +91,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
   const handleTouch = (evt: GestureResponderEvent) => {
     const x = evt.nativeEvent.locationX;
-    const step = barWidth + gap;
-    const index = Math.round(x / (step > 0 ? step : 1));
-    const clampedIndex = Math.max(0, Math.min(6, index));
+    const index = Math.floor(x / slotWidth);
+    const clampedIndex = Math.max(0, Math.min(slots - 1, index));
     setActiveDayIndex(clampedIndex);
   };
 
@@ -132,7 +132,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           <View 
             style={{ 
               position: 'absolute',
-              left: activeDayIndex * (barWidth + gap) + (barWidth / 2) - 24,
+              left: (activeDayIndex * slotWidth) + (slotWidth / 2) - 24,
               top: 5, width: 48, height: 24, borderRadius: 12,
               backgroundColor: "#22D3EE", justifyContent: 'center', alignItems: 'center', zIndex: 10,
             }}
@@ -161,22 +161,25 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               );
             })}
 
-            {/* VERTICAL DIVIDER LINES (Behind) */}
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Line 
-                key={i}
-                x1={(i + 1) * (barWidth + gap) - gap/2} y1={0}
-                x2={(i + 1) * (barWidth + gap) - gap/2} y2={chartHeight}
-                stroke={palette.secondaryText} strokeWidth="1" opacity="0.08"
-              />
-            ))}
+            {/* VERTICAL DIVIDER LINES (Superimposed - 5 lines total) */}
+            {Array.from({ length: slots + 1 }).map((_, i) => { // 7 slots means 8 dividers (0 to 7)
+              if (i === 0 || i === slots) return null; // Don't draw at 0 or end, as chart boundaries serve this
+              const x = i * slotWidth;
+              return (
+                <Line 
+                  key={i}
+                  x1={x} y1={0}
+                  x2={x} y2={chartHeight}
+                  stroke={palette.secondaryText} strokeWidth="1" opacity="0.08"
+                />
+              );
+            })}
 
             {/* Bars */}
             {daysData.map((d, i) => {
               const focusH = (d.focus / maxMinutes) * chartHeight;
               const breakH = (d.break / maxMinutes) * chartHeight;
-              const totalH = focusH + breakH;
-              const x = i * (barWidth + gap);
+              const x = i * slotWidth + barWidthHorizontalOffset; // Re-calculate x using the new slotWidth and barWidthHorizontalOffset
               const isToday = i === today.getDay(); 
               const isActive = activeDayIndex === i;
 

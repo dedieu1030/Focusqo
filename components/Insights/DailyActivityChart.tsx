@@ -18,8 +18,9 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
   const chartAreaWidth = availableWidth - yAxisWidth;
   
   const slots = 24;
+  const slotWidth = chartAreaWidth / slots;
   const barW = 7;
-  const gap = (chartAreaWidth - (barW * slots)) / (slots - 1);
+  const barWidthHorizontalOffset = (slotWidth - barW) / 2;
 
   // Today's data (24 slots)
   const startOfToday = new Date().setHours(0, 0, 0, 0);
@@ -91,14 +92,12 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
 
             {/* VERTICAL DIVIDER LINES (Superimposed - 5 lines total) */}
             {[0, 6, 12, 18, 24].map((hour) => {
-              const x = hour * (barW + gap);
-              // Handle the last line specifically (ends at the end of the 23rd bar)
-              const finalX = hour === 24 ? 24 * (barW + gap) - gap : x;
+              const x = hour * slotWidth;
               return (
                 <Line 
                   key={hour}
-                  x1={finalX} y1={0}
-                  x2={finalX} y2={chartHeight}
+                  x1={x} y1={0}
+                  x2={x} y2={chartHeight}
                   stroke={palette.secondaryText} strokeWidth="1" opacity="0.1"
                 />
               );
@@ -106,7 +105,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
 
             {/* Bars */}
             {hourlyData.map((d, i) => {
-              const x = i * (barW + gap);
+              const x = i * slotWidth + barWidthHorizontalOffset;
               const focusH = (d.focus / maxMins) * chartHeight;
               const breakH = (d.break / maxMins) * chartHeight;
               
@@ -119,7 +118,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
                   
                   {/* Time labels (selected hours) */}
                   {(i === 0 || i === 6 || i === 12 || i === 18) && (
-                    <SvgText x={x} y={chartHeight + 25} fontSize="9" fill={palette.secondaryText} opacity="0.5" textAnchor="start" fontWeight="bold">
+                    <SvgText x={i * slotWidth} y={chartHeight + 25} fontSize="9" fill={palette.secondaryText} opacity="0.5" textAnchor="start" fontWeight="bold">
                       {i === 0 ? '12 AM' : i === 12 ? '12 PM' : `${i > 12 ? i-12 : i} ${i>=12?'PM':'AM'}`}
                     </SvgText>
                   )}
