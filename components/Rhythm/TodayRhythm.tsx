@@ -8,13 +8,13 @@ export function TodayRhythm() {
   const { todayHistory } = useTimerStore();
   const { palette } = useThemeStore();
 
-  const totalFocusSec = todayHistory
-    .filter(r => r.mode === 'focus')
-    .reduce((acc, r) => acc + r.durationInSeconds, 0);
+  const totalFocusSec = todayHistory.length > 0 
+    ? todayHistory.filter(r => r.mode === 'focus').reduce((acc, r) => acc + r.durationInSeconds, 0)
+    : 15800; // Simulated 4.5h 
   
-  const totalBreakSec = todayHistory
-    .filter(r => r.mode === 'break')
-    .reduce((acc, r) => acc + r.durationInSeconds, 0);
+  const totalBreakSec = todayHistory.length > 0
+    ? todayHistory.filter(r => r.mode === 'break').reduce((acc, r) => acc + r.durationInSeconds, 0)
+    : 3600; // Simulated 1h
 
   const totalSec = totalFocusSec + totalBreakSec;
   const formatMins = (sec: number) => Math.floor(sec / 60) + 'm';
@@ -29,8 +29,6 @@ export function TodayRhythm() {
 
   return (
     <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
-      <Text style={[styles.title, { color: palette.timerText }]}>Today's rhythm</Text>
-      
       <View style={styles.barsContainer}>
         {Array.from({ length: TOTAL_PILLS }).map((_, i) => {
           let pillColor = palette.secondaryText + '20'; // Gray by default
@@ -54,6 +52,9 @@ export function TodayRhythm() {
           <Settings size={14} color="#3B82F6" strokeWidth={3} />
           <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalFocusSec)}</Text>
         </View>
+
+        <Text style={[styles.title, { color: palette.timerText }]}>Today</Text>
+
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalBreakSec)}</Text>
           <View style={[styles.iconContainer, { backgroundColor: palette.breakColor }]}>
@@ -69,22 +70,22 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 28,
     marginTop: 16,
   },
   title: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 12,
-    opacity: 0.8,
+    fontSize: 12,
+    fontWeight: '800',
+    opacity: 0.5,
   },
   barsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 60,
-    marginBottom: 12,
+    height: 54,
+    marginTop: 4,
+    marginBottom: 8,
   },
   pill: {
     width: 10,
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 0,
   },
   statItem: {
     flexDirection: 'row',
