@@ -11,6 +11,8 @@ const BLOCKED_APPS = [
   { id: '2', name: 'YouTube', icon: require('../../assets/app-logos/youtube.png') },
   { id: '3', name: 'TikTok', icon: require('../../assets/app-logos/tiktok.png') },
   { id: '4', name: 'Reddit', icon: require('../../assets/app-logos/reddit.png') },
+  { id: '5', name: 'X', icon: require('../../assets/app-logos/x.png') },
+  { id: '6', name: 'Pinterest', icon: require('../../assets/app-logos/pinterest.png') },
 ];
 
 export function BlockedApps() {
@@ -32,7 +34,7 @@ export function BlockedApps() {
         
         {/* Overflow Indicator */}
         <View style={[styles.overflowCircle, { backgroundColor: palette.secondaryText + '20' }]}>
-          <Text style={[styles.overflowText, { color: palette.timerText }]}>+12</Text>
+          <Text style={[styles.overflowText, { color: palette.timerText }]}>+8</Text>
         </View>
       </View>
 
@@ -46,16 +48,18 @@ export function BlockedApps() {
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 28,
     marginTop: 16,
+    minHeight: 108, // Match TodayRhythm precisely
+    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 4,
   },
   headerTitle: {
     fontSize: 13,
@@ -65,15 +69,14 @@ const styles = StyleSheet.create({
   appsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 54,
-    marginBottom: 8,
-    gap: 12,
+    height: 52,
+    gap: 8,
     justifyContent: 'center',
   },
   appIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#000',
   },
@@ -82,14 +85,14 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   overflowCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   overflowText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '800',
   },
   footer: {

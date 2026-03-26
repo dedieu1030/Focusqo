@@ -73,6 +73,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 28,
     marginTop: 16,
+    minHeight: 108, // Standardized height for pagination
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 12,
