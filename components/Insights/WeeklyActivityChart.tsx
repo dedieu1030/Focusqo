@@ -78,8 +78,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const trueMax = Math.max(...displayMinutes);
   const maxMinutes = Math.max(trueMax, 30); 
 
-  // Dynamic Y-axis labels: Increased to 4 lines (0, 33%, 66%, 100%)
-  const yLabels = [0, Math.round(maxMinutes / 3), Math.round((maxMinutes * 2) / 3), maxMinutes];
+  // Dynamic Y-axis labels: Increased to 5 lines (0, 25%, 50%, 75%, 100%)
+  const yLabels = [0, Math.round(maxMinutes * 0.25), Math.round(maxMinutes * 0.5), Math.round(maxMinutes * 0.75), maxMinutes];
 
   const handleTouch = (evt: GestureResponderEvent) => {
     const x = evt.nativeEvent.locationX;
