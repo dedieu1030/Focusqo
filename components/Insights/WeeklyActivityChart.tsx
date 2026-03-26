@@ -78,8 +78,8 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const trueMax = Math.max(...displayMinutes);
   const maxMinutes = Math.max(trueMax, 30); 
 
-  // Dynamic Y-axis labels
-  const yLabels = [0, Math.round(maxMinutes / 2), maxMinutes];
+  // Dynamic Y-axis labels: Increased to 4 lines (0, 33%, 66%, 100%)
+  const yLabels = [0, Math.round(maxMinutes / 3), Math.round((maxMinutes * 2) / 3), maxMinutes];
 
   const handleTouch = (evt: GestureResponderEvent) => {
     const x = evt.nativeEvent.locationX;
@@ -145,6 +145,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
           </Defs>
 
           <G transform={`translate(0, ${tooltipHeight})`}>
+            {/* HORIZONTAL GRID LINES - Increased to 4 levels */}
             {yLabels.map((val) => {
               const y = chartHeight - (val / maxMinutes) * chartHeight;
               return (
@@ -156,6 +157,16 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                 </G>
               );
             })}
+
+            {/* VERTICAL DIVIDER LINES - Subtle separators */}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Line 
+                key={i}
+                x1={(i + 1) * (barWidth + gap) - gap/2} y1={0}
+                x2={(i + 1) * (barWidth + gap) - gap/2} y2={chartHeight}
+                stroke={palette.secondaryText} strokeWidth="1" opacity="0.03"
+              />
+            ))}
 
             {dailyAverage > 0 && dailyAverage <= maxMinutes && (
                <G>
@@ -177,11 +188,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
 
               return (
                 <G key={i}>
-                  {/* BACKGROUND TRACK: More visible light grey contrast */}
+                  {/* BACKGROUND TRACK */}
                   <Rect
                     x={x} y={0} width={barWidth} height={chartHeight}
                     rx={6} fill={palette.secondaryText} 
-                    opacity={isActive ? "0.15" : "0.1"} // Increased from 0.03
+                    opacity={isActive ? "0.15" : "0.08"}
                   />
                   <Rect
                     x={x} y={y} width={barWidth} height={barHeight}
