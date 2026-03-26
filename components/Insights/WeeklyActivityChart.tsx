@@ -55,15 +55,30 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   const displayMondayOffset = new Date(mondayOffset);
   displayMondayOffset.setDate(mondayOffset.getDate() - 1); 
 
-  // DATA FETCHING: Clean data (no dummy injection)
+  // DATA FETCHING: Clean aggregation with overlap splitting
   const daysData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(displayMondayOffset);
     d.setDate(displayMondayOffset.getDate() + i);
     const start = d.getTime();
     const end = start + 86400000;
-    const daySessions = history.filter(r => r.timestamp >= start && r.timestamp < end);
-    const focusSecs = daySessions.filter(s => s.mode === 'focus').reduce((acc, s) => acc + s.durationInSeconds, 0);
-    const breakSecs = daySessions.filter(s => s.mode === 'break').reduce((acc, s) => acc + s.durationInSeconds, 0);
+    
+    let focusSecs = 0;
+    let breakSecs = 0;
+
+    history.forEach(r => {
+      const sessionStart = r.timestamp;
+      const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
+
+      const overlapStart = Math.max(start, sessionStart);
+      const overlapEnd = Math.min(end, sessionEnd);
+
+      if (overlapEnd > overlapStart) {
+        const durationSec = (overlapEnd - overlapStart) / 1000;
+        if (r.mode === 'focus') focusSecs += durationSec;
+        else breakSecs += durationSec;
+      }
+    });
+
     return { 
       focus: Math.round(focusSecs / 60), 
       break: Math.round(breakSecs / 60),
@@ -72,7 +87,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
   });
 
   const thisWeekTotal = daysData.reduce((acc, d) => acc + d.focus, 0);
-  const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday) || 180; // Default baseline 3h
+  const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday) || 180;
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
   const dailyAverage = Math.round(thisWeekTotal / 7);
@@ -82,12 +97,11 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
     diffPercent = Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
   }
 
-  // DYNAMIC SCALING: Base is 30 minutes, but scales up if data is larger
+  // DYNAMIC SCALING with 20% headroom to prevent overflow
   const trueMax = Math.max(...daysData.map(d => d.total));
-  const maxMinutes = Math.max(trueMax, 30); 
+  const maxMinutes = Math.max(trueMax * 1.2, 30); 
 
-  // Dynamic Y-axis labels: Increased to 5 lines (0, 25%, 50%, 75%, 100%)
-  const yLabels = [0, Math.round(maxMinutes * 0.25), Math.round(maxMinutes * 0.5), Math.round(maxMinutes * 0.75), maxMinutes];
+  const yLabels = [0, Math.round(maxMinutes * 0.25), Math.round(maxMinutes * 0.5), Math.round(maxMinutes * 0.75), Math.round(maxMinutes)];
 
   const handleTouch = (evt: GestureResponderEvent) => {
     const x = evt.nativeEvent.locationX;

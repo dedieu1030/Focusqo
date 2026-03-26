@@ -34,24 +34,36 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
     const start = d.getTime();
     const end = start + 86400000;
 
-    // Only process if the day is not in the future
     const isFuture = start > now.getTime();
-    
-    if (isFuture) {
-      return { focus: 0, break: 0, total: 0, date: d };
-    }
+    if (isFuture) return { focus: 0, break: 0, total: 0, date: d };
 
-    const focusMins = Math.round(history
-      .filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end)
-      .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
-    const breakMins = Math.round(history
-      .filter(r => r.mode === 'break' && r.timestamp >= start && r.timestamp < end)
-      .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
+    let focusSecs = 0;
+    let breakSecs = 0;
 
-    return { focus: focusMins, break: breakMins, total: focusMins + breakMins, date: d };
+    history.forEach(r => {
+      const sessionStart = r.timestamp;
+      const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
+
+      const overlapStart = Math.max(start, sessionStart);
+      const overlapEnd = Math.min(end, sessionEnd);
+
+      if (overlapEnd > overlapStart) {
+        const durationSec = (overlapEnd - overlapStart) / 1000;
+        if (r.mode === 'focus') focusSecs += durationSec;
+        else breakSecs += durationSec;
+      }
+    });
+
+    return { 
+      focus: focusSecs / 60, 
+      break: breakSecs / 60, 
+      total: (focusSecs + breakSecs) / 60, 
+      date: d 
+    };
   });
 
-  const maxMins = Math.max(120, ...daysData.map(d => d.total));
+  const trueMax = Math.max(...daysData.map(d => d.total));
+  const maxMins = Math.max(trueMax * 1.2, 120); 
   const yLabels = [0, maxMins * 0.25, maxMins * 0.5, maxMins * 0.75, maxMins];
 
   return (

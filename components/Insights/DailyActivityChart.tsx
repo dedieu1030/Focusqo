@@ -29,38 +29,32 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
     const start = startOfToday + hour * 3600000;
     const end = start + 3600000;
     
-    // Filter actual history
-    const focusMins = Math.round(history
-      .filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end)
-      .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
-    const breakMins = Math.round(history
-      .filter(r => r.mode === 'break' && r.timestamp >= start && r.timestamp < end)
-      .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
-    
-    // Dummy injection for visual testing (only if history is low)
-    let dFocus = 0;
-    let dBreak = 0;
-    if (history.length < 50) { // If mostly dummy data in global history
-      if (hour >= 9 && hour <= 12) {
-        dFocus = Math.round(Math.random() * 30 + 15);
-        dBreak = Math.round(Math.random() * 10 + 5);
-      }
-      if (hour >= 14 && hour <= 18) {
-        dFocus = Math.round(Math.random() * 40 + 10);
-        dBreak = Math.round(Math.random() * 5 + 5);
-      }
-      if (hour >= 20 && hour <= 23) {
-        dFocus = Math.round(Math.random() * 20 + 5);
-        dBreak = Math.round(Math.random() * 5);
-      }
-    }
+    let focusMins = 0;
+    let breakMins = 0;
 
-    const f = Math.max(focusMins, dFocus);
-    const b = Math.max(breakMins, dBreak);
-    return { focus: f, break: b, total: f + b };
+    // Filter and compute overlap for each session to properly attribute time to the right hour slot
+    history.forEach(r => {
+      const sessionStart = r.timestamp;
+      const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
+
+      const overlapStart = Math.max(start, sessionStart);
+      const overlapEnd = Math.min(end, sessionEnd);
+
+      if (overlapEnd > overlapStart) {
+        const durationSec = (overlapEnd - overlapStart) / 1000;
+        if (r.mode === 'focus') focusMins += durationSec / 60;
+        else breakMins += durationSec / 60;
+      }
+    });
+
+    return { 
+      focus: focusMins, 
+      break: breakMins, 
+      total: focusMins + breakMins 
+    };
   });
 
-  const maxMins = 60; // Hourly max is usually 60m
+  const maxMins = 60; 
   const yLabels = [0, 15, 30, 45, 60];
 
   return (
@@ -90,7 +84,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
               );
             })}
 
-            {/* VERTICAL DIVIDER LINES (Superimposed - 5 lines total) */}
+            {/* VERTICAL DIVIDER LINES */}
             {[0, 6, 12, 18, 24].map((hour) => {
               const x = hour * slotWidth;
               return (
@@ -106,25 +100,34 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
             {/* Bars */}
             {hourlyData.map((d, i) => {
               const x = i * slotWidth + barWidthHorizontalOffset;
-              const focusH = (d.focus / maxMins) * chartHeight;
-              const breakH = (d.break / maxMins) * chartHeight;
               
+              // Ensure we never exceed 60m total to prevent visual overflow
+              const total = d.focus + d.break;
+              const scale = total > 60 ? 60 / total : 1;
+              const focusScaled = d.focus * scale;
+              const breakScaled = d.break * scale;
+
+              const focusH = (focusScaled / maxMins) * chartHeight;
+              const breakH = (breakScaled / maxMins) * chartHeight;
+              
+              const radius = 2; // Subtle corner radius
+
               return (
                 <G key={i}>
                   {/* Focus bar (Blue) */}
-                  {d.focus > 0 && (
+                  {focusScaled > 0.5 && (
                     <Path
-                      d={d.break > 0 
+                      d={breakScaled > 0.5 
                         ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
-                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+2} Q${x+barW},${chartHeight-focusH} ${x+barW-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
+                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+radius} Q${x+barW},${chartHeight-focusH} ${x+barW-radius},${chartHeight-focusH} L${x+radius},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+radius} Z`
                       }
                       fill="#3B82F6"
                     />
                   )}
                   {/* Break bar (Orange) */}
-                  {d.break > 0 && (
+                  {breakScaled > 0.5 && (
                     <Path
-                      d={`M${x},${chartHeight-focusH} L${x+barW},${chartHeight-focusH} L${x+barW},${chartHeight-focusH-breakH+2} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
+                      d={`M${x},${chartHeight-focusH} L${x+barW},${chartHeight-focusH} L${x+barW},${chartHeight-focusH-breakH+radius} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-radius},${chartHeight-focusH-breakH} L${x+radius},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+radius} Z`}
                       fill={palette.breakColor}
                     />
                   )}
