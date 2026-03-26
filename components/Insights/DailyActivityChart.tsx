@@ -11,14 +11,14 @@ interface DailyActivityChartProps {
 
 export function DailyActivityChart({ history, palette }: DailyActivityChartProps) {
   const windowWidth = Dimensions.get('window').width;
-  const chartHeight = 100;
+  const chartHeight = 120;
   const chartInnerPadding = 48;
   const availableWidth = windowWidth - chartInnerPadding - 32;
   const yAxisWidth = 35;
   const chartAreaWidth = availableWidth - yAxisWidth;
   
   const slots = 24;
-  const barW = 5;
+  const barW = 7;
   const gap = (chartAreaWidth - (barW * slots)) / (slots - 1);
 
   // Today's data (24 slots)
@@ -66,19 +66,19 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
     <View style={{ marginTop: 32, paddingBottom: 10 }}>
        <View className="flex-row items-center mb-4">
           <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
-          <Text style={{ color: palette.secondaryText }} className="mx-4 text-[10px] font-black opacity-30 uppercase tracking-[2px]">Daily Breakdown</Text>
+          <Text style={{ color: palette.secondaryText }} className="mx-4 text-[10px] font-black opacity-40 uppercase tracking-[2px]">Daily Breakdown</Text>
           <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
        </View>
 
-      <View style={{ width: availableWidth, height: chartHeight + 50 }}>
-        <Svg height={chartHeight + 50} width={availableWidth}>
-          <G transform="translate(0, 15)">
+      <View style={{ width: availableWidth, height: chartHeight + 60 }}>
+        <Svg height={chartHeight + 60} width={availableWidth}>
+          <G transform="translate(0, 20)">
             {/* Grid */}
             {yLabels.map((val) => {
               const y = chartHeight - (val / maxMins) * chartHeight;
               return (
                 <G key={val}>
-                   <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.05" />
+                   <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
                    <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
                      {val}m
                    </SvgText>
@@ -92,7 +92,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
                 key={i}
                 x1={(i + 1) * (barW + gap) - gap/2} y1={0}
                 x2={(i + 1) * (barW + gap) - gap/2} y2={chartHeight}
-                stroke={palette.secondaryText} strokeWidth="1" opacity="0.03"
+                stroke={palette.secondaryText} strokeWidth="1" opacity="0.08"
               />
             ))}
 
@@ -111,7 +111,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
                   
                   {/* Time labels (selected hours) */}
                   {(i === 0 || i === 6 || i === 12 || i === 18) && (
-                    <SvgText x={x} y={chartHeight + 20} fontSize="8" fill={palette.secondaryText} opacity="0.4" textAnchor="start" fontWeight="bold">
+                    <SvgText x={x} y={chartHeight + 25} fontSize="9" fill={palette.secondaryText} opacity="0.5" textAnchor="start" fontWeight="bold">
                       {i === 0 ? '12 AM' : i === 12 ? '12 PM' : `${i > 12 ? i-12 : i} ${i>=12?'PM':'AM'}`}
                     </SvgText>
                   )}

@@ -151,7 +151,7 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               const shouldShowLabel = idx === 0 || idx === 2 || idx === 4;
               return (
                 <G key={val}>
-                  <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.05" />
+                  <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
                   {shouldShowLabel && (
                     <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
                       {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
@@ -167,9 +167,21 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
                 key={i}
                 x1={(i + 1) * (barWidth + gap) - gap/2} y1={0}
                 x2={(i + 1) * (barWidth + gap) - gap/2} y2={chartHeight}
-                stroke={palette.secondaryText} strokeWidth="1" opacity="0.03"
+                stroke={palette.secondaryText} strokeWidth="1" opacity="0.08"
               />
             ))}
+
+            {/* AVERAGE LINE */}
+            {dailyAverage > 0 && dailyAverage <= maxMinutes && (
+               <G>
+                  <Line 
+                    x1={0} y1={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
+                    x2={chartWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
+                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
+                  />
+                  <SvgText x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
+               </G>
+            )}
 
             {/* Bars */}
             {daysData.map((d, i) => {
