@@ -51,7 +51,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
   });
 
   const maxMins = Math.max(600, ...monthsData.map(d => d.total));
-  const yLabels = [0, Math.round(maxMins/2), Math.round(maxMins)];
+  const yLabels = [0, maxMins * 0.25, maxMins * 0.5, maxMins * 0.75, maxMins];
 
   return (
     <View style={{ marginTop: 20 }}>
@@ -65,19 +65,22 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
         <Svg height={chartHeight + 40} width={availableWidth}>
           <G transform="translate(0, 10)">
              {/* Grid */}
-             {yLabels.map((val) => {
+             {yLabels.map((val, i) => {
               const y = chartHeight - (val / maxMins) * chartHeight;
+              const isSignificant = i === 0 || i === 2 || i === 4;
               return (
-                <G key={val}>
+                <G key={i}>
                    <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
-                   <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
-                     {val >= 60 ? `${Math.round(val/60)}h` : `${val}m`}
-                   </SvgText>
+                   {isSignificant && (
+                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
+                       {val >= 60 ? `${Math.round(val/60)}h` : `${Math.round(val)}m`}
+                     </SvgText>
+                   )}
                 </G>
               );
             })}
 
-            {/* Vertical Dividers (Standard 5-line, 4 equal partitions) */}
+            {/* Vertical Dividers (5 lines standard) */}
             {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
               const x = p * chartAreaWidth;
               return (
@@ -92,11 +95,14 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
               );
             })}
 
-            {/* Bars */}
+            {/* Bars with Centered Labels */}
             {monthsData.map((d, i) => {
               const x = i * slotWidth + barOffset;
               const focusH = (d.focus / maxMins) * chartHeight;
               const breakH = (d.break / maxMins) * chartHeight;
+
+              // Show centered labels for quarters and last month
+              const showLabel = i % 3 === 0 || i === slots - 1;
 
               return (
                 <G key={i}>
@@ -115,13 +121,19 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                       fill={palette.breakColor}
                     />
                   )}
-                  
-                  {/* Labels (Every 3 months or first/last) */}
-                  {(i % 3 === 0 || i === slots - 1) && (
-                    <SvgText x={x + barW/2} y={chartHeight + 20} fontSize="8" fill={palette.secondaryText} opacity="0.4" textAnchor="middle" fontWeight="bold">
-                      {d.monthName}
-                    </SvgText>
-                  )}
+
+                  {/* All 12 Month Labels (Centered) */}
+                  <SvgText 
+                    x={x + barW / 2} 
+                    y={chartHeight + 20} 
+                    fontSize="7.5" 
+                    fill={palette.secondaryText} 
+                    opacity="0.4" 
+                    textAnchor="middle" 
+                    fontWeight="bold"
+                  >
+                    {d.monthName.substring(0, 3)}
+                  </SvgText>
                 </G>
               );
             })}
