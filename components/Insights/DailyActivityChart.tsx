@@ -60,7 +60,7 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
   });
 
   const maxMins = 60; // Hourly max is usually 60m
-  const yLabels = [0, 30, 60];
+  const yLabels = [0, 15, 30, 45, 60];
 
   return (
     <View style={{ marginTop: 32, paddingBottom: 10 }}>
@@ -85,6 +85,16 @@ export function DailyActivityChart({ history, palette }: DailyActivityChartProps
                 </G>
               );
             })}
+
+            {/* VERTICAL DIVIDER LINES */}
+            {Array.from({ length: 23 }).map((_, i) => (
+              <Line 
+                key={i}
+                x1={(i + 1) * (barW + gap) - gap/2} y1={0}
+                x2={(i + 1) * (barW + gap) - gap/2} y2={chartHeight}
+                stroke={palette.secondaryText} strokeWidth="1" opacity="0.03"
+              />
+            ))}
 
             {/* Bars */}
             {hourlyData.map((d, i) => {

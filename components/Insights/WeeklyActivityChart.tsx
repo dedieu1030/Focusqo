@@ -161,6 +161,16 @@ export function WeeklyActivityChart({ history, palette }: WeeklyActivityChartPro
               );
             })}
 
+            {/* VERTICAL DIVIDER LINES */}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Line 
+                key={i}
+                x1={(i + 1) * (barWidth + gap) - gap/2} y1={0}
+                x2={(i + 1) * (barWidth + gap) - gap/2} y2={chartHeight}
+                stroke={palette.secondaryText} strokeWidth="1" opacity="0.03"
+              />
+            ))}
+
             {/* Bars */}
             {daysData.map((d, i) => {
               const focusH = (d.focus / maxMinutes) * chartHeight;
