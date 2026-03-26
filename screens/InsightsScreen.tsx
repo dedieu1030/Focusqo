@@ -1,31 +1,64 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimerStore, SessionRecord } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Clock, Flame, Target, Tag, BarChart3 } from 'lucide-react-native';
+import { Clock, Flame, Target, Tag } from 'lucide-react-native';
 import { WeeklyActivityChart } from '../components/Insights/WeeklyActivityChart';
+import { DailyActivityChart } from '../components/Insights/DailyActivityChart';
+
+type InsightsView = 'day' | 'week' | 'month' | 'year';
 
 export function InsightsScreen() {
   const { labels } = useTimerStore();
   const { palette } = useThemeStore();
   const [history, setHistory] = useState<SessionRecord[]>([]);
+  const [activeView, setActiveView] = useState<InsightsView>('day');
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const str = await AsyncStorage.getItem('@focusqo_timer_state_v2_history');
+        let parsed: SessionRecord[] = [];
         if (str) {
-          setHistory(JSON.parse(str));
+          parsed = JSON.parse(str);
         }
+
+        // INJECT DUMMY DATA FOR DEMO PURPOSES
+        const now = Date.now();
+        const dummyRecords: SessionRecord[] = [];
+        
+        // Past 30 days dummy data
+        for (let i = 0; i < 30; i++) {
+          const dayStart = now - (i * 86400000);
+          // Random 3-6 focus sessions per day
+          const sessions = 3 + Math.floor(Math.random() * 4);
+          for (let s = 0; s < sessions; s++) {
+            dummyRecords.push({
+              id: `dummy-${i}-${s}`,
+              mode: 'focus',
+              durationInSeconds: 1200 + Math.floor(Math.random() * 2400),
+              timestamp: dayStart - (s * 7200000), // Spaced by 2h
+              labelId: labels.length > 0 ? labels[s % labels.length].id : 'default'
+            });
+          }
+          // Random break
+          dummyRecords.push({
+            id: `dummy-break-${i}`,
+            mode: 'break',
+            durationInSeconds: 600 + Math.floor(Math.random() * 1200),
+            timestamp: dayStart - 3600000,
+            labelId: 'break'
+          });
+        }
+        
+        setHistory([...parsed, ...dummyRecords]);
       } catch (e) {}
     };
     fetchHistory();
-  }, []);
+  }, [labels]);
 
   const focusHistory = history.filter(r => r.mode === 'focus');
-  
-  const totalFocusSessions = focusHistory.length;
   const totalFocusSeconds = focusHistory.reduce((acc, r) => acc + r.durationInSeconds, 0);
 
   const formatTime = (seconds: number) => {
@@ -35,11 +68,7 @@ export function InsightsScreen() {
     return `${minutes}m`;
   };
 
-  const uniqueDays = new Set(focusHistory.map(r => {
-    const d = new Date(r.timestamp);
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-  }));
-  const activeDaysCount = uniqueDays.size;
+  const activeDaysCount = new Set(focusHistory.map(r => new Date(r.timestamp).toDateString())).size;
 
   const labelTimes = labels.map(label => ({
     ...label,
@@ -57,56 +86,95 @@ export function InsightsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Text style={[styles.screenTitle, { color: palette.primaryText }]}>Insights</Text>
+
+      {/* Unified Navigation Toggles */}
+      <View className="flex-row justify-center mb-8 px-2 py-1 mx-4 rounded-3xl" style={{ backgroundColor: palette.timerBlock + '15' }}>
+        {(['day', 'week', 'month', 'year'] as InsightsView[]).map((v) => (
+          <TouchableOpacity 
+            key={v}
+            onPress={() => setActiveView(v)}
+            style={{ 
+              flex: 1, 
+              paddingVertical: 10, 
+              borderRadius: 20, 
+              backgroundColor: activeView === v ? palette.timerBlock : 'transparent',
+              shadowOpacity: activeView === v ? 0.05 : 0
+            }}
+            className="items-center justify-center"
+          >
+            <Text style={{ 
+              color: activeView === v ? palette.timerText : palette.secondaryText,
+              fontWeight: activeView === v ? '900' : '600',
+              fontSize: 13,
+              opacity: activeView === v ? 1 : 0.6
+            }}>
+              {v.charAt(0).toUpperCase() + v.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       
       <View style={styles.bentoGrid}>
-        {/* Weekly Activity Chart */}
+        {/* Main "Combo" Card */}
         <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
-          <WeeklyActivityChart history={history} palette={palette} />
+           {/* BASE CHART (Original) */}
+           <WeeklyActivityChart history={history} palette={palette} />
+           
+           {/* DAILY BREAKDOWN (Added only for Day view) */}
+           {activeView === 'day' && (
+             <DailyActivityChart history={history} palette={palette} />
+           )}
+
+           {/* Placeholder for Month/Year if needed, otherwise just keep base chart */}
+           {(activeView === 'month' || activeView === 'year') && (
+             <View className="items-center py-6">
+                <Text style={{ color: palette.secondaryText }} className="text-xs font-bold opacity-30 italic">Detailed {activeView} view coming soon</Text>
+             </View>
+           )}
         </View>
 
-        {/* Full-width main card */}
+        {/* Total Focus Time Card */}
         <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
           <View style={styles.bentoHeaderRow}>
-            <Clock size={20} color={palette.focusColor} />
-            <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Total Focus Time</Text>
+            <Clock size={18} color={palette.focusColor} />
+            <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Total focus time</Text>
           </View>
           <Text style={[styles.bentoHugeValue, { color: palette.timerText }]}>{formatTime(totalFocusSeconds)}</Text>
         </View>
 
-        {/* Two-column sub cards */}
+        {/* Stats Grid */}
         <View style={styles.bentoSplit}>
           <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: palette.timerBlock }]}>
-            <Target size={24} color={palette.breakColor} style={{ marginBottom: 12 }} />
-            <Text style={[styles.bentoValue, { color: palette.timerText }]}>{totalFocusSessions}</Text>
+            <Target size={22} color={palette.breakColor} style={{ marginBottom: 10 }} />
+            <Text style={[styles.bentoValue, { color: palette.timerText }]}>{focusHistory.length}</Text>
             <Text style={[styles.bentoSubLabel, { color: palette.secondaryText }]}>Sessions</Text>
           </View>
 
           <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: palette.timerBlock }]}>
-            <Flame size={24} color={palette.focusColor} style={{ marginBottom: 12 }} />
+            <Flame size={22} color={palette.focusColor} style={{ marginBottom: 10 }} />
             <Text style={[styles.bentoValue, { color: palette.timerText }]}>{activeDaysCount}</Text>
-            <Text style={[styles.bentoSubLabel, { color: palette.secondaryText }]}>Active Days</Text>
+            <Text style={[styles.bentoSubLabel, { color: palette.secondaryText }]}>Active days</Text>
           </View>
         </View>
 
-        {/* Labels Block */}
+        {/* Labels Content */}
         {labelTimes.length > 0 && (
-          <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock, marginTop: 16 }]}>
+          <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
             <View style={styles.bentoHeaderRow}>
-              <Tag size={20} color={palette.accentColor} />
-              <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Time by Label</Text>
+              <Tag size={18} color={palette.accentColor} />
+              <Text style={[styles.bentoLabel, { color: palette.secondaryText }]}>Labels distribution</Text>
             </View>
-            
-            <View style={styles.labelsContainer}>
+            <View className="mt-4">
               {labelTimes.map((label, idx) => {
-                const ratio = maxLabelTime > 0 ? label.seconds / maxLabelTime : 0;
+                const ratio = label.seconds / maxLabelTime;
                 return (
-                  <View key={label.id} style={[styles.labelRow, idx !== labelTimes.length - 1 && styles.labelRowMargin]}>
-                    <View style={styles.labelHeader}>
-                      <Text style={[styles.labelName, { color: palette.timerText }]}>{label.name}</Text>
-                      <Text style={[styles.labelTime, { color: palette.secondaryText }]}>{formatTime(label.seconds)}</Text>
+                  <View key={label.id} className={idx !== labelTimes.length - 1 ? "mb-6" : ""}>
+                    <View className="flex-row justify-between mb-2">
+                       <Text style={{ color: palette.timerText }} className="font-bold text-sm">{label.name}</Text>
+                       <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">{formatTime(label.seconds)}</Text>
                     </View>
-                    <View style={[styles.progressTrack, { backgroundColor: palette.background + '20' }]}>
-                      <View style={[styles.progressFill, { backgroundColor: palette.focusColor, width: `${ratio * 100}%` }]} />
+                    <View className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: palette.secondaryText + '10' }}>
+                       <View className="h-full rounded-full" style={{ backgroundColor: palette.focusColor, width: `${ratio * 100}%` }} />
                     </View>
                   </View>
                 );
@@ -140,7 +208,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   bentoCard: {
-    borderRadius: 24,
+    borderRadius: 28,
     padding: 24,
   },
   bentoFull: {
@@ -152,65 +220,35 @@ const styles = StyleSheet.create({
   },
   bentoHalf: {
     flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
     padding: 20,
+    borderRadius: 24,
   },
   bentoHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
     gap: 8,
   },
   bentoLabel: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '700',
+    opacity: 0.5,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   bentoHugeValue: {
-    fontSize: 40,
-    fontWeight: '700',
+    fontSize: 36,
+    fontWeight: '800',
     letterSpacing: -1,
   },
   bentoValue: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '800',
     marginBottom: 4,
   },
   bentoSubLabel: {
     fontSize: 14,
-    fontWeight: '500',
-  },
-  labelsContainer: {
-    marginTop: 8,
-  },
-  labelRow: {
-    // container for a single label
-  },
-  labelRowMargin: {
-    marginBottom: 20,
-  },
-  labelHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  labelName: {
-    fontSize: 15,
     fontWeight: '600',
-  },
-  labelTime: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  progressTrack: {
-    height: 8,
-    borderRadius: 4,
-    width: '100%',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
+    opacity: 0.6,
   },
 });
