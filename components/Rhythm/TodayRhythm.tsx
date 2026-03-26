@@ -20,6 +20,9 @@ export function TodayRhythm() {
   const formatMins = (sec: number) => Math.floor(sec / 60) + 'm';
 
   const TOTAL_PILLS = 18;
+  const MAX_HEIGHT = 52;
+  const MIN_HEIGHT = 24;
+
   // If no sessions, show default state (maybe all gray or all focus template)
   const focusRatio = totalSec > 0 ? totalFocusSec / totalSec : 1;
   const focusPillsCount = totalSec > 0 ? Math.round(TOTAL_PILLS * focusRatio) : 0;
@@ -34,10 +37,13 @@ export function TodayRhythm() {
           if (totalSec > 0) {
             pillColor = i < focusPillsCount ? '#3B82F6' : palette.breakColor;
           }
+
+          const pillHeight = MIN_HEIGHT + (MAX_HEIGHT - MIN_HEIGHT) * Math.sin(Math.PI * (i + 0.5) / TOTAL_PILLS);
+
           return (
             <View 
               key={i} 
-              style={[styles.pill, { backgroundColor: pillColor }]} 
+              style={[styles.pill, { backgroundColor: pillColor, height: pillHeight }]} 
             />
           );
         })}
@@ -70,19 +76,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 12,
     opacity: 0.8,
   },
   barsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 44,
-    marginBottom: 8,
+    height: 60,
+    marginBottom: 12,
   },
   pill: {
     width: 10,
-    height: 42,
     borderRadius: 5,
   },
   statsRow: {
