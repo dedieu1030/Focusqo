@@ -6,6 +6,8 @@ import { useThemeStore } from '../store/useThemeStore';
 import { Clock, Flame, Target, Tag } from 'lucide-react-native';
 import { WeeklyActivityChart } from '../components/Insights/WeeklyActivityChart';
 import { DailyActivityChart } from '../components/Insights/DailyActivityChart';
+import { MonthlyActivityChart } from '../components/Insights/MonthlyActivityChart';
+import { YearlyActivityChart } from '../components/Insights/YearlyActivityChart';
 
 type InsightsView = 'day' | 'week' | 'month' | 'year';
 
@@ -24,32 +26,40 @@ export function InsightsScreen() {
           parsed = JSON.parse(str);
         }
 
-        // INJECT DUMMY DATA FOR DEMO PURPOSES
+        // INJECT DUMMY DATA FOR 365 DAYS (Seasonal Variance)
         const now = Date.now();
         const dummyRecords: SessionRecord[] = [];
         
-        // Past 30 days dummy data
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 365; i++) {
           const dayStart = now - (i * 86400000);
-          // Random 3-6 focus sessions per day
-          const sessions = 3 + Math.floor(Math.random() * 4);
+          const monthIndex = new Date(dayStart).getMonth();
+          
+          // Seasonal variance: busier in Spring (March-May) and Autumn (Sept-Nov)
+          let intensity = 1.0;
+          if (monthIndex >= 2 && monthIndex <= 4) intensity = 1.4; // Spring burst
+          if (monthIndex >= 8 && monthIndex <= 10) intensity = 1.2; // Autumn focus
+          if (monthIndex === 7 || monthIndex === 11) intensity = 0.6; // Holiday dips
+
+          const sessions = Math.floor((3 + Math.floor(Math.random() * 4)) * intensity);
           for (let s = 0; s < sessions; s++) {
             dummyRecords.push({
               id: `dummy-${i}-${s}`,
               mode: 'focus',
-              durationInSeconds: 1200 + Math.floor(Math.random() * 2400),
-              timestamp: dayStart - (s * 7200000), // Spaced by 2h
+              durationInSeconds: (1200 + Math.floor(Math.random() * 2400)) * intensity,
+              timestamp: dayStart - (s * 3600000 * 3), // Spaced by 3h
               labelId: labels.length > 0 ? labels[s % labels.length].id : 'default'
             });
           }
           // Random break
-          dummyRecords.push({
-            id: `dummy-break-${i}`,
-            mode: 'break',
-            durationInSeconds: 600 + Math.floor(Math.random() * 1200),
-            timestamp: dayStart - 3600000,
-            labelId: 'break'
-          });
+          if (sessions > 0) {
+            dummyRecords.push({
+              id: `dummy-break-${i}`,
+              mode: 'break',
+              durationInSeconds: (600 + Math.floor(Math.random() * 1200)) * intensity,
+              timestamp: dayStart - 3600000,
+              labelId: 'break'
+            });
+          }
         }
         
         setHistory([...parsed, ...dummyRecords]);
@@ -117,19 +127,21 @@ export function InsightsScreen() {
       <View style={styles.bentoGrid}>
         {/* Main "Combo" Card */}
         <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: palette.timerBlock }]}>
-           {/* BASE CHART (Original) */}
-           <WeeklyActivityChart history={history} palette={palette} />
-           
-           {/* DAILY BREAKDOWN (Added only for Day view) */}
+           {/* Detail Charts based on View */}
            {activeView === 'day' && (
-             <DailyActivityChart history={history} palette={palette} />
+             <>
+               <WeeklyActivityChart history={history} palette={palette} />
+               <DailyActivityChart history={history} palette={palette} />
+             </>
            )}
-
-           {/* Placeholder for Month/Year if needed, otherwise just keep base chart */}
-           {(activeView === 'month' || activeView === 'year') && (
-             <View className="items-center py-6">
-                <Text style={{ color: palette.secondaryText }} className="text-xs font-bold opacity-30 italic">Detailed {activeView} view coming soon</Text>
-             </View>
+           {activeView === 'week' && (
+             <WeeklyActivityChart history={history} palette={palette} />
+           )}
+           {activeView === 'month' && (
+             <MonthlyActivityChart history={history} palette={palette} />
+           )}
+           {activeView === 'year' && (
+             <YearlyActivityChart history={history} palette={palette} />
            )}
         </View>
 
