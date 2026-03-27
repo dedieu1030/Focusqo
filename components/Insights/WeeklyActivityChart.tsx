@@ -21,7 +21,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
   
   // Layout constants
   const chartHeight = 160;
-  const tooltipHeight = 40; 
+  const effectiveTooltipHeight = hideTooltip ? 0 : 40; 
   const barWidth = 22;
   const yAxisWidth = 50;
   
@@ -169,7 +169,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
         )}
       </View>
 
-      <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
+      <View style={{ width: availableWidth, height: chartHeight + effectiveTooltipHeight + 40 }} className="relative">
         {activeIdx !== null && !hideTooltip && (() => {
           if (daysData[activeIdx].total === 0) return null;
           const barCenter = (activeIdx * slotWidth) + (slotWidth / 2);
@@ -203,8 +203,8 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
           );
         })()}
 
-        <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
-          <G transform={`translate(0, ${tooltipHeight})`}>
+        <Svg height={chartHeight + effectiveTooltipHeight + 40} width={availableWidth}>
+          <G transform={`translate(0, ${effectiveTooltipHeight})`}>
             {/* Dynamic Connector Line */}
             {activeIdx !== null && !hideTooltip && (() => {
               if (daysData[activeIdx].total === 0) return null;
@@ -346,7 +346,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
           onResponderTerminate={() => {
             if (!onSelectDay) setInternalActiveIndex(null);
           }}
-          style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartAreaWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
+          style={{ position: 'absolute', top: effectiveTooltipHeight, left: 0, width: chartAreaWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
         />
       </View>
 
