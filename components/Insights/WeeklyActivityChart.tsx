@@ -21,7 +21,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
   
   // Layout constants
   const chartHeight = 160;
-  const effectiveTooltipHeight = hideTooltip ? 0 : 40; 
+  const effectiveTooltipHeight = hideTooltip ? 10 : 40; 
   const barWidth = 22;
   const yAxisWidth = 50;
   
