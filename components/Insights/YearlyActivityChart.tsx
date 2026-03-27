@@ -12,6 +12,7 @@ interface YearlyActivityChartProps {
 
 export function YearlyActivityChart({ history, palette }: YearlyActivityChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [measuredTooltipWidth, setMeasuredTooltipWidth] = useState(160);
   const windowWidth = Dimensions.get('window').width;
   const chartHeight = 150;
   const tooltipHeight = 40;
@@ -136,20 +137,19 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         {activeIndex !== null && (() => {
           const barCenter = (activeIndex * slotWidth) + (slotWidth / 2);
-          const tooltipWidth = 180;
-          const tooltipLeft = Math.max(8, Math.min(availableWidth - tooltipWidth - 8, barCenter - tooltipWidth / 2));
+          const tooltipLeft = Math.max(8, Math.min(availableWidth - measuredTooltipWidth - 8, barCenter - measuredTooltipWidth / 2));
 
           return (
             <View 
-              className="absolute z-10 px-3 py-1.5 rounded-xl items-center shadow-2xl border"
+              onLayout={(e) => setMeasuredTooltipWidth(e.nativeEvent.layout.width)}
+              className="absolute z-20 px-4 py-1.5 rounded-xl items-center shadow-2xl border"
               style={{ 
-                left: tooltipLeft, 
-                top: -8, 
+                left: tooltipLeft,
+                top: -8,
                 backgroundColor: '#111111', 
                 borderColor: '#22D3EE',
                 borderWidth: 1,
-                width: tooltipWidth,
-                alignSelf: 'flex-start',
+                minWidth: 120,
               }}
             >
               <View className="flex-row items-center" style={{ gap: 12 }}>

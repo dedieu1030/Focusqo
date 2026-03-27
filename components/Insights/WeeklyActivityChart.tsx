@@ -16,6 +16,7 @@ interface WeeklyActivityChartProps {
 
 export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSelectDay, hideTooltip, hideLegend }: WeeklyActivityChartProps) {
   const [internalActiveIndex, setInternalActiveIndex] = useState<number | null>(null);
+  const [measuredTooltipWidth, setMeasuredTooltipWidth] = useState(140);
   const windowWidth = Dimensions.get('window').width;
   
   // Layout constants
@@ -171,23 +172,22 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         {activeIdx !== null && !hideTooltip && (() => {
           const barCenter = (activeIdx * slotWidth) + (slotWidth / 2);
-          const tooltipWidth = 140;
-          const tooltipLeft = Math.max(8, Math.min(availableWidth - tooltipWidth - 8, barCenter - tooltipWidth / 2));
+          const tooltipLeft = Math.max(8, Math.min(availableWidth - measuredTooltipWidth - 8, barCenter - measuredTooltipWidth / 2));
 
           return (
             <View 
-              className="absolute z-10 px-3 py-1.5 rounded-xl items-center shadow-2xl border"
+              onLayout={(e) => setMeasuredTooltipWidth(e.nativeEvent.layout.width)}
+              className="absolute z-20 px-4 py-1.5 rounded-xl items-center shadow-2xl border"
               style={{ 
-                left: tooltipLeft, 
-                top: -8, 
+                left: tooltipLeft,
+                top: -8,
                 backgroundColor: '#111111', 
                 borderColor: '#22D3EE',
                 borderWidth: 1,
-                width: tooltipWidth,
-                alignSelf: 'flex-start',
+                minWidth: 120,
               }}
             >
-              <View className="flex-row items-center" style={{ gap: 10 }}>
+              <View className="flex-row items-center" style={{ gap: 12 }}>
                 <View className="items-center">
                   <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
                   <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].focus)}</Text>
