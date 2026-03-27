@@ -63,7 +63,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
     <View style={{ marginTop: 32, paddingBottom: 10 }}>
        <View className="flex-row items-center mb-4">
           <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
-          <Text style={{ color: palette.timerText }} className="mx-4 text-[10px] font-black opacity-40 uppercase tracking-[2px]">Daily Breakdown</Text>
+          <Text style={{ color: palette.timerText }} className="mx-4 text-[11px] font-bold opacity-60">Daily breakdown</Text>
           <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
        </View>
 
