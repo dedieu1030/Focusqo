@@ -136,7 +136,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
     <View className="mt-2">
       <View className="flex-row justify-between items-start mb-4">
         <View>
-          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-80">Daily Average</Text>
+          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-70">Daily Average</Text>
           <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
             {formatHours(dailyAverage)}
           </Text>
@@ -149,7 +149,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
             ) : (
               <TrendingDown size={14} color="#F87171" />
             )}
-            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1">
+            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
               {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last week</Text>
             </Text>
           </View>
@@ -218,7 +218,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                 <G key={val}>
                   <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                   {shouldShowLabel && (
-                    <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.timerText} opacity="0.4" fontWeight="600">
+                    <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.timerText} opacity="0.7" fontWeight="600">
                       {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
                     </SvgText>
                   )}

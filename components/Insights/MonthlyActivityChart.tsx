@@ -106,7 +106,7 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
     <View style={{ marginTop: 2 }}>
       <View className="flex-row justify-between items-start mb-4">
         <View>
-          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-80">Daily Average</Text>
+          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-60">Daily Average</Text>
           <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
             {formatHours(dailyAverage)}
           </Text>

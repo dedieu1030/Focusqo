@@ -78,7 +78,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
                 <G key={val}>
                    <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                    {isSignificant && (
-                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.timerText} opacity="0.4" fontWeight="600">
+                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.timerText} opacity="0.7" fontWeight="600">
                        {val}m
                      </SvgText>
                    )}
@@ -136,7 +136,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
                   
                   {/* Time labels (selected hours) */}
                   {(i === 0 || i === 6 || i === 12 || i === 18) && (
-                    <SvgText x={i * slotWidth} y={chartHeight + 25} fontSize="9" fill={palette.timerText} opacity="0.5" textAnchor="start" fontWeight="bold">
+                    <SvgText x={i * slotWidth} y={chartHeight + 25} fontSize="9" fill={palette.timerText} opacity="0.7" textAnchor="start" fontWeight="bold">
                       {i === 0 ? '12 AM' : i === 12 ? '12 PM' : `${i > 12 ? i-12 : i} ${i>=12?'PM':'AM'}`}
                     </SvgText>
                   )}
