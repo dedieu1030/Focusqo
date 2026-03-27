@@ -164,7 +164,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               left: Math.max(8, Math.min(availableWidth - 148, (activeIdx * slotWidth) + (slotWidth / 2) - 70)), 
               top: -8, 
               backgroundColor: '#22D3EE', 
-              minWidth: 140,
+              width: 140,
               alignSelf: 'flex-start',
             }}
           >
@@ -179,16 +179,22 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                 <Text numberOfLines={1} className="text-[14px] font-black text-black">{formatHours(daysData[activeIdx].break)}</Text>
               </View>
             </View>
-            {/* Tooltip Arrow - Perfectly Centered */}
+            {/* Tooltip Arrow - Robust Centering Wrapper */}
             <View 
-              className="absolute w-2.5 h-2.5 rotate-45" 
               style={{ 
-                backgroundColor: '#22D3EE', 
+                position: 'absolute',
                 bottom: -4,
-                left: '50%',
-                marginLeft: -5,
-              }} 
-            />
+                left: 0,
+                right: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <View 
+                className="w-2.5 h-2.5 rotate-45" 
+                style={{ backgroundColor: '#22D3EE' }} 
+              />
+            </View>
           </View>
         )}
 
