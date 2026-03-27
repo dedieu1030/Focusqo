@@ -161,7 +161,6 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
           const barCenter = (activeIdx * slotWidth) + (slotWidth / 2);
           const tooltipWidth = 140;
           const tooltipLeft = Math.max(8, Math.min(availableWidth - tooltipWidth - 8, barCenter - tooltipWidth / 2));
-          const arrowLeft = barCenter - tooltipLeft;
 
           return (
             <View 
@@ -187,23 +186,30 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                   <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].break)}</Text>
                 </View>
               </View>
-              {/* Tooltip Arrow - Dynamically Positioned */}
-              <View 
-                className="absolute w-2.5 h-2.5 rotate-45 border-b border-r" 
-                style={{ 
-                  backgroundColor: '#111111', 
-                  borderColor: '#22D3EE',
-                  bottom: -5,
-                  left: arrowLeft,
-                  marginLeft: -5, // center the 10px box
-                }} 
-              />
             </View>
           );
         })()}
 
         <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
           <G transform={`translate(0, ${tooltipHeight})`}>
+            {/* Dynamic Connector Line */}
+            {activeIdx !== null && !hideTooltip && (() => {
+              const d = daysData[activeIdx];
+              const focusH = (d.focus / maxMinutes) * chartHeight;
+              const breakH = (d.break / maxMinutes) * chartHeight;
+              const barTopY = chartHeight - focusH - breakH;
+              return (
+                <Line 
+                  x1={(activeIdx * slotWidth) + (slotWidth / 2)} 
+                  y1={-35} 
+                  x2={(activeIdx * slotWidth) + (slotWidth / 2)} 
+                  y2={barTopY} 
+                  stroke="#22D3EE"
+                  strokeWidth="1"
+                  opacity="1"
+                />
+              );
+            })()}
             {/* HORIZONTAL GRID LINES */}
             {yLabels.map((val, idx) => {
               const y = chartHeight - (val / maxMinutes) * chartHeight;
