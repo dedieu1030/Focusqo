@@ -157,46 +157,50 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
-        {activeIdx !== null && !hideTooltip && (
-          <View 
-            className="absolute z-10 px-3 py-1.5 rounded-xl items-center shadow-2xl border border-white/40"
-            style={{ 
-              left: Math.max(8, Math.min(availableWidth - 148, (activeIdx * slotWidth) + (slotWidth / 2) - 70)), 
-              top: -8, 
-              backgroundColor: '#22D3EE', 
-              width: 140,
-              alignSelf: 'flex-start',
-            }}
-          >
-            <View className="flex-row items-center" style={{ gap: 10 }}>
-              <View className="items-center">
-                <Text style={{ color: '#2563EB' }} className="text-[9px] font-bold">focus</Text>
-                <Text numberOfLines={1} className="text-[14px] font-black text-black">{formatHours(daysData[activeIdx].focus)}</Text>
-              </View>
-              <View className="w-[1px] h-6 bg-black/10 mx-1" />
-              <View className="items-center">
-                <Text style={{ color: '#EA580C' }} className="text-[9px] font-bold">break</Text>
-                <Text numberOfLines={1} className="text-[14px] font-black text-black">{formatHours(daysData[activeIdx].break)}</Text>
-              </View>
-            </View>
-            {/* Tooltip Arrow - Robust Centering Wrapper */}
+        {activeIdx !== null && !hideTooltip && (() => {
+          const barCenter = (activeIdx * slotWidth) + (slotWidth / 2);
+          const tooltipWidth = 140;
+          const tooltipLeft = Math.max(8, Math.min(availableWidth - tooltipWidth - 8, barCenter - tooltipWidth / 2));
+          const arrowLeft = barCenter - tooltipLeft;
+
+          return (
             <View 
+              className="absolute z-10 px-3 py-1.5 rounded-xl items-center shadow-2xl border"
               style={{ 
-                position: 'absolute',
-                bottom: -4,
-                left: 0,
-                right: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
+                left: tooltipLeft, 
+                top: -8, 
+                backgroundColor: '#111111', 
+                borderColor: '#22D3EE',
+                borderWidth: 1,
+                width: tooltipWidth,
+                alignSelf: 'flex-start',
               }}
             >
+              <View className="flex-row items-center" style={{ gap: 10 }}>
+                <View className="items-center">
+                  <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
+                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].focus)}</Text>
+                </View>
+                <View className="w-[1px] h-6 bg-white/10 mx-1" />
+                <View className="items-center">
+                  <Text style={{ color: palette.breakColor }} className="text-[9px] font-bold">break</Text>
+                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].break)}</Text>
+                </View>
+              </View>
+              {/* Tooltip Arrow - Dynamically Positioned */}
               <View 
-                className="w-2.5 h-2.5 rotate-45" 
-                style={{ backgroundColor: '#22D3EE' }} 
+                className="absolute w-2.5 h-2.5 rotate-45 border-b border-r" 
+                style={{ 
+                  backgroundColor: '#111111', 
+                  borderColor: '#22D3EE',
+                  bottom: -5,
+                  left: arrowLeft,
+                  marginLeft: -5, // center the 10px box
+                }} 
               />
             </View>
-          </View>
-        )}
+          );
+        })()}
 
         <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
           <G transform={`translate(0, ${tooltipHeight})`}>
