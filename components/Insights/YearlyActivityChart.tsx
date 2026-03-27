@@ -30,6 +30,10 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
   const now = new Date();
   const currentYear = now.getFullYear();
   
+  // Optimize: Pre-filter history (This year + last year)
+  const lastYearStart = new Date(currentYear - 1, 0, 1).getTime();
+  const relevantHistory = history.filter(r => r.timestamp >= lastYearStart);
+
   const monthsData = Array.from({ length: 12 }, (_, i) => {
     const monthIndex = i; // 0 = Jan, 11 = Dec
     const d = new Date(currentYear, monthIndex, 1);
@@ -44,10 +48,10 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
       return { focus: 0, break: 0, total: 0, monthName: d.toLocaleString('default', { month: 'short' }) };
     }
 
-    const focusMins = Math.round(history
+    const focusMins = Math.round(relevantHistory
       .filter(r => r.mode === 'focus' && r.timestamp >= start && r.timestamp < end)
       .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
-    const breakMins = Math.round(history
+    const breakMins = Math.round(relevantHistory
       .filter(r => r.mode === 'break' && r.timestamp >= start && r.timestamp < end)
       .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
 
@@ -64,9 +68,8 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
   const monthlyAverageYearly = thisYearTotalFocusMins / monthsElapsed;
 
   // Last Year Data
-  const lastYearStart = new Date(currentYear - 1, 0, 1).getTime();
   const lastYearEnd = new Date(currentYear, 0, 1).getTime();
-  const lastYearTotalFocusMins = history
+  const lastYearTotalFocusMins = relevantHistory
     .filter(r => r.mode === 'focus' && r.timestamp >= lastYearStart && r.timestamp < lastYearEnd)
     .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60;
   

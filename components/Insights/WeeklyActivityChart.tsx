@@ -46,19 +46,25 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
   const prevSunday = new Date(mondayOffset);
   prevSunday.setMilliseconds(-1);
 
+  const displayMondayOffset = new Date(mondayOffset);
+  displayMondayOffset.setDate(mondayOffset.getDate() - 1); 
+
+  // Optimize: Pre-filter history once
+  const weekStartTime = mondayOffset.getTime();
+  const weekEndTime = weekStartTime + 7 * 86400000;
+  const prevWeekStartTime = prevMonday.getTime();
+  const relevantHistory = history.filter(r => r.timestamp >= prevWeekStartTime && r.timestamp < weekEndTime);
+
   const getWeekMinutes = (start: Date, end: Date) => {
     const startTime = start.getTime();
     const endTime = end.getTime();
-    const weekSessions = history.filter(r => 
+    const weekSessions = relevantHistory.filter(r => 
       r.mode === 'focus' && 
       r.timestamp >= startTime && 
       r.timestamp <= endTime
     );
     return Math.round(weekSessions.reduce((acc, r) => acc + r.durationInSeconds, 0) / 60);
   };
-
-  const displayMondayOffset = new Date(mondayOffset);
-  displayMondayOffset.setDate(mondayOffset.getDate() - 1); 
 
   // DATA FETCHING: Clean aggregation with overlap splitting
   const daysData = Array.from({ length: 7 }, (_, i) => {
@@ -70,7 +76,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
     let focusSecs = 0;
     let breakSecs = 0;
 
-    history.forEach(r => {
+    relevantHistory.forEach(r => {
       const sessionStart = r.timestamp;
       const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
 
@@ -95,7 +101,9 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
   const lastWeekTotal = getWeekMinutes(prevMonday, prevSunday) || 180;
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
-  const dailyAverage = Math.round(thisWeekTotal / 7);
+  // LOGIC FIX: Use elapsed days for average
+  const elapsedDaysInWeek = today.getDay() === 0 ? 7 : today.getDay();
+  const dailyAverage = Math.round(thisWeekTotal / elapsedDaysInWeek);
   
   let diffPercent = 0;
   if (lastWeekTotal > 0) {

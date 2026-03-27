@@ -23,6 +23,10 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
   const month = now.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   
+  // Optimize: Pre-filter history (Current month + previous month)
+  const lastMonthStart = new Date(year, month - 1, 1).getTime();
+  const relevantHistory = history.filter(r => r.timestamp >= lastMonthStart);
+
   const slots = daysInMonth;
   const slotWidth = chartAreaWidth / slots;
   const barW = Math.max(2, slotWidth * 0.6); // Reactive bar width
@@ -41,7 +45,7 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
     let focusSecs = 0;
     let breakSecs = 0;
 
-    history.forEach(r => {
+    relevantHistory.forEach(r => {
       const sessionStart = r.timestamp;
       const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
 
@@ -73,11 +77,10 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
   const dailyAverage = thisMonthTotalFocusMins / elapsedDaysInMonth;
 
   // Last Month Data
-  const lastMonthStart = new Date(year, month - 1, 1).getTime();
   const lastMonthEnd = new Date(year, month, 1).getTime();
   const daysInLastMonth = new Date(year, month, 0).getDate();
   
-  const lastMonthTotalFocusMins = history
+  const lastMonthTotalFocusMins = relevantHistory
     .filter(r => r.mode === 'focus' && r.timestamp >= lastMonthStart && r.timestamp < lastMonthEnd)
     .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60;
   

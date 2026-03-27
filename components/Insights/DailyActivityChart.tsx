@@ -3,6 +3,7 @@ import { View, Text, Dimensions } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Line, Defs, LinearGradient, Stop, Path } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
+import { TrendingUp, TrendingDown } from 'lucide-react-native';
 
 interface DailyActivityChartProps {
   history: SessionRecord[];
@@ -22,10 +23,21 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
   const slotWidth = chartAreaWidth / slots;
   const barW = 7;
   const barWidthHorizontalOffset = (slotWidth - barW) / 2;
-
-  // Selected day's data (24 slots)
+  
   const baseDate = date || new Date();
   const startOfSelectedDay = new Date(baseDate).setHours(0, 0, 0, 0);
+  const endOfSelectedDay = startOfSelectedDay + 86400000;
+
+  // Optimize: Pre-filter history for the selected day
+  const relevantDayHistory = history.filter(r => 
+    r.timestamp + (r.durationInSeconds * 1000) > startOfSelectedDay && 
+    r.timestamp < endOfSelectedDay
+  );
+
+  // Stats: Overall Daily Average (Focus only)
+  const uniqueDays = new Set(history.map(r => new Date(r.timestamp).toDateString())).size;
+  const totalHistoricalFocusSecs = history.filter(r => r.mode === 'focus').reduce((acc, r) => acc + r.durationInSeconds, 0);
+  const historicalDailyAverageMins = uniqueDays > 0 ? (totalHistoricalFocusSecs / 60) / uniqueDays : 0;
   
   const hourlyData = Array.from({ length: 24 }, (_, hour) => {
     const start = startOfSelectedDay + hour * 3600000;
@@ -35,7 +47,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
     let breakMins = 0;
 
     // Filter and compute overlap for each session to properly attribute time to the right hour slot
-    history.forEach(r => {
+    relevantDayHistory.forEach(r => {
       const sessionStart = r.timestamp;
       const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
 
@@ -62,6 +74,19 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
   const totalFocus = hourlyData.reduce((acc, d) => acc + d.focus, 0);
   const totalBreak = hourlyData.reduce((acc, d) => acc + d.break, 0);
 
+  // Trend logic (vs Historical Average)
+  let diffPercent = 0;
+  if (historicalDailyAverageMins > 0) {
+    diffPercent = Math.round(((totalFocus - historicalDailyAverageMins) / historicalDailyAverageMins) * 100);
+  }
+
+  const formatHours = (mins: number) => {
+    if (mins < 60) return `${Math.round(mins)}m`;
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    return `${h}h ${m}m`;
+  };
+
   const formatMinsShort = (m: number) => {
     if (m < 1) return '0m';
     if (m < 60) return `${Math.round(m)}m`;
@@ -71,8 +96,30 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
   };
 
   return (
-    <View style={{ marginTop: 32, paddingBottom: 10 }}>
-       <View className="flex-row items-center mb-4">
+    <View style={{ marginTop: 10 }}>
+       <View className="flex-row justify-between items-start mb-4">
+        <View>
+          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-60">Total Focus Today</Text>
+          <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
+            {formatHours(totalFocus)}
+          </Text>
+        </View>
+        
+        {diffPercent !== 0 && (
+          <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
+            {diffPercent > 0 ? (
+              <TrendingUp size={14} color="#4ADE80" />
+            ) : (
+              <TrendingDown size={14} color="#F87171" />
+            )}
+            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
+              {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">vs average</Text>
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View className="flex-row items-center mb-4">
           <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
           <Text style={{ color: palette.timerText }} className="mx-4 text-[11px] font-bold opacity-60">Daily breakdown</Text>
           <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
