@@ -157,20 +157,6 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
-        {activeIdx !== null && !hideTooltip && (
-          <View 
-            style={{ 
-              position: 'absolute',
-              left: (activeIdx * slotWidth) + (slotWidth / 2) - 24,
-              top: 5, width: 48, height: 24, borderRadius: 12,
-              backgroundColor: "#22D3EE", justifyContent: 'center', alignItems: 'center', zIndex: 10,
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: '900', fontSize: 11 }}>
-              {daysData[activeIdx].focus}m
-            </Text>
-          </View>
-        )}
 
         <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
           <G transform={`translate(0, ${tooltipHeight})`}>
