@@ -235,11 +235,15 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
       <View className="flex-row items-center justify-center mt-6" style={{ gap: 32 }}>
         <View className="flex-row items-center">
           <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
-          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Total Focus {formatMinsShort(totalFocus)}</Text>
+          <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
+            Total Focus <Text className="font-black">{formatMinsShort(totalFocus)}</Text>
+          </Text>
         </View>
         <View className="flex-row items-center">
           <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
-          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Total Break {formatMinsShort(totalBreak)}</Text>
+          <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
+            Total Break <Text className="font-black">{formatMinsShort(totalBreak)}</Text>
+          </Text>
         </View>
       </View>
     </View>

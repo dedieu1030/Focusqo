@@ -11,9 +11,10 @@ interface WeeklyActivityChartProps {
   selectedDayIndex?: number | null;
   onSelectDay?: (index: number) => void;
   hideTooltip?: boolean;
+  hideLegend?: boolean;
 }
 
-export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSelectDay, hideTooltip }: WeeklyActivityChartProps) {
+export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSelectDay, hideTooltip, hideLegend }: WeeklyActivityChartProps) {
   const [internalActiveIndex, setInternalActiveIndex] = useState<number | null>(null);
   const windowWidth = Dimensions.get('window').width;
   
@@ -145,27 +146,29 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
 
   return (
     <View className="mt-2">
-      <View className="flex-row justify-between items-start mb-4">
-        <View>
-          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-70">Daily Average</Text>
-          <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
-            {formatHours(dailyAverage)}
-          </Text>
-        </View>
-        
-        {diffPercent !== 0 && (
-          <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
-            {diffPercent > 0 ? (
-              <TrendingUp size={14} color="#4ADE80" />
-            ) : (
-              <TrendingDown size={14} color="#F87171" />
-            )}
-            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
-              {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last week</Text>
+      {!hideLegend && (
+        <View className="flex-row justify-between items-start mb-4">
+          <View>
+            <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-70">Daily Average</Text>
+            <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
+              {formatHours(dailyAverage)}
             </Text>
           </View>
-        )}
-      </View>
+          
+          {diffPercent !== 0 && (
+            <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
+              {diffPercent > 0 ? (
+                <TrendingUp size={14} color="#4ADE80" />
+              ) : (
+                <TrendingDown size={14} color="#F87171" />
+              )}
+              <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
+                {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last week</Text>
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         {activeIdx !== null && !hideTooltip && (() => {
@@ -347,17 +350,22 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
         />
       </View>
 
-      {/* Legend */}
-      <View className="flex-row items-center justify-center mt-6" style={{ gap: 32 }}>
-        <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
-          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Total Focus {formatMinsShort(totalFocus)}</Text>
+      {!hideLegend && (
+        <View className="flex-row items-center justify-center mt-6" style={{ gap: 32 }}>
+          <View className="flex-row items-center">
+            <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
+            <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
+              Total Focus <Text className="font-black">{formatMinsShort(totalFocus)}</Text>
+            </Text>
+          </View>
+          <View className="flex-row items-center">
+            <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
+            <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
+              Total Break <Text className="font-black">{formatMinsShort(totalBreak)}</Text>
+            </Text>
+          </View>
         </View>
-        <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
-          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Total Break {formatMinsShort(totalBreak)}</Text>
-        </View>
-      </View>
+      )}
     </View>
   );
 }

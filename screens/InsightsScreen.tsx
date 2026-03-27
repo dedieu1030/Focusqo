@@ -114,6 +114,7 @@ export function InsightsScreen() {
               selectedDayIndex={selectedDayIndex}
               onSelectDay={setSelectedDayIndex}
               hideTooltip={true}
+              hideLegend={true}
             />
             <DailyActivityChart 
               history={history} 
