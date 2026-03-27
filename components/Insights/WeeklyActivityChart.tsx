@@ -207,6 +207,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
           <G transform={`translate(0, ${tooltipHeight})`}>
             {/* Dynamic Connector Line */}
             {activeIdx !== null && !hideTooltip && (() => {
+              if (daysData[activeIdx].total === 0) return null;
               const d = daysData[activeIdx];
               const focusH = (d.focus / maxMinutes) * chartHeight;
               const breakH = (d.break / maxMinutes) * chartHeight;

@@ -172,6 +172,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
           <G transform={`translate(0, ${tooltipHeight})`}>
             {/* Dynamic Connector Line */}
             {activeIndex !== null && (() => {
+              if (monthsData[activeIndex].total === 0) return null;
               const d = monthsData[activeIndex];
               const focusH = (d.focus / maxMins) * chartHeight;
               const breakH = (d.break / maxMins) * chartHeight;
