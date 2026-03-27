@@ -151,7 +151,7 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
                 <G key={i}>
                    <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
                    {isSignificant && (
-                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
+                     <SvgText x={chartAreaWidth + 4} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
                        {Math.round(val)}m
                      </SvgText>
                    )}

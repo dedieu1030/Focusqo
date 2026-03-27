@@ -23,7 +23,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
   const chartHeight = 160;
   const effectiveTooltipHeight = hideTooltip ? 10 : 40; 
   const barWidth = 22;
-  const yAxisWidth = 50;
+  const yAxisWidth = 35;
   
   // Spacing
   const chartInnerPadding = 48; 
@@ -240,7 +240,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                 <G key={val}>
                   <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                   {shouldShowLabel && (
-                    <SvgText x={chartAreaWidth + 8} y={y + 4} fontSize="10" fill={palette.timerText} opacity="0.7" fontWeight="600">
+                    <SvgText x={chartAreaWidth + 4} y={y + 4} fontSize="10" fill={palette.timerText} opacity="0.7" fontWeight="600">
                       {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
                     </SvgText>
                   )}
@@ -308,7 +308,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                     x2={chartAreaWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
                     stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
                   />
-                  <SvgText x={chartAreaWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
+                  <SvgText x={chartAreaWidth + 4} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
                </G>
             )}
 

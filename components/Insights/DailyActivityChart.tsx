@@ -136,7 +136,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
                 <G key={val}>
                    <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                    {isSignificant && (
-                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.timerText} opacity="0.7" fontWeight="600">
+                     <SvgText x={chartAreaWidth + 4} y={y + 3} fontSize="9" fill={palette.timerText} opacity="0.7" fontWeight="600">
                        {val}m
                      </SvgText>
                    )}
