@@ -146,29 +146,27 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
 
   return (
     <View className="mt-2">
-      {!hideLegend && (
-        <View className="flex-row justify-between items-start mb-4">
-          <View>
-            <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-70">Daily Average</Text>
-            <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
-              {formatHours(dailyAverage)}
+      <View className="flex-row justify-between items-start mb-4">
+        <View>
+          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-70">Daily Average</Text>
+          <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
+            {formatHours(dailyAverage)}
+          </Text>
+        </View>
+        
+        {diffPercent !== 0 && (
+          <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
+            {diffPercent > 0 ? (
+              <TrendingUp size={14} color="#4ADE80" />
+            ) : (
+              <TrendingDown size={14} color="#F87171" />
+            )}
+            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
+              {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last week</Text>
             </Text>
           </View>
-          
-          {diffPercent !== 0 && (
-            <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
-              {diffPercent > 0 ? (
-                <TrendingUp size={14} color="#4ADE80" />
-              ) : (
-                <TrendingDown size={14} color="#F87171" />
-              )}
-              <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
-                {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last week</Text>
-              </Text>
-            </View>
-          )}
-        </View>
-      )}
+        )}
+      </View>
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         {activeIdx !== null && !hideTooltip && (() => {
