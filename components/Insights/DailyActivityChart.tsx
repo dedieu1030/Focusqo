@@ -59,6 +59,17 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
   const maxMins = 60; 
   const yLabels = [0, 15, 30, 45, 60];
 
+  const totalFocus = hourlyData.reduce((acc, d) => acc + d.focus, 0);
+  const totalBreak = hourlyData.reduce((acc, d) => acc + d.break, 0);
+
+  const formatMinsShort = (m: number) => {
+    if (m < 1) return '0m';
+    if (m < 60) return `${Math.round(m)}m`;
+    const h = Math.floor(m / 60);
+    const mins = Math.round(m % 60);
+    return `${h}h${mins > 0 ? ` ${mins}m` : ''}`;
+  };
+
   return (
     <View style={{ marginTop: 32, paddingBottom: 10 }}>
        <View className="flex-row items-center mb-4">
@@ -151,11 +162,11 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
       <View className="flex-row items-center justify-center mt-6 gap-6">
         <View className="flex-row items-center">
           <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
-          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-60">Focus</Text>
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Focus {formatMinsShort(totalFocus)}</Text>
         </View>
         <View className="flex-row items-center">
           <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.breakColor }} />
-          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-60">Break</Text>
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Break {formatMinsShort(totalBreak)}</Text>
         </View>
       </View>
     </View>

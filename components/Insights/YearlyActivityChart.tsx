@@ -80,6 +80,17 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
     return `${h}h ${m}m`;
   };
 
+  const totalFocus = monthsData.reduce((acc, d) => acc + d.focus, 0);
+  const totalBreak = monthsData.reduce((acc, d) => acc + d.break, 0);
+
+  const formatMinsShort = (m: number) => {
+    if (m < 1) return '0m';
+    if (m < 60) return `${Math.round(m)}m`;
+    const h = Math.floor(m / 60);
+    const mins = Math.round(m % 60);
+    return `${h}h${mins > 0 ? ` ${mins}m` : ''}`;
+  };
+
   // Average Line (Standard line in chart)
   const pastMonths = monthsData.filter((_, i) => i <= now.getMonth());
   const avgMins = pastMonths.length > 0
@@ -218,6 +229,18 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
             )}
           </G>
         </Svg>
+      </View>
+
+      {/* Legend */}
+      <View className="flex-row items-center justify-center mt-6 gap-6">
+        <View className="flex-row items-center">
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Focus {formatMinsShort(totalFocus)}</Text>
+        </View>
+        <View className="flex-row items-center">
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Break {formatMinsShort(totalBreak)}</Text>
+        </View>
       </View>
     </View>
   );

@@ -128,6 +128,17 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
     return `${h}h ${m}m`;
   };
 
+  const totalFocus = daysData.reduce((acc, d) => acc + d.focus, 0);
+  const totalBreak = daysData.reduce((acc, d) => acc + d.break, 0);
+
+  const formatMinsShort = (m: number) => {
+    if (m < 1) return '0m';
+    if (m < 60) return `${Math.round(m)}m`;
+    const h = Math.floor(m / 60);
+    const mins = Math.round(m % 60);
+    return `${h}h${mins > 0 ? ` ${mins}m` : ''}`;
+  };
+
   const activeIdx = onSelectDay 
     ? (selectedDayIndex ?? null) 
     : (internalActiveIndex ?? null);
@@ -334,6 +345,18 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
           }}
           style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
         />
+      </View>
+
+      {/* Legend */}
+      <View className="flex-row items-center justify-center mt-6 gap-6">
+        <View className="flex-row items-center">
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Focus {formatMinsShort(totalFocus)}</Text>
+        </View>
+        <View className="flex-row items-center">
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-70">Break {formatMinsShort(totalBreak)}</Text>
+        </View>
       </View>
     </View>
   );
