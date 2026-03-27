@@ -158,18 +158,12 @@ export function InsightsScreen() {
               flex: 1, 
               paddingVertical: 10, 
               borderRadius: 20, 
-              backgroundColor: activeView === v ? '#22D3EE' : 'transparent',
-              // Add a subtle glow for the active one
-              shadowColor: '#22D3EE',
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: activeView === v ? 0.3 : 0,
-              shadowRadius: 10,
-              elevation: activeView === v ? 4 : 0,
+              backgroundColor: activeView === v ? palette.timerBlock : 'transparent',
             }}
             className="items-center justify-center"
           >
             <Text style={{ 
-              color: activeView === v ? '#000000' : palette.timerText,
+              color: palette.timerText,
               fontWeight: activeView === v ? '900' : '600',
               fontSize: 13,
               opacity: activeView === v ? 1 : 0.4
