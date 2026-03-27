@@ -155,7 +155,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                   key={i} 
                   x1={x} y1={0} 
                   x2={x} y2={chartHeight} 
-                  stroke={palette.secondaryText} 
+                  stroke={palette.timerText} 
                   strokeWidth="1" 
                   opacity="0.12"
                 />
@@ -190,7 +190,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                     x={x + barW / 2} 
                     y={chartHeight + 20} 
                     fontSize="7.5" 
-                    fill={palette.secondaryText} 
+                    fill={palette.timerText} 
                     opacity="0.4" 
                     textAnchor="middle" 
                     fontWeight="bold"

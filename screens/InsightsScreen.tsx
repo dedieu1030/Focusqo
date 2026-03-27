@@ -146,8 +146,7 @@ export function InsightsScreen() {
         className="flex-row justify-center mb-8 px-1 py-1 mx-4 rounded-3xl" 
         style={{ 
           backgroundColor: '#111111',
-          borderWidth: 1,
-          borderColor: '#333333'
+          gap: 4
         }}
       >
         {(['day', 'week', 'month', 'year'] as InsightsView[]).map((v) => (
@@ -156,10 +155,9 @@ export function InsightsScreen() {
             onPress={() => setActiveView(v)}
             style={{ 
               flex: 1, 
-              paddingVertical: 12, 
-              paddingHorizontal: 16,
+              paddingVertical: 10, 
               borderRadius: 20, 
-              backgroundColor: activeView === v ? palette.timerBlock : 'transparent',
+              backgroundColor: activeView === v ? palette.secondaryText : 'transparent',
             }}
             className="items-center justify-center"
           >

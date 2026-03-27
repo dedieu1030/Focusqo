@@ -216,9 +216,9 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               const shouldShowLabel = idx === 0 || idx === 2 || idx === 4;
               return (
                 <G key={val}>
-                  <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
+                  <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                   {shouldShowLabel && (
-                    <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
+                    <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.timerText} opacity="0.4" fontWeight="600">
                       {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
                     </SvgText>
                   )}
@@ -234,7 +234,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                   key={i}
                   x1={x} y1={0}
                   x2={x} y2={chartHeight}
-                  stroke={palette.secondaryText} strokeWidth="1" opacity="0.08"
+                  stroke={palette.timerText} strokeWidth="1" opacity="0.08"
                 />
               );
             })}
@@ -268,7 +268,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                   )}
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
-                    fontSize="12" fill={palette.secondaryText}
+                    fontSize="12" fill={palette.timerText}
                     textAnchor="middle" fontWeight={isToday ? "900" : "500"}
                     opacity={isToday ? 1 : 0.3}
                   >
@@ -309,7 +309,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                   )}
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
-                    fontSize="12" fill={palette.secondaryText}
+                    fontSize="12" fill={palette.timerText}
                     textAnchor="middle" fontWeight="900"
                     opacity={1}
                   >
