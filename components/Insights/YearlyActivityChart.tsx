@@ -18,7 +18,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
   const tooltipHeight = 40;
   const chartInnerPadding = 48;
   const availableWidth = windowWidth - chartInnerPadding - 32;
-  const yAxisWidth = 35;
+  const yAxisWidth = 55;
   const chartAreaWidth = availableWidth - yAxisWidth;
   
   const slots = 12;

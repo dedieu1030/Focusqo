@@ -23,14 +23,14 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
   const chartHeight = 160;
   const tooltipHeight = 40; 
   const barWidth = 22;
-  const yAxisWidth = 35;
+  const yAxisWidth = 50;
   
   // Spacing
   const chartInnerPadding = 48; 
   const availableWidth = windowWidth - chartInnerPadding - 32; 
-  const chartWidth = availableWidth - yAxisWidth; 
+  const chartAreaWidth = availableWidth - yAxisWidth; 
   const slots = 7; // For weekly chart, 7 days
-  const slotWidth = chartWidth / slots;
+  const slotWidth = chartAreaWidth / slots;
   const barWidthHorizontalOffset = (slotWidth - barWidth) / 2;
 
   // Week calculation (Current Monday - Sunday)
@@ -228,9 +228,9 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               const shouldShowLabel = idx === 0 || idx === 2 || idx === 4;
               return (
                 <G key={val}>
-                  <Line x1={0} y1={y} x2={chartWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
+                  <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                   {shouldShowLabel && (
-                    <SvgText x={chartWidth + 8} y={y + 4} fontSize="10" fill={palette.timerText} opacity="0.7" fontWeight="600">
+                    <SvgText x={chartAreaWidth + 8} y={y + 4} fontSize="10" fill={palette.timerText} opacity="0.7" fontWeight="600">
                       {val === 0 ? '0' : (val < 60 ? `${val}m` : `${Math.floor(val/60)}h`)}
                     </SvgText>
                   )}
@@ -295,10 +295,10 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                <G>
                   <Line 
                     x1={0} y1={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
-                    x2={chartWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
+                    x2={chartAreaWidth} y2={chartHeight - (dailyAverage / maxMinutes) * chartHeight} 
                     stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
                   />
-                  <SvgText x={chartWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
+                  <SvgText x={chartAreaWidth + 8} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
                </G>
             )}
 
@@ -344,7 +344,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
           onResponderTerminate={() => {
             if (!onSelectDay) setInternalActiveIndex(null);
           }}
-          style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
+          style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartAreaWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
         />
       </View>
 
