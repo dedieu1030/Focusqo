@@ -157,7 +157,7 @@ export function InsightsScreen() {
               flex: 1, 
               paddingVertical: 12, 
               borderRadius: 20, 
-              backgroundColor: activeView === v ? '#48484A' : 'transparent',
+              backgroundColor: activeView === v ? palette.timerBlock : 'transparent',
             }}
             className="items-center justify-center"
           >
