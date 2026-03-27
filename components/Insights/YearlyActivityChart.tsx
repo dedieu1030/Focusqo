@@ -55,25 +55,22 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
   const yLabels = [0, maxMins * 0.25, maxMins * 0.5, maxMins * 0.75, maxMins];
 
   // --- STATS & TRENDS ---
-  // Average calculation (up to today in current year)
-  const startOfYear = new Date(currentYear, 0, 1).getTime();
-  const daysElapsedInYear = Math.max(1, Math.floor((now.getTime() - startOfYear) / (1000 * 60 * 60 * 24)) + 1);
+  // Monthly Average calculation (in current year)
+  const monthsElapsed = now.getMonth() + 1;
   const thisYearTotalFocusMins = monthsData.reduce((acc, d) => acc + d.focus, 0);
-  const dailyAverageYearly = thisYearTotalFocusMins / daysElapsedInYear;
+  const monthlyAverageYearly = thisYearTotalFocusMins / monthsElapsed;
 
   // Last Year Data
   const lastYearStart = new Date(currentYear - 1, 0, 1).getTime();
   const lastYearEnd = new Date(currentYear, 0, 1).getTime();
-  const daysInLastYear = 365; // Simplify for baseline
-  
   const lastYearTotalFocusMins = history
     .filter(r => r.mode === 'focus' && r.timestamp >= lastYearStart && r.timestamp < lastYearEnd)
     .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60;
   
-  const lastYearDailyAverage = lastYearTotalFocusMins / daysInLastYear;
+  const lastYearMonthlyAverage = lastYearTotalFocusMins / 12;
   let diffPercent = 0;
-  if (lastYearDailyAverage > 0) {
-    diffPercent = Math.round(((dailyAverageYearly - lastYearDailyAverage) / lastYearDailyAverage) * 100);
+  if (lastYearMonthlyAverage > 0) {
+    diffPercent = Math.round(((monthlyAverageYearly - lastYearMonthlyAverage) / lastYearMonthlyAverage) * 100);
   }
 
   const formatHours = (mins: number) => {
@@ -95,9 +92,9 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
     <View style={{ marginTop: 2 }}>
       <View className="flex-row justify-between items-start mb-4">
         <View>
-          <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Daily Average</Text>
+          <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Monthly Average</Text>
           <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
-            {formatHours(dailyAverageYearly)}
+            {formatHours(monthlyAverageYearly)}
           </Text>
         </View>
         
