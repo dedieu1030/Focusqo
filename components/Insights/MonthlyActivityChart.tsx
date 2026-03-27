@@ -66,6 +66,13 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
   const maxMins = Math.max(trueMax * 1.2, 120); 
   const yLabels = [0, maxMins * 0.25, maxMins * 0.5, maxMins * 0.75, maxMins];
 
+  // Average calculation (up to today)
+  const pastDays = daysData.filter(d => d.date <= now);
+  const avgMins = pastDays.length > 0 
+    ? daysData.reduce((acc, d) => acc + d.total, 0) / pastDays.length 
+    : 0;
+  const avgY = chartHeight - (avgMins / maxMins) * chartHeight;
+
   return (
     <View style={{ marginTop: 20 }}>
       <View className="flex-row items-center mb-6">
@@ -92,6 +99,22 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
                 </G>
               );
             })}
+
+            {/* Average Line */}
+            {avgMins > 0 && (
+              <G>
+                <Line 
+                  x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
+                  stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4, 4" 
+                />
+                <SvgText 
+                   x={chartAreaWidth + 8} y={avgY + 3} 
+                   fontSize="10" fill="#4ADE80" fontWeight="900"
+                >
+                  avg
+                </SvgText>
+              </G>
+            )}
 
             {/* Vertical Dividers (5 lines standard) */}
             {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
