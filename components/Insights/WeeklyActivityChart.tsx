@@ -247,10 +247,10 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               const isToday = i === today.getDay(); 
               const isActive = activeIdx === i;
 
-              // Selection styling (Vibrant Cyan)
-              const isSelected = isActive && onSelectDay;
+              // Selection styling (Vibrant Cyan - Unified)
+              const isSelected = isActive;
               const focusColor = isSelected ? "#22D3EE" : "#3B82F6";
-              const breakColor = isSelected ? "#06B6D4" : palette.breakColor; // Darker Cyan for the break part if selected
+              const breakColor = isSelected ? "#22D3EE" : palette.breakColor;
               const opacity = 0.9;
 
               return (
