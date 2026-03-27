@@ -62,9 +62,9 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
   return (
     <View style={{ marginTop: 32, paddingBottom: 10 }}>
        <View className="flex-row items-center mb-4">
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
-          <Text style={{ color: palette.secondaryText }} className="mx-4 text-[10px] font-black opacity-40 uppercase tracking-[2px]">Daily Breakdown</Text>
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
+          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
+          <Text style={{ color: palette.timerText }} className="mx-4 text-[10px] font-black opacity-40 uppercase tracking-[2px]">Daily Breakdown</Text>
+          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
        </View>
 
       <View style={{ width: availableWidth, height: chartHeight + 60 }}>
@@ -76,7 +76,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
               const isSignificant = val === 0 || val === 30 || val === 60;
               return (
                 <G key={val}>
-                   <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
+                   <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                    {isSignificant && (
                      <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
                        {val}m
@@ -94,7 +94,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
                   key={hour}
                   x1={x} y1={0}
                   x2={x} y2={chartHeight}
-                  stroke={palette.secondaryText} strokeWidth="1" opacity="0.12"
+                  stroke={palette.timerText} strokeWidth="1" opacity="0.12"
                 />
               );
             })}
@@ -136,7 +136,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
                   
                   {/* Time labels (selected hours) */}
                   {(i === 0 || i === 6 || i === 12 || i === 18) && (
-                    <SvgText x={i * slotWidth} y={chartHeight + 25} fontSize="9" fill={palette.secondaryText} opacity="0.5" textAnchor="start" fontWeight="bold">
+                    <SvgText x={i * slotWidth} y={chartHeight + 25} fontSize="9" fill={palette.timerText} opacity="0.5" textAnchor="start" fontWeight="bold">
                       {i === 0 ? '12 AM' : i === 12 ? '12 PM' : `${i > 12 ? i-12 : i} ${i>=12?'PM':'AM'}`}
                     </SvgText>
                   )}
@@ -151,11 +151,11 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
       <View className="flex-row items-center justify-center mt-6 gap-6">
         <View className="flex-row items-center">
           <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
-          <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold opacity-60">Focus</Text>
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-60">Focus</Text>
         </View>
         <View className="flex-row items-center">
           <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.breakColor }} />
-          <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold opacity-60">Break</Text>
+          <Text style={{ color: palette.timerText }} className="text-[12px] font-bold opacity-60">Break</Text>
         </View>
       </View>
     </View>

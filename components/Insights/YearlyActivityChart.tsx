@@ -92,7 +92,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
     <View style={{ marginTop: 2 }}>
       <View className="flex-row justify-between items-start mb-4">
         <View>
-          <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Monthly Average</Text>
+          <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-60">Monthly Average</Text>
           <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
             {formatHours(monthlyAverageYearly)}
           </Text>
@@ -105,7 +105,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
             ) : (
               <TrendingDown size={14} color="#F87171" />
             )}
-            <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold ml-1">
+            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1">
               {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last year</Text>
             </Text>
           </View>
