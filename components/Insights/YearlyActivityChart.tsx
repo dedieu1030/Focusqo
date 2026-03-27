@@ -136,6 +136,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         {activeIndex !== null && (() => {
+          if (monthsData[activeIndex].total === 0) return null;
           const barCenter = (activeIndex * slotWidth) + (slotWidth / 2);
           const tooltipLeft = Math.max(8, Math.min(availableWidth - measuredTooltipWidth - 8, barCenter - measuredTooltipWidth / 2));
 

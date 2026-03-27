@@ -171,6 +171,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         {activeIdx !== null && !hideTooltip && (() => {
+          if (daysData[activeIdx].total === 0) return null;
           const barCenter = (activeIdx * slotWidth) + (slotWidth / 2);
           const tooltipLeft = Math.max(8, Math.min(availableWidth - measuredTooltipWidth - 8, barCenter - measuredTooltipWidth / 2));
 
