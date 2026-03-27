@@ -136,7 +136,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
         {activeIndex !== null && (() => {
           const barCenter = (activeIndex * slotWidth) + (slotWidth / 2);
-          const tooltipWidth = 140;
+          const tooltipWidth = 180;
           const tooltipLeft = Math.max(8, Math.min(availableWidth - tooltipWidth - 8, barCenter - tooltipWidth / 2));
 
           return (
@@ -149,9 +149,10 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                 borderColor: '#22D3EE',
                 borderWidth: 1,
                 width: tooltipWidth,
+                alignSelf: 'flex-start',
               }}
             >
-              <View className="flex-row items-center" style={{ gap: 10 }}>
+              <View className="flex-row items-center" style={{ gap: 12 }}>
                 <View className="items-center">
                   <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
                   <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].focus)}</Text>
