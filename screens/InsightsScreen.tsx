@@ -155,9 +155,9 @@ export function InsightsScreen() {
             onPress={() => setActiveView(v)}
             style={{ 
               flex: 1, 
-              paddingVertical: 10, 
+              paddingVertical: 12, 
               borderRadius: 20, 
-              backgroundColor: activeView === v ? palette.secondaryText : 'transparent',
+              backgroundColor: activeView === v ? '#48484A' : 'transparent',
             }}
             className="items-center justify-center"
           >
