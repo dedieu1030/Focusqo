@@ -142,7 +142,14 @@ export function InsightsScreen() {
       <Text style={[styles.screenTitle, { color: palette.primaryText }]}>Insights</Text>
 
       {/* Unified Navigation Toggles */}
-      <View className="flex-row justify-center mb-8 px-2 py-1 mx-4 rounded-3xl" style={{ backgroundColor: palette.timerBlock + '15' }}>
+      <View 
+        className="flex-row justify-center mb-8 px-1 py-1 mx-4 rounded-3xl" 
+        style={{ 
+          backgroundColor: '#111111',
+          borderWidth: 1,
+          borderColor: '#333333'
+        }}
+      >
         {(['day', 'week', 'month', 'year'] as InsightsView[]).map((v) => (
           <TouchableOpacity 
             key={v}
@@ -151,16 +158,21 @@ export function InsightsScreen() {
               flex: 1, 
               paddingVertical: 10, 
               borderRadius: 20, 
-              backgroundColor: activeView === v ? palette.timerBlock : 'transparent',
-              shadowOpacity: activeView === v ? 0.05 : 0
+              backgroundColor: activeView === v ? '#22D3EE' : 'transparent',
+              // Add a subtle glow for the active one
+              shadowColor: '#22D3EE',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: activeView === v ? 0.3 : 0,
+              shadowRadius: 10,
+              elevation: activeView === v ? 4 : 0,
             }}
             className="items-center justify-center"
           >
             <Text style={{ 
-              color: activeView === v ? palette.timerText : palette.secondaryText,
+              color: activeView === v ? '#000000' : palette.timerText,
               fontWeight: activeView === v ? '900' : '600',
               fontSize: 13,
-              opacity: activeView === v ? 1 : 0.6
+              opacity: activeView === v ? 1 : 0.4
             }}>
               {v.charAt(0).toUpperCase() + v.slice(1)}
             </Text>
