@@ -57,7 +57,7 @@ export function TodayRhythm() {
 
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalBreakSec)}</Text>
-          <View style={[styles.iconContainer, { backgroundColor: palette.breakColor }]}>
+          <View style={[styles.iconContainer, { backgroundColor: '#FF9F0A' }]}>
             <Pause size={10} color="white" strokeWidth={4} />
           </View>
         </View>

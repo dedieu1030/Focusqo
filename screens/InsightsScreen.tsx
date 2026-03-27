@@ -173,61 +173,8 @@ export function InsightsScreen() {
         ))}
       </View>
       
-      <View style={styles.bentoGrid}>
-        {/* Main "Combo" Card */}
-        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: '#111111' }]}>
-           {renderChart}
-        </View>
-
-        {/* Total Focus Time Card */}
-        <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: '#111111' }]}>
-          <View style={styles.bentoHeaderRow}>
-            <Clock size={14} color={palette.focusColor} />
-            <Text style={[styles.bentoLabel, { color: palette.timerText }]}>Total focus time</Text>
-          </View>
-          <Text style={[styles.bentoHugeValue, { color: palette.timerText }]}>{formatTime(totalFocusSeconds)}</Text>
-        </View>
-
-        {/* Stats Grid */}
-        <View style={styles.bentoSplit}>
-          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: '#111111' }]}>
-            <Target size={18} color={palette.breakColor} style={{ marginBottom: 10 }} />
-            <Text style={[styles.bentoValue, { color: palette.timerText }]}>{focusHistory.length}</Text>
-            <Text style={[styles.bentoSubLabel, { color: palette.timerText }]}>Sessions</Text>
-          </View>
-
-          <View style={[styles.bentoCard, styles.bentoHalf, { backgroundColor: '#111111' }]}>
-            <Flame size={18} color={palette.focusColor} style={{ marginBottom: 10 }} />
-            <Text style={[styles.bentoValue, { color: palette.timerText }]}>{activeDaysCount}</Text>
-            <Text style={[styles.bentoSubLabel, { color: palette.timerText }]}>Active days</Text>
-          </View>
-        </View>
-
-        {/* Labels Content */}
-        {labelTimes.length > 0 && (
-          <View style={[styles.bentoCard, styles.bentoFull, { backgroundColor: '#111111' }]}>
-            <View style={styles.bentoHeaderRow}>
-              <Tag size={18} color={palette.accentColor} />
-              <Text style={[styles.bentoLabel, { color: palette.timerText }]}>Labels distribution</Text>
-            </View>
-            <View className="mt-4">
-              {labelTimes.map((label, idx) => {
-                const ratio = label.seconds / maxLabelTime;
-                return (
-                  <View key={label.id} className={idx !== labelTimes.length - 1 ? "mb-6" : ""}>
-                    <View className="flex-row justify-between mb-2">
-                       <Text style={{ color: palette.timerText }} className="font-bold text-sm">{label.name}</Text>
-                       <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-70">{formatTime(label.seconds)}</Text>
-                    </View>
-                    <View className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: palette.timerText + '10' }}>
-                       <View className="h-full rounded-full" style={{ backgroundColor: palette.focusColor, width: `${ratio * 100}%` }} />
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        )}
+      <View style={[styles.chartContainer, { backgroundColor: '#111111' }]}>
+         {renderChart}
       </View>
     </ScrollView>
   );
@@ -250,51 +197,9 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     textAlign: 'center',
   },
-  bentoGrid: {
-    gap: 16,
-  },
-  bentoCard: {
+  chartContainer: {
     borderRadius: 28,
     padding: 24,
-  },
-  bentoFull: {
     width: '100%',
-  },
-  bentoSplit: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  bentoHalf: {
-    flex: 1,
-    padding: 20,
-    borderRadius: 24,
-  },
-  bentoHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
-  },
-  bentoLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    opacity: 0.5,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  bentoHugeValue: {
-    fontSize: 36,
-    fontWeight: '800',
-    letterSpacing: -1,
-  },
-  bentoValue: {
-    fontSize: 28,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  bentoSubLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    opacity: 0.6,
   },
 });

@@ -247,7 +247,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               const x = i * slotWidth + barWidthHorizontalOffset;
               const isToday = i === today.getDay(); 
               const focusColor = "#3B82F6";
-              const breakColor = palette.breakColor;
+              const breakColor = "#FF9F0A";
 
               return (
                 <G key={i}>

@@ -197,7 +197,7 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
                   {d.break > 0 && (
                     <Path
                       d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${chartHeight-focusH-breakH+1} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-1},${chartHeight-focusH-breakH} L${x+1},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+1} Z`}
-                      fill={palette.breakColor}
+                      fill="#FF9F0A"
                     />
                   )}
 
