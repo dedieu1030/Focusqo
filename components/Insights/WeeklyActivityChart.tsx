@@ -255,22 +255,33 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
 
               return (
                 <G key={i}>
-                  {/* FOCUS BAR */}
-                  {d.focus > 0 && (
-                    <Path
-                      d={d.break > 0 
-                        ? `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
-                        : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH+2} Q${x+barWidth},${chartHeight-focusH} ${x+barWidth-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
-                      }
-                      fill={focusColor} opacity={opacity}
-                    />
-                  )}
-                  {/* BREAK BAR */}
-                  {d.break > 0 && (
-                    <Path
-                      d={`M${x},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH} L${x+barWidth},${chartHeight-focusH-breakH+2} Q${x+barWidth},${chartHeight-focusH-breakH} ${x+barWidth-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
-                      fill={breakColor} opacity={opacity}
-                    />
+                  {isSelected ? (
+                    // UNIFIED SELECTION BAR
+                    (d.focus > 0 || d.break > 0) && (
+                      <Path
+                        d={`M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-(focusH+breakH)+2} Q${x+barWidth},${chartHeight-(focusH+breakH)} ${x+barWidth-2},${chartHeight-(focusH+breakH)} L${x+2},${chartHeight-(focusH+breakH)} Q${x},${chartHeight-(focusH+breakH)} ${x},${chartHeight-(focusH+breakH)+2} Z`}
+                        fill="#22D3EE"
+                      />
+                    )
+                  ) : (
+                    // STANDARD STACKED BAR
+                    <>
+                      {d.focus > 0 && (
+                        <Path
+                          d={d.break > 0 
+                            ? `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
+                            : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH+2} Q${x+barWidth},${chartHeight-focusH} ${x+barWidth-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
+                          }
+                          fill={focusColor}
+                        />
+                      )}
+                      {d.break > 0 && (
+                        <Path
+                          d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barWidth},${Math.floor(chartHeight-focusH)} L${x+barWidth},${chartHeight-focusH-breakH+2} Q${x+barWidth},${chartHeight-focusH-breakH} ${x+barWidth-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
+                          fill={breakColor}
+                        />
+                      )}
+                    </>
                   )}
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
