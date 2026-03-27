@@ -155,14 +155,14 @@ export function InsightsScreen() {
             onPress={() => setActiveView(v)}
             style={{ 
               flex: 1, 
-              paddingVertical: 12, 
+              paddingVertical: 10, 
               borderRadius: 20, 
-              backgroundColor: activeView === v ? palette.timerBlock : 'transparent',
+              backgroundColor: activeView === v ? palette.timerText : 'transparent',
             }}
             className="items-center justify-center"
           >
             <Text style={{ 
-              color: palette.timerText,
+              color: activeView === v ? '#111111' : palette.timerText,
               fontWeight: activeView === v ? '900' : '600',
               fontSize: 13,
               opacity: activeView === v ? 1 : 0.7
