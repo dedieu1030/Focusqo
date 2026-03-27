@@ -258,15 +258,17 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               );
             })}
 
-            {/* Bars (Inactive Only) */}
+            {/* Bars */}
             {daysData.map((d, i) => {
-              if (activeIdx === i) return null;
               const focusH = (d.focus / maxMinutes) * chartHeight;
               const breakH = (d.break / maxMinutes) * chartHeight;
               const x = i * slotWidth + barWidthHorizontalOffset;
               const isToday = i === today.getDay(); 
-              const focusColor = "#3B82F6";
-              const breakColor = "#FF9F0A";
+              const isActive = activeIdx === i;
+              const isHighlighted = isActive && d.total > 0;
+              
+              const focusColor = isHighlighted ? "#22D3EE" : "#3B82F6";
+              const breakColor = isHighlighted ? "#22D3EE" : "#FF9F0A";
 
               return (
                 <G key={i}>
@@ -274,22 +276,22 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                     <Path
                       d={d.break > 0 
                         ? `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
-                        : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-focusH+2} Q${x+barWidth},${chartHeight-focusH} ${x+barWidth-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
+                        : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${Math.floor(chartHeight-focusH)+2} Q${x+barWidth},${Math.floor(chartHeight-focusH)} ${x+barWidth-2},${Math.floor(chartHeight-focusH)} L${x+2},${Math.floor(chartHeight-focusH)} Q${x},${Math.floor(chartHeight-focusH)} ${x},${Math.floor(chartHeight-focusH)+2} Z`
                       }
                       fill={focusColor}
                     />
                   )}
                   {d.break > 0 && (
                     <Path
-                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barWidth},${Math.floor(chartHeight-focusH)} L${x+barWidth},${chartHeight-focusH-breakH+2} Q${x+barWidth},${chartHeight-focusH-breakH} ${x+barWidth-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
+                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barWidth},${Math.floor(chartHeight-focusH)} L${x+barWidth},${Math.floor(chartHeight-focusH-breakH)+2} Q${x+barWidth},${Math.floor(chartHeight-focusH-breakH)} ${x+barWidth-2},${Math.floor(chartHeight-focusH-breakH)} L${x+2},${Math.floor(chartHeight-focusH-breakH)} Q${x},${Math.floor(chartHeight-focusH-breakH)} ${x},${Math.floor(chartHeight-focusH-breakH)+2} Z`}
                       fill={breakColor}
                     />
                   )}
                   <SvgText
                     x={x + barWidth / 2} y={chartHeight + 25}
                     fontSize="12" fill={palette.timerText}
-                    textAnchor="middle" fontWeight={isToday ? "900" : "500"}
-                    opacity={isToday ? 1 : 0.3}
+                    textAnchor="middle" fontWeight={isToday ? "900" : (isHighlighted ? "900" : "500")}
+                    opacity={isToday ? 1 : (isHighlighted ? 1 : 0.3)}
                   >
                     {dayNames[i]}
                   </SvgText>
@@ -297,7 +299,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               );
             })}
 
-            {/* AVERAGE LINE (Behind Selection) */}
+            {/* AVERAGE LINE (In front of bars) */}
             {dailyAverage > 0 && dailyAverage <= maxMinutes && (
                <G>
                   <Line 
@@ -308,35 +310,6 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                   <SvgText x={chartAreaWidth + 4} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
                </G>
             )}
-
-            {/* Active/Selected Bar (On Top of Average Line) */}
-            {activeIdx !== null && (() => {
-              const i = activeIdx;
-              const d = daysData[i];
-              const focusH = (d.focus / maxMinutes) * chartHeight;
-              const breakH = (d.break / maxMinutes) * chartHeight;
-              const x = i * slotWidth + barWidthHorizontalOffset;
-              const isToday = i === today.getDay();
-              
-              return (
-                <G key={i}>
-                  {(d.focus > 0 || d.break > 0) && (
-                    <Path
-                      d={`M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${chartHeight-(focusH+breakH)+2} Q${x+barWidth},${chartHeight-(focusH+breakH)} ${x+barWidth-2},${chartHeight-(focusH+breakH)} L${x+2},${chartHeight-(focusH+breakH)} Q${x},${chartHeight-(focusH+breakH)} ${x},${chartHeight-(focusH+breakH)+2} Z`}
-                      fill="#22D3EE"
-                    />
-                  )}
-                  <SvgText
-                    x={x + barWidth / 2} y={chartHeight + 25}
-                    fontSize="12" fill={palette.timerText}
-                    textAnchor="middle" fontWeight="900"
-                    opacity={1}
-                  >
-                    {dayNames[i]}
-                  </SvgText>
-                </G>
-              );
-            })()}
           </G>
         </Svg>
 
