@@ -131,13 +131,11 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
               );
             })}
 
-            {/* Bars with Centered Labels */}
+            {/* Bars (Regular) */}
             {daysData.map((d, i) => {
               const x = i * slotWidth + barOffset;
               const focusH = (d.focus / maxMins) * chartHeight;
               const breakH = (d.break / maxMins) * chartHeight;
-
-              // Show centered labels under specific bars (approx 1/4 intervals)
               const showLabel = i === 0 || i === Math.floor(slots * 0.25) || i === Math.floor(slots * 0.5) || i === Math.floor(slots * 0.75) || i === slots - 1;
 
               return (
@@ -145,7 +143,7 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
                   {d.focus > 0 && (
                     <Path
                       d={d.break > 0 
-                        ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
+                        ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
                         : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+1} Q${x+barW},${chartHeight-focusH} ${x+barW-1},${chartHeight-focusH} L${x+1},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+1} Z`
                       }
                       fill="#3B82F6"
@@ -153,7 +151,7 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
                   )}
                   {d.break > 0 && (
                     <Path
-                      d={`M${x},${chartHeight-focusH} L${x+barW},${chartHeight-focusH} L${x+barW},${chartHeight-focusH-breakH+1} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-1},${chartHeight-focusH-breakH} L${x+1},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+1} Z`}
+                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${chartHeight-focusH-breakH+1} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-1},${chartHeight-focusH-breakH} L${x+1},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+1} Z`}
                       fill={palette.breakColor}
                     />
                   )}
@@ -174,6 +172,22 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
                 </G>
               );
             })}
+
+            {/* Average Line (On top of regular bars) */}
+            {avgMins > 0 && (
+              <G>
+                <Line 
+                  x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
+                  stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4, 4" 
+                />
+                <SvgText 
+                   x={chartAreaWidth + 8} y={avgY + 3} 
+                   fontSize="10" fill="#4ADE80" fontWeight="900"
+                >
+                  avg
+                </SvgText>
+              </G>
+            )}
           </G>
         </Svg>
       </View>

@@ -118,21 +118,18 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
               );
             })}
 
-            {/* Bars with Centered Labels */}
+            {/* Bars (Regular) */}
             {monthsData.map((d, i) => {
               const x = i * slotWidth + barOffset;
               const focusH = (d.focus / maxMins) * chartHeight;
               const breakH = (d.break / maxMins) * chartHeight;
-
-              // Show centered labels for quarters and last month
-              const showLabel = i % 3 === 0 || i === slots - 1;
 
               return (
                 <G key={i}>
                   {d.focus > 0 && (
                     <Path
                       d={d.break > 0 
-                        ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
+                        ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
                         : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+3} Q${x+barW},${chartHeight-focusH} ${x+barW-3},${chartHeight-focusH} L${x+3},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+3} Z`
                       }
                       fill="#3B82F6"
@@ -140,12 +137,11 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                   )}
                   {d.break > 0 && (
                     <Path
-                      d={`M${x},${chartHeight-focusH} L${x+barW},${chartHeight-focusH} L${x+barW},${chartHeight-focusH-breakH+3} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-3},${chartHeight-focusH-breakH} L${x+3},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+3} Z`}
+                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${chartHeight-focusH-breakH+3} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-3},${chartHeight-focusH-breakH} L${x+3},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+3} Z`}
                       fill={palette.breakColor}
                     />
                   )}
 
-                  {/* All 12 Month Labels (Centered) */}
                   <SvgText 
                     x={x + barW / 2} 
                     y={chartHeight + 20} 
@@ -160,6 +156,22 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                 </G>
               );
             })}
+
+            {/* Average Line (On top of regular bars) */}
+            {avgMins > 0 && (
+              <G>
+                <Line 
+                  x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
+                  stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4, 4" 
+                />
+                <SvgText 
+                   x={chartAreaWidth + 8} y={avgY + 3} 
+                   fontSize="10" fill="#4ADE80" fontWeight="900"
+                >
+                  avg
+                </SvgText>
+              </G>
+            )}
           </G>
         </Svg>
       </View>
