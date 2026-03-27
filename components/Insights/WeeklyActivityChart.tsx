@@ -157,6 +157,40 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
+        {activeIdx !== null && !hideTooltip && (
+          <View 
+            className="absolute z-10 px-3 py-1.5 rounded-xl items-center shadow-2xl border border-white/40"
+            style={{ 
+              left: Math.max(8, Math.min(availableWidth - 148, (activeIdx * slotWidth) + (slotWidth / 2) - 70)), 
+              top: -8, 
+              backgroundColor: '#22D3EE', 
+              minWidth: 140,
+              alignSelf: 'flex-start',
+            }}
+          >
+            <View className="flex-row items-center" style={{ gap: 10 }}>
+              <View className="items-center">
+                <Text style={{ color: '#2563EB' }} className="text-[9px] font-bold">focus</Text>
+                <Text numberOfLines={1} className="text-[14px] font-black text-black">{formatHours(daysData[activeIdx].focus)}</Text>
+              </View>
+              <View className="w-[1px] h-6 bg-black/10 mx-1" />
+              <View className="items-center">
+                <Text style={{ color: '#EA580C' }} className="text-[9px] font-bold">break</Text>
+                <Text numberOfLines={1} className="text-[14px] font-black text-black">{formatHours(daysData[activeIdx].break)}</Text>
+              </View>
+            </View>
+            {/* Tooltip Arrow - Perfectly Centered */}
+            <View 
+              className="absolute w-2.5 h-2.5 rotate-45" 
+              style={{ 
+                backgroundColor: '#22D3EE', 
+                bottom: -4,
+                left: '50%',
+                marginLeft: -5,
+              }} 
+            />
+          </View>
+        )}
 
         <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
           <G transform={`translate(0, ${tooltipHeight})`}>
