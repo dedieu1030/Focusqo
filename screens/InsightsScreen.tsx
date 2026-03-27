@@ -165,7 +165,7 @@ export function InsightsScreen() {
               color: palette.timerText,
               fontWeight: activeView === v ? '900' : '600',
               fontSize: 13,
-              opacity: activeView === v ? 1 : 0.4
+              opacity: activeView === v ? 1 : 0.7
             }}>
               {v.charAt(0).toUpperCase() + v.slice(1)}
             </Text>
@@ -217,7 +217,7 @@ export function InsightsScreen() {
                   <View key={label.id} className={idx !== labelTimes.length - 1 ? "mb-6" : ""}>
                     <View className="flex-row justify-between mb-2">
                        <Text style={{ color: palette.timerText }} className="font-bold text-sm">{label.name}</Text>
-                       <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-60">{formatTime(label.seconds)}</Text>
+                       <Text style={{ color: palette.timerText }} className="text-sm font-medium opacity-80">{formatTime(label.seconds)}</Text>
                     </View>
                     <View className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: palette.timerText + '10' }}>
                        <View className="h-full rounded-full" style={{ backgroundColor: palette.focusColor, width: `${ratio * 100}%` }} />
