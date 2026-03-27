@@ -3,6 +3,7 @@ import { View, Text, Dimensions } from 'react-native';
 import Svg, { G, Text as SvgText, Line, Path } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
+import { TrendingUp, TrendingDown } from 'lucide-react-native';
 
 interface YearlyActivityChartProps {
   history: SessionRecord[];
@@ -53,19 +54,65 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
   const maxMins = Math.max(600, ...monthsData.map(d => d.total));
   const yLabels = [0, maxMins * 0.25, maxMins * 0.5, maxMins * 0.75, maxMins];
 
-  // Average calculation (up to current month)
+  // --- STATS & TRENDS ---
+  // Average calculation (up to today in current year)
+  const startOfYear = new Date(currentYear, 0, 1).getTime();
+  const daysElapsedInYear = Math.max(1, Math.floor((now.getTime() - startOfYear) / (1000 * 60 * 60 * 24)) + 1);
+  const thisYearTotalFocusMins = monthsData.reduce((acc, d) => acc + d.focus, 0);
+  const dailyAverageYearly = thisYearTotalFocusMins / daysElapsedInYear;
+
+  // Last Year Data
+  const lastYearStart = new Date(currentYear - 1, 0, 1).getTime();
+  const lastYearEnd = new Date(currentYear, 0, 1).getTime();
+  const daysInLastYear = 365; // Simplify for baseline
+  
+  const lastYearTotalFocusMins = history
+    .filter(r => r.mode === 'focus' && r.timestamp >= lastYearStart && r.timestamp < lastYearEnd)
+    .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60;
+  
+  const lastYearDailyAverage = lastYearTotalFocusMins / daysInLastYear;
+  let diffPercent = 0;
+  if (lastYearDailyAverage > 0) {
+    diffPercent = Math.round(((dailyAverageYearly - lastYearDailyAverage) / lastYearDailyAverage) * 100);
+  }
+
+  const formatHours = (mins: number) => {
+    if (mins < 60) return `${Math.round(mins)}m`;
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    return `${h}h ${m}m`;
+  };
+
+  // Average Line (Standard line in chart)
   const pastMonths = monthsData.filter((_, i) => i <= now.getMonth());
   const avgMins = pastMonths.length > 0
     ? monthsData.reduce((acc, d) => acc + d.total, 0) / pastMonths.length
     : 0;
   const avgY = chartHeight - (avgMins / maxMins) * chartHeight;
 
+
   return (
-    <View style={{ marginTop: 20 }}>
-      <View className="flex-row items-center mb-6">
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
-          <Text style={{ color: palette.secondaryText }} className="mx-4 text-[10px] font-black opacity-40 uppercase tracking-[2px]">Yearly Activity</Text>
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
+    <View style={{ marginTop: 2 }}>
+      <View className="flex-row justify-between items-start mb-4">
+        <View>
+          <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Daily Average</Text>
+          <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
+            {formatHours(dailyAverageYearly)}
+          </Text>
+        </View>
+        
+        {diffPercent !== 0 && (
+          <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
+            {diffPercent > 0 ? (
+              <TrendingUp size={14} color="#4ADE80" />
+            ) : (
+              <TrendingDown size={14} color="#F87171" />
+            )}
+            <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold ml-1">
+              {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last year</Text>
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + 40 }}>

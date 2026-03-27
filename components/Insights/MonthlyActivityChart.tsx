@@ -3,6 +3,7 @@ import { View, Text, Dimensions } from 'react-native';
 import Svg, { G, Text as SvgText, Line, Path } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
+import { TrendingUp, TrendingDown } from 'lucide-react-native';
 
 interface MonthlyActivityChartProps {
   history: SessionRecord[];
@@ -66,19 +67,63 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
   const maxMins = Math.max(trueMax * 1.2, 120); 
   const yLabels = [0, maxMins * 0.25, maxMins * 0.5, maxMins * 0.75, maxMins];
 
-  // Average calculation (up to today)
+  // --- STATS & TRENDS ---
+  const elapsedDaysInMonth = Math.max(1, now.getDate());
+  const thisMonthTotalFocusMins = daysData.reduce((acc, d) => acc + d.focus, 0);
+  const dailyAverage = thisMonthTotalFocusMins / elapsedDaysInMonth;
+
+  // Last Month Data
+  const lastMonthStart = new Date(year, month - 1, 1).getTime();
+  const lastMonthEnd = new Date(year, month, 1).getTime();
+  const daysInLastMonth = new Date(year, month, 0).getDate();
+  
+  const lastMonthTotalFocusMins = history
+    .filter(r => r.mode === 'focus' && r.timestamp >= lastMonthStart && r.timestamp < lastMonthEnd)
+    .reduce((acc, r) => acc + r.durationInSeconds, 0) / 60;
+  
+  const lastMonthDailyAverage = lastMonthTotalFocusMins / daysInLastMonth;
+  let diffPercent = 0;
+  if (lastMonthDailyAverage > 0) {
+    diffPercent = Math.round(((dailyAverage - lastMonthDailyAverage) / lastMonthDailyAverage) * 100);
+  }
+
+  const formatHours = (mins: number) => {
+    if (mins < 60) return `${Math.round(mins)}m`;
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    return `${h}h ${m}m`;
+  };
+
+  // Average line calculation (up to today)
   const pastDays = daysData.filter(d => d.date <= now);
   const avgMins = pastDays.length > 0 
     ? daysData.reduce((acc, d) => acc + d.total, 0) / pastDays.length 
     : 0;
   const avgY = chartHeight - (avgMins / maxMins) * chartHeight;
 
+
   return (
-    <View style={{ marginTop: 20 }}>
-      <View className="flex-row items-center mb-6">
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
-          <Text style={{ color: palette.secondaryText }} className="mx-4 text-[10px] font-black opacity-40 uppercase tracking-[2px]">Monthly Activity</Text>
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.secondaryText }} />
+    <View style={{ marginTop: 2 }}>
+      <View className="flex-row justify-between items-start mb-4">
+        <View>
+          <Text style={{ color: palette.secondaryText }} className="text-sm font-medium opacity-60">Daily Average</Text>
+          <Text style={{ color: palette.timerText }} className="text-4xl font-extrabold tracking-tight">
+            {formatHours(dailyAverage)}
+          </Text>
+        </View>
+        
+        {diffPercent !== 0 && (
+          <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
+            {diffPercent > 0 ? (
+              <TrendingUp size={14} color="#4ADE80" />
+            ) : (
+              <TrendingDown size={14} color="#F87171" />
+            )}
+            <Text style={{ color: palette.secondaryText }} className="text-[12px] font-bold ml-1">
+              {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last month</Text>
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + 40 }}>
