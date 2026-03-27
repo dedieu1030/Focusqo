@@ -121,13 +121,10 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
     const index = Math.floor(x / slotWidth);
     const clampedIndex = Math.max(0, Math.min(6, index));
     
-    // Only allow selection if the day has data (focus or break > 0)
-    if (daysData[clampedIndex].total > 0) {
-      if (onSelectDay) {
-        onSelectDay(clampedIndex);
-      } else {
-        setInternalActiveIndex(clampedIndex);
-      }
+    if (onSelectDay) {
+      onSelectDay(clampedIndex);
+    } else {
+      setInternalActiveIndex(clampedIndex);
     }
   };
 
@@ -181,7 +178,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
         {activeIdx !== null && !hideTooltip && (() => {
           if (daysData[activeIdx].total === 0) return null;
           const barCenter = (activeIdx * slotWidth) + (slotWidth / 2);
-          const tooltipLeft = Math.max(8, Math.min(availableWidth - measuredTooltipWidth - 8, barCenter - measuredTooltipWidth / 2));
+          const tooltipLeft = Math.max(0, Math.min(chartAreaWidth - measuredTooltipWidth, barCenter - measuredTooltipWidth / 2));
 
           return (
             <View 
