@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Dimensions, GestureResponderEvent } from 'react-native';
 import Svg, { G, Text as SvgText, Line, Path } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
@@ -11,8 +11,10 @@ interface YearlyActivityChartProps {
 }
 
 export function YearlyActivityChart({ history, palette }: YearlyActivityChartProps) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const windowWidth = Dimensions.get('window').width;
   const chartHeight = 150;
+  const tooltipHeight = 40;
   const chartInnerPadding = 48;
   const availableWidth = windowWidth - chartInnerPadding - 32;
   const yAxisWidth = 35;
@@ -98,6 +100,14 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
     : 0;
   const avgY = chartHeight - (avgMins / maxMins) * chartHeight;
 
+  const handleTouch = (evt: GestureResponderEvent) => {
+    const x = evt.nativeEvent.locationX;
+    const index = Math.floor(x / slotWidth);
+    if (index >= 0 && index < slots) {
+      setActiveIndex(index);
+    }
+  };
+
 
   return (
     <View style={{ marginTop: 2 }}>
@@ -116,68 +126,107 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
             ) : (
               <TrendingDown size={14} color="#F87171" />
             )}
-            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1">
+            <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
               {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last year</Text>
             </Text>
           </View>
         )}
       </View>
 
-      <View style={{ width: availableWidth, height: chartHeight + 40 }}>
-        <Svg height={chartHeight + 40} width={availableWidth}>
-          <G transform="translate(0, 10)">
-             {/* Grid */}
-             {yLabels.map((val, i) => {
+      <View style={{ width: availableWidth, height: chartHeight + tooltipHeight + 40 }} className="relative">
+        {activeIndex !== null && (() => {
+          const barCenter = (activeIndex * slotWidth) + (slotWidth / 2);
+          const tooltipWidth = 140;
+          const tooltipLeft = Math.max(8, Math.min(availableWidth - tooltipWidth - 8, barCenter - tooltipWidth / 2));
+
+          return (
+            <View 
+              className="absolute z-10 px-3 py-1.5 rounded-xl items-center shadow-2xl border"
+              style={{ 
+                left: tooltipLeft, 
+                top: -8, 
+                backgroundColor: '#111111', 
+                borderColor: '#22D3EE',
+                borderWidth: 1,
+                width: tooltipWidth,
+              }}
+            >
+              <View className="flex-row items-center" style={{ gap: 10 }}>
+                <View className="items-center">
+                  <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
+                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].focus)}</Text>
+                </View>
+                <View className="w-[1px] h-6 bg-white/10 mx-1" />
+                <View className="items-center">
+                  <Text style={{ color: palette.breakColor }} className="text-[9px] font-bold">break</Text>
+                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].break)}</Text>
+                </View>
+              </View>
+            </View>
+          );
+        })()}
+
+        <Svg height={chartHeight + tooltipHeight + 40} width={availableWidth}>
+          <G transform={`translate(0, ${tooltipHeight})`}>
+            {/* Dynamic Connector Line */}
+            {activeIndex !== null && (() => {
+              const d = monthsData[activeIndex];
+              const focusH = (d.focus / maxMins) * chartHeight;
+              const breakH = (d.break / maxMins) * chartHeight;
+              const barTopY = chartHeight - focusH - breakH;
+              return (
+                <Line 
+                  x1={(activeIndex * slotWidth) + (slotWidth / 2)} 
+                  y1={-35} 
+                  x2={(activeIndex * slotWidth) + (slotWidth / 2)} 
+                  y2={barTopY} 
+                  stroke="#22D3EE"
+                  strokeWidth="1"
+                />
+              );
+            })()}
+
+            {/* Grid Lines */}
+            {yLabels.map((val, i) => {
               const y = chartHeight - (val / maxMins) * chartHeight;
               const isSignificant = i === 0 || i === 2 || i === 4;
               return (
                 <G key={i}>
-                   <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.secondaryText} strokeWidth="1" opacity="0.1" />
+                   <Line x1={0} y1={y} x2={chartAreaWidth} y2={y} stroke={palette.timerText} strokeWidth="1" opacity="0.1" />
                    {isSignificant && (
-                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.secondaryText} opacity="0.4" fontWeight="600">
-                       {val >= 60 ? `${Math.round(val/60)}h` : `${Math.round(val)}m`}
+                     <SvgText x={chartAreaWidth + 8} y={y + 3} fontSize="9" fill={palette.timerText} opacity="0.7" fontWeight="600">
+                       {Math.round(val)}m
                      </SvgText>
                    )}
                 </G>
               );
             })}
 
-            {/* Average Line */}
+            {/* Average Line (Behind) */}
             {avgMins > 0 && (
-              <G>
-                <Line 
-                  x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
-                  stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4, 4" 
-                />
-                <SvgText 
-                   x={chartAreaWidth + 8} y={avgY + 3} 
-                   fontSize="10" fill="#4ADE80" fontWeight="900"
-                >
-                  avg
-                </SvgText>
-              </G>
+               <G>
+                  <Line 
+                    x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
+                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
+                  />
+               </G>
             )}
 
-            {/* Vertical Dividers (5 lines standard) */}
+            {/* Vertical Dividers */}
             {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
               const x = p * chartAreaWidth;
               return (
-                <Line 
-                  key={i} 
-                  x1={x} y1={0} 
-                  x2={x} y2={chartHeight} 
-                  stroke={palette.timerText} 
-                  strokeWidth="1" 
-                  opacity="0.12"
-                />
+                <Line key={i} x1={x} y1={0} x2={x} y2={chartHeight} stroke={palette.timerText} strokeWidth="1" opacity="0.12" />
               );
             })}
 
-            {/* Bars (Regular) */}
+            {/* Bars */}
             {monthsData.map((d, i) => {
+              const isActive = activeIndex === i;
               const x = i * slotWidth + barOffset;
               const focusH = (d.focus / maxMins) * chartHeight;
               const breakH = (d.break / maxMins) * chartHeight;
+              const showLabel = i % 2 === 0;
 
               return (
                 <G key={i}>
@@ -185,50 +234,43 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                     <Path
                       d={d.break > 0 
                         ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
-                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+3} Q${x+barW},${chartHeight-focusH} ${x+barW-3},${chartHeight-focusH} L${x+3},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+3} Z`
+                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+2} Q${x+barW},${chartHeight-focusH} ${x+barW-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
                       }
-                      fill="#3B82F6"
+                      fill={isActive ? "#22D3EE" : "#3B82F6"}
                     />
                   )}
                   {d.break > 0 && (
                     <Path
-                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${chartHeight-focusH-breakH+3} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-3},${chartHeight-focusH-breakH} L${x+3},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+3} Z`}
-                      fill={palette.breakColor}
+                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${chartHeight-focusH-breakH+2} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
+                      fill={isActive ? "#22D3EE" : "#FF9F0A"}
                     />
                   )}
 
-                  <SvgText 
-                    x={x + barW / 2} 
-                    y={chartHeight + 20} 
-                    fontSize="7.5" 
-                    fill={palette.timerText} 
-                    opacity="0.4" 
-                    textAnchor="middle" 
-                    fontWeight="bold"
-                  >
-                    {d.monthName.substring(0, 3)}
-                  </SvgText>
+                  {showLabel && (
+                    <SvgText x={x + barW / 2} y={chartHeight + 20} fontSize="8" fill={palette.timerText} opacity="0.7" textAnchor="middle" fontWeight="bold">
+                      {d.monthName}
+                    </SvgText>
+                  )}
                 </G>
               );
             })}
-
-            {/* Average Line (On top of regular bars) */}
-            {avgMins > 0 && (
-              <G>
-                <Line 
-                  x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
-                  stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4, 4" 
-                />
-                <SvgText 
-                   x={chartAreaWidth + 8} y={avgY + 3} 
-                   fontSize="10" fill="#4ADE80" fontWeight="900"
-                >
-                  avg
-                </SvgText>
-              </G>
-            )}
+            
+            {/* Average Label (On Top) */}
+             {avgMins > 0 && (
+               <SvgText x={chartAreaWidth + 8} y={avgY + 3} fontSize="10" fill="#4ADE80" fontWeight="900">avg</SvgText>
+             )}
           </G>
         </Svg>
+        
+        <View 
+          onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
+          onResponderGrant={handleTouch}
+          onResponderMove={handleTouch}
+          onResponderRelease={() => setActiveIndex(null)}
+          onResponderTerminate={() => setActiveIndex(null)}
+          style={{ position: 'absolute', top: tooltipHeight, left: 0, width: chartAreaWidth, height: chartHeight, backgroundColor: 'transparent', zIndex: 5 }}
+        />
       </View>
 
       {/* Legend */}
