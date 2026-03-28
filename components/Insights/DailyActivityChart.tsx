@@ -119,11 +119,6 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
         )}
       </View>
 
-      <View className="flex-row items-center mb-4">
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
-          <Text style={{ color: palette.timerText }} className="mx-4 text-[11px] font-bold opacity-60">Daily breakdown</Text>
-          <View className="h-[1px] flex-1 opacity-10 bg-white" style={{ backgroundColor: palette.timerText }} />
-       </View>
 
       <View style={{ width: availableWidth, height: chartHeight + 60 }}>
         <Svg height={chartHeight + 60} width={availableWidth}>
