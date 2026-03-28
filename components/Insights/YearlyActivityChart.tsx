@@ -12,7 +12,6 @@ interface YearlyActivityChartProps {
 
 export function YearlyActivityChart({ history, palette }: YearlyActivityChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [measuredTooltipWidth, setMeasuredTooltipWidth] = useState(160);
   const windowWidth = Dimensions.get('window').width;
   const chartHeight = 150;
   const tooltipHeight = 40;
@@ -141,30 +140,47 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
         {activeIndex !== null && (() => {
           if (monthsData[activeIndex].total === 0) return null;
           const barCenter = (activeIndex * slotWidth) + (slotWidth / 2);
-          const tooltipLeft = Math.max(0, Math.min(chartAreaWidth - measuredTooltipWidth, barCenter - measuredTooltipWidth / 2));
+          
+          // 3-Zone alignment to prevent overflow over Y-axis labels
+          let wrapperStyle: any;
+          if (activeIndex <= 2) {
+            wrapperStyle = { left: 0, width: chartAreaWidth, alignItems: 'flex-start' };
+          } else if (activeIndex >= 9) {
+            wrapperStyle = { left: 0, width: chartAreaWidth, alignItems: 'flex-end' };
+          } else {
+            // Middle bars: center on bar
+            wrapperStyle = { left: barCenter - 150, width: 300, alignItems: 'center' };
+          }
 
           return (
             <View 
-              onLayout={(e) => setMeasuredTooltipWidth(e.nativeEvent.layout.width)}
-              className="absolute z-20 px-4 py-1.5 rounded-xl items-center shadow-2xl border"
+              key={activeIndex}
+              pointerEvents="none"
+              className="absolute z-20"
               style={{ 
-                left: tooltipLeft,
+                ...wrapperStyle,
                 top: -8,
-                backgroundColor: '#111111', 
-                borderColor: '#22D3EE',
-                borderWidth: 1,
-                minWidth: 120,
               }}
             >
-              <View className="flex-row items-center" style={{ gap: 12 }}>
-                <View className="items-center">
-                  <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
-                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].focus)}</Text>
-                </View>
-                <View className="w-[1px] h-6 bg-white/10 mx-1" />
-                <View className="items-center">
-                  <Text style={{ color: palette.breakColor }} className="text-[9px] font-bold">break</Text>
-                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].break)}</Text>
+              <View 
+                className="px-4 py-1.5 rounded-xl items-center shadow-2xl border"
+                style={{ 
+                  backgroundColor: '#111111', 
+                  borderColor: '#22D3EE',
+                  borderWidth: 1,
+                  minWidth: 140,
+                }}
+              >
+                <View className="flex-row items-center" style={{ gap: 12 }}>
+                  <View className="items-center">
+                    <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
+                    <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].focus)}</Text>
+                  </View>
+                  <View className="w-[1px] h-6 bg-white/10 mx-1" />
+                  <View className="items-center">
+                    <Text style={{ color: palette.breakColor }} className="text-[9px] font-bold">break</Text>
+                    <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].break)}</Text>
+                  </View>
                 </View>
               </View>
             </View>
@@ -240,14 +256,14 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                     <Path
                       d={d.break > 0 
                         ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
-                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+2} Q${x+barW},${chartHeight-focusH} ${x+barW-2},${chartHeight-focusH} L${x+2},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+2} Z`
+                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)+2} Q${x+barW},${Math.floor(chartHeight-focusH)} ${x+barW-2},${Math.floor(chartHeight-focusH)} L${x+2},${Math.floor(chartHeight-focusH)} Q${x},${Math.floor(chartHeight-focusH)} ${x},${Math.floor(chartHeight-focusH)+2} Z`
                       }
                       fill={isActive ? "#22D3EE" : "#3B82F6"}
                     />
                   )}
                   {d.break > 0 && (
                     <Path
-                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${chartHeight-focusH-breakH+2} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-2},${chartHeight-focusH-breakH} L${x+2},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+2} Z`}
+                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH-breakH)+2} Q${x+barW},${Math.floor(chartHeight-focusH-breakH)} ${x+barW-2},${Math.floor(chartHeight-focusH-breakH)} L${x+2},${Math.floor(chartHeight-focusH-breakH)} Q${x},${Math.floor(chartHeight-focusH-breakH)} ${x},${Math.floor(chartHeight-focusH-breakH)+2} Z`}
                       fill={isActive ? "#22D3EE" : "#FF9F0A"}
                     />
                   )}

@@ -16,7 +16,6 @@ interface WeeklyActivityChartProps {
 
 export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSelectDay, hideTooltip, hideLegend }: WeeklyActivityChartProps) {
   const [internalActiveIndex, setInternalActiveIndex] = useState<number | null>(null);
-  const [measuredTooltipWidth, setMeasuredTooltipWidth] = useState(140);
   const windowWidth = Dimensions.get('window').width;
   
   // Layout constants
@@ -178,30 +177,47 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
         {activeIdx !== null && !hideTooltip && (() => {
           if (daysData[activeIdx].total === 0) return null;
           const barCenter = (activeIdx * slotWidth) + (slotWidth / 2);
-          const tooltipLeft = Math.max(0, Math.min(chartAreaWidth - measuredTooltipWidth, barCenter - measuredTooltipWidth / 2));
+          
+          // 3-Zone alignment to prevent overflow over Y-axis labels
+          let wrapperStyle: any;
+          if (activeIdx <= 1) {
+            wrapperStyle = { left: 0, width: chartAreaWidth, alignItems: 'flex-start' };
+          } else if (activeIdx >= 5) {
+            wrapperStyle = { left: 0, width: chartAreaWidth, alignItems: 'flex-end' };
+          } else {
+            // Middle bars: center on bar, but with a safe container to prevent jitter
+            wrapperStyle = { left: barCenter - 150, width: 300, alignItems: 'center' };
+          }
 
           return (
             <View 
-              onLayout={(e) => setMeasuredTooltipWidth(e.nativeEvent.layout.width)}
-              className="absolute z-20 px-4 py-1.5 rounded-xl items-center shadow-2xl border"
+              key={activeIdx}
+              pointerEvents="none"
+              className="absolute z-20"
               style={{ 
-                left: tooltipLeft,
+                ...wrapperStyle,
                 top: -8,
-                backgroundColor: '#111111', 
-                borderColor: '#22D3EE',
-                borderWidth: 1,
-                minWidth: 120,
               }}
             >
-              <View className="flex-row items-center" style={{ gap: 12 }}>
-                <View className="items-center">
-                  <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
-                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].focus)}</Text>
-                </View>
-                <View className="w-[1px] h-6 bg-white/10 mx-1" />
-                <View className="items-center">
-                  <Text style={{ color: palette.breakColor }} className="text-[9px] font-bold">break</Text>
-                  <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].break)}</Text>
+              <View 
+                className="px-4 py-1.5 rounded-xl items-center shadow-2xl border"
+                style={{ 
+                  backgroundColor: '#111111', 
+                  borderColor: '#22D3EE',
+                  borderWidth: 1,
+                  minWidth: 120,
+                }}
+              >
+                <View className="flex-row items-center" style={{ gap: 12 }}>
+                  <View className="items-center">
+                    <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
+                    <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].focus)}</Text>
+                  </View>
+                  <View className="w-[1px] h-6 bg-white/10 mx-1" />
+                  <View className="items-center">
+                    <Text style={{ color: palette.breakColor }} className="text-[9px] font-bold">break</Text>
+                    <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].break)}</Text>
+                  </View>
                 </View>
               </View>
             </View>
