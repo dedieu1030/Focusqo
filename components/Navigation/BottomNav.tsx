@@ -19,22 +19,25 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
         style={[styles.navItem, currentScreen === 'insights' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('insights')}
       >
-        <BarChart2 size={20} color={currentScreen === 'insights' ? palette.timerText : palette.secondaryText} />
+        <BarChart2 size={24} color={currentScreen === 'insights' ? palette.timerText : palette.secondaryText} />
         <Text style={[styles.navText, { color: currentScreen === 'insights' ? palette.timerText : palette.secondaryText }]}>Insights</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
-        style={[styles.navItem, styles.centerItem, currentScreen === 'timer' && { backgroundColor: palette.timerBlock }]} 
+        style={[
+          styles.centerItem, 
+          currentScreen === 'timer' && { backgroundColor: palette.timerBlock }
+        ]} 
         onPress={() => onNavigate('timer')}
       >
-        <Timer size={20} color={currentScreen === 'timer' ? palette.timerText : palette.secondaryText} />
+        <Timer size={32} color={currentScreen === 'timer' ? palette.timerText : palette.secondaryText} />
       </TouchableOpacity>
 
       <TouchableOpacity 
         style={[styles.navItem, currentScreen === 'settings' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('settings')}
       >
-        <Settings size={20} color={currentScreen === 'settings' ? palette.timerText : palette.secondaryText} />
+        <Settings size={24} color={currentScreen === 'settings' ? palette.timerText : palette.secondaryText} />
         <Text style={[styles.navText, { color: currentScreen === 'settings' ? palette.timerText : palette.secondaryText }]}>Settings</Text>
       </TouchableOpacity>
     </View>
@@ -46,24 +49,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 4,
-    paddingBottom: 16, // Shifted even lower for maximum space above
-    gap: 8,
+    paddingBottom: 16, 
+    gap: 12,
   },
   navItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 24,
     gap: 8,
+    justifyContent: 'center',
   },
   centerItem: {
-    paddingHorizontal: 24, // Wider for the center main button
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
   },
   navText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
 });
