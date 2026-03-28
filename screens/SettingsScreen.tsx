@@ -7,7 +7,7 @@ import { PALETTES } from '../constants/Palettes';
 export function SettingsScreen() {
   const timerSettings = useTimerStore();
   
-  const { activePaletteId, palette, setPalette } = useThemeStore();
+  const { activePaletteId, palette, setPalette, lockBrandColors, setLockBrandColors } = useThemeStore();
 
   const handleDurationChange = (key: keyof typeof timerSettings, current: any, delta: number) => {
     if (typeof current !== 'number') return;
@@ -96,6 +96,18 @@ export function SettingsScreen() {
           <Switch 
             value={timerSettings.hapticEnabled} 
             onValueChange={(v) => timerSettings.updateSettings({ hapticEnabled: v })}
+            trackColor={{ true: palette.focusColor }}
+          />
+        </View>
+
+        <View style={styles.settingRow}>
+          <View>
+            <Text style={[styles.settingLabel, { color: palette.primaryText }]}>Keep Brand Colors</Text>
+            <Text style={{ color: palette.secondaryText, fontSize: 12, opacity: 0.6 }}>Always use default Blue & Orange</Text>
+          </View>
+          <Switch 
+            value={lockBrandColors} 
+            onValueChange={setLockBrandColors}
             trackColor={{ true: palette.focusColor }}
           />
         </View>

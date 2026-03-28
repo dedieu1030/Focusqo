@@ -1,3 +1,8 @@
+export const BRAND_COLORS = {
+  focus: '#0A84FF', // Midnight Blue
+  break: '#FF9F0A', // Midnight Orange
+};
+
 export type ColorPalette = {
   id: string;
   name: string;
@@ -129,7 +134,7 @@ export const PALETTES: Record<string, ColorPalette> = {
     primaryText: '#0C4A6E',
     secondaryText: '#075985',
     focusColor: '#0EA5E9',
-    breakColor: '#38BDF8',
+    breakColor: '#BAE6FD',
     accentColor: '#BAE6FD',
   },
 };
