@@ -210,7 +210,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               >
                 <View className="flex-row items-center" style={{ gap: 12 }}>
                   <View className="items-center">
-                    <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
+                    <Text style={{ color: palette.focusColor }} className="text-[9px] font-bold">focus</Text>
                     <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(daysData[activeIdx].focus)}</Text>
                   </View>
                   <View className="w-[1px] h-6 bg-white/10 mx-1" />
@@ -283,8 +283,8 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               const isActive = activeIdx === i;
               const isHighlighted = isActive && d.total > 0;
               
-              const focusColor = isHighlighted ? "#22D3EE" : "#3B82F6";
-              const breakColor = isHighlighted ? "#22D3EE" : "#FF9F0A";
+              const focusColor = isHighlighted ? "#22D3EE" : palette.focusColor;
+              const breakColor = isHighlighted ? "#22D3EE" : palette.breakColor;
 
               return (
                 <G key={i}>
@@ -378,13 +378,13 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
       {!hideLegend && (
         <View className="flex-row items-center justify-center mt-6" style={{ gap: 32 }}>
           <View className="flex-row items-center">
-            <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
+            <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.focusColor }} />
             <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
               Total Focus <Text className="font-black">{formatMinsShort(totalFocus)}</Text>
             </Text>
           </View>
           <View className="flex-row items-center">
-            <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
+            <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.breakColor }} />
             <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
               Total Break <Text className="font-black">{formatMinsShort(totalBreak)}</Text>
             </Text>

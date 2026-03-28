@@ -173,7 +173,7 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
               >
                 <View className="flex-row items-center" style={{ gap: 12 }}>
                   <View className="items-center">
-                    <Text style={{ color: '#3B82F6' }} className="text-[9px] font-bold">focus</Text>
+                    <Text style={{ color: palette.focusColor }} className="text-[9px] font-bold">focus</Text>
                     <Text numberOfLines={1} className="text-[14px] font-black" style={{ color: '#F1F5F9' }}>{formatHours(monthsData[activeIndex].focus)}</Text>
                   </View>
                   <View className="w-[1px] h-6 bg-white/10 mx-1" />
@@ -248,13 +248,13 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                         ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
                         : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)+2} Q${x+barW},${Math.floor(chartHeight-focusH)} ${x+barW-2},${Math.floor(chartHeight-focusH)} L${x+2},${Math.floor(chartHeight-focusH)} Q${x},${Math.floor(chartHeight-focusH)} ${x},${Math.floor(chartHeight-focusH)+2} Z`
                       }
-                      fill={isActive ? "#22D3EE" : "#3B82F6"}
+                      fill={isActive ? "#22D3EE" : palette.focusColor}
                     />
                   )}
                   {d.break > 0 && (
                     <Path
                       d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH-breakH)+2} Q${x+barW},${Math.floor(chartHeight-focusH-breakH)} ${x+barW-2},${Math.floor(chartHeight-focusH-breakH)} L${x+2},${Math.floor(chartHeight-focusH-breakH)} Q${x},${Math.floor(chartHeight-focusH-breakH)} ${x},${Math.floor(chartHeight-focusH-breakH)+2} Z`}
-                      fill={isActive ? "#22D3EE" : "#FF9F0A"}
+                      fill={isActive ? "#22D3EE" : palette.breakColor}
                     />
                   )}
 
@@ -326,13 +326,13 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
       {/* Legend */}
       <View className="flex-row items-center justify-center mt-6" style={{ gap: 32 }}>
         <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.focusColor }} />
           <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
             Total Focus <Text className="font-black">{formatMinsShort(totalFocus)}</Text>
           </Text>
         </View>
         <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.breakColor }} />
           <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
             Total Break <Text className="font-black">{formatMinsShort(totalBreak)}</Text>
           </Text>

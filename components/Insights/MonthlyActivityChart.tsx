@@ -205,13 +205,13 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
                         ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
                         : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+1} Q${x+barW},${chartHeight-focusH} ${x+barW-1},${chartHeight-focusH} L${x+1},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+1} Z`
                       }
-                      fill="#3B82F6"
+                      fill={palette.focusColor}
                     />
                   )}
                   {d.break > 0 && (
                     <Path
                       d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${chartHeight-focusH-breakH+1} Q${x+barW},${chartHeight-focusH-breakH} ${x+barW-1},${chartHeight-focusH-breakH} L${x+1},${chartHeight-focusH-breakH} Q${x},${chartHeight-focusH-breakH} ${x},${chartHeight-focusH-breakH+1} Z`}
-                      fill="#FF9F0A"
+                      fill={palette.breakColor}
                     />
                   )}
 
@@ -254,13 +254,13 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
       {/* Legend */}
       <View className="flex-row items-center justify-center mt-6" style={{ gap: 32 }}>
         <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.focusColor }} />
           <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
             Total Focus <Text className="font-black">{formatMinsShort(totalFocus)}</Text>
           </Text>
         </View>
         <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#FF9F0A" }} />
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.breakColor }} />
           <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
             Total Break <Text className="font-black">{formatMinsShort(totalBreak)}</Text>
           </Text>

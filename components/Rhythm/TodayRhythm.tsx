@@ -33,7 +33,7 @@ export function TodayRhythm() {
         {Array.from({ length: TOTAL_PILLS }).map((_, i) => {
           let pillColor = palette.secondaryText + '20'; // Gray by default
           if (totalSec > 0) {
-            pillColor = i < focusPillsCount ? '#3B82F6' : palette.breakColor;
+            pillColor = i < focusPillsCount ? palette.focusColor : palette.breakColor;
           }
 
           const pillHeight = MIN_HEIGHT + (MAX_HEIGHT - MIN_HEIGHT) * Math.sin(Math.PI * (i + 0.5) / TOTAL_PILLS);
@@ -49,7 +49,7 @@ export function TodayRhythm() {
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Settings size={14} color="#3B82F6" strokeWidth={3} />
+          <Settings size={14} color={palette.focusColor} strokeWidth={3} />
           <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalFocusSec)}</Text>
         </View>
 
@@ -57,7 +57,7 @@ export function TodayRhythm() {
 
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalBreakSec)}</Text>
-          <View style={[styles.iconContainer, { backgroundColor: '#FF9F0A' }]}>
+          <View style={[styles.iconContainer, { backgroundColor: palette.breakColor }]}>
             <Pause size={10} color="white" strokeWidth={4} />
           </View>
         </View>

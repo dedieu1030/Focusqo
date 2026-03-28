@@ -176,7 +176,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
                         ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH} L${x},${chartHeight-focusH} Z`
                         : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${chartHeight-focusH+radius} Q${x+barW},${chartHeight-focusH} ${x+barW-radius},${chartHeight-focusH} L${x+radius},${chartHeight-focusH} Q${x},${chartHeight-focusH} ${x},${chartHeight-focusH+radius} Z`
                       }
-                      fill="#3B82F6"
+                      fill={palette.focusColor}
                     />
                   )}
                   {/* Break bar (Orange) */}
@@ -203,7 +203,7 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
       {/* Legend */}
       <View className="flex-row items-center justify-center mt-6" style={{ gap: 32 }}>
         <View className="flex-row items-center">
-          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: "#3B82F6" }} />
+          <View className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: palette.focusColor }} />
           <Text style={{ color: palette.timerText }} className="text-[12px] opacity-70">
             Total Focus <Text className="font-black">{formatMinsShort(totalFocus)}</Text>
           </Text>

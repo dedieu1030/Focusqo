@@ -23,7 +23,7 @@ export function BlockedApps() {
   return (
     <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
       <View style={styles.header}>
-        <ShieldAlert size={16} color="#3B82F6" strokeWidth={2.5} />
+        <ShieldAlert size={16} color={palette.focusColor} strokeWidth={2.5} />
         <Text style={[styles.headerTitle, { color: palette.timerText }]}>Restricted Apps</Text>
       </View>
 
