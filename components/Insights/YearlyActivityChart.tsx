@@ -224,16 +224,6 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
               );
             })}
 
-            {/* Average Line (Behind) */}
-            {avgMins > 0 && (
-               <G>
-                  <Line 
-                    x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
-                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
-                  />
-               </G>
-            )}
-
             {/* Vertical Dividers */}
             {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
               const x = p * chartAreaWidth;
@@ -276,7 +266,45 @@ export function YearlyActivityChart({ history, palette }: YearlyActivityChartPro
                 </G>
               );
             })}
-            
+
+            {/* Average Line */}
+            {avgMins > 0 && (
+               <G>
+                  <Line 
+                    x1={0} y1={avgY} x2={chartAreaWidth} y2={avgY} 
+                    stroke="#4ADE80" strokeWidth="1.5" strokeDasharray="4 3" 
+                  />
+               </G>
+            )}
+
+            {/* RE-RENDER ACTIVE BAR ON TOP OF AVG LINE */}
+            {activeIndex !== null && monthsData[activeIndex]?.total > 0 && (() => {
+              const d = monthsData[activeIndex];
+              const x = activeIndex * slotWidth + barOffset;
+              const focusH = (d.focus / maxMins) * chartHeight;
+              const breakH = (d.break / maxMins) * chartHeight;
+
+              return (
+                <G>
+                  {d.focus > 0 && (
+                    <Path
+                      d={d.break > 0 
+                        ? `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
+                        : `M${x},${chartHeight} L${x+barW},${chartHeight} L${x+barW},${Math.floor(chartHeight-focusH)+2} Q${x+barW},${Math.floor(chartHeight-focusH)} ${x+barW-2},${Math.floor(chartHeight-focusH)} L${x+2},${Math.floor(chartHeight-focusH)} Q${x},${Math.floor(chartHeight-focusH)} ${x},${Math.floor(chartHeight-focusH)+2} Z`
+                      }
+                      fill="#22D3EE"
+                    />
+                  )}
+                  {d.break > 0 && (
+                    <Path
+                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH)} L${x+barW},${Math.floor(chartHeight-focusH-breakH)+2} Q${x+barW},${Math.floor(chartHeight-focusH-breakH)} ${x+barW-2},${Math.floor(chartHeight-focusH-breakH)} L${x+2},${Math.floor(chartHeight-focusH-breakH)} Q${x},${Math.floor(chartHeight-focusH-breakH)} ${x},${Math.floor(chartHeight-focusH-breakH)+2} Z`}
+                      fill="#22D3EE"
+                    />
+                  )}
+                </G>
+              );
+            })()}
+
             {/* Average Label (On Top) */}
              {avgMins > 0 && (
                 <SvgText x={chartAreaWidth + 4} y={avgY + 3} fontSize="8" fill="#4ADE80" fontWeight="900">avg</SvgText>

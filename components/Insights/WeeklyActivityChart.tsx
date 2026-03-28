@@ -315,7 +315,7 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
               );
             })}
 
-            {/* AVERAGE LINE (In front of bars) */}
+            {/* AVERAGE LINE */}
             {dailyAverage > 0 && dailyAverage <= maxMinutes && (
                <G>
                   <Line 
@@ -326,6 +326,37 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
                   <SvgText x={chartAreaWidth + 4} y={chartHeight - (dailyAverage / maxMinutes) * chartHeight + 4} fontSize="10" fill="#4ADE80" fontWeight="bold">avg</SvgText>
                </G>
             )}
+
+            {/* RE-RENDER ACTIVE BAR ON TOP OF AVG LINE */}
+            {activeIdx !== null && daysData[activeIdx]?.total > 0 && (() => {
+              const d = daysData[activeIdx];
+              const focusH = (d.focus / maxMinutes) * chartHeight;
+              const breakH = (d.break / maxMinutes) * chartHeight;
+              const x = activeIdx * slotWidth + barWidthHorizontalOffset;
+              
+              const focusColor = "#22D3EE";
+              const breakColor = "#22D3EE";
+
+              return (
+                <G>
+                  {d.focus > 0 && (
+                    <Path
+                      d={d.break > 0 
+                        ? `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${Math.floor(chartHeight-focusH)} L${x},${Math.floor(chartHeight-focusH)} Z`
+                        : `M${x},${chartHeight} L${x+barWidth},${chartHeight} L${x+barWidth},${Math.floor(chartHeight-focusH)+2} Q${x+barWidth},${Math.floor(chartHeight-focusH)} ${x+barWidth-2},${Math.floor(chartHeight-focusH)} L${x+2},${Math.floor(chartHeight-focusH)} Q${x},${Math.floor(chartHeight-focusH)} ${x},${Math.floor(chartHeight-focusH)+2} Z`
+                      }
+                      fill={focusColor}
+                    />
+                  )}
+                  {d.break > 0 && (
+                    <Path
+                      d={`M${x},${Math.floor(chartHeight-focusH)} L${x+barWidth},${Math.floor(chartHeight-focusH)} L${x+barWidth},${Math.floor(chartHeight-focusH-breakH)+2} Q${x+barWidth},${Math.floor(chartHeight-focusH-breakH)} ${x+barWidth-2},${Math.floor(chartHeight-focusH-breakH)} L${x+2},${Math.floor(chartHeight-focusH-breakH)} Q${x},${Math.floor(chartHeight-focusH-breakH)} ${x},${Math.floor(chartHeight-focusH-breakH)+2} Z`}
+                      fill={breakColor}
+                    />
+                  )}
+                </G>
+              );
+            })()}
           </G>
         </Svg>
 
