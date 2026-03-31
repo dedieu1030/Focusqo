@@ -9,6 +9,7 @@ import { SettingsScreen } from './screens/SettingsScreen';
 import { TodayRhythm } from './components/Rhythm/TodayRhythm';
 import { BlockedApps } from './components/Rhythm/BlockedApps';
 import { BlockedAppsModal } from './components/Rhythm/BlockedAppsModal';
+import { DeepWorkBlock } from './components/Rhythm/DeepWorkBlock';
 import { BottomNav, ScreenName } from './components/Navigation/BottomNav';
 import { useThemeStore } from './store/useThemeStore';
 import { useTimerStore } from './store/useTimerStore';
@@ -20,6 +21,7 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('timer');
   const [activePage, setActivePage] = useState(0);
   const [showAppsModal, setShowAppsModal] = useState(false);
+  const [deepWorkEnabled, setDeepWorkEnabled] = useState(false);
   const { palette, loadPalette } = useThemeStore();
   const { loadState, tick, syncBackgroundTime } = useTimerStore();
   const { loadApps } = useBlockedAppsStore();
@@ -94,26 +96,24 @@ export default function App() {
             <View style={{ width: SCREEN_WIDTH }}>
               <BlockedApps onPress={() => setShowAppsModal(true)} />
             </View>
+            <View style={{ width: SCREEN_WIDTH }}>
+              <DeepWorkBlock enabled={deepWorkEnabled} onToggle={() => setDeepWorkEnabled(!deepWorkEnabled)} />
+            </View>
           </ScrollView>
           
           {/* Pagination Dots */}
           <View className="flex-row justify-center gap-2 mt-6 mb-6">
-             <View 
-               className="h-1.5 rounded-full" 
-               style={{ 
-                 width: activePage === 0 ? 24 : 6,
-                 backgroundColor: 'white', 
-                 opacity: activePage === 0 ? 0.9 : 0.2 
-               }} 
-             />
-             <View 
-               className="h-1.5 rounded-full" 
-               style={{ 
-                 width: activePage === 1 ? 24 : 6,
-                 backgroundColor: 'white', 
-                 opacity: activePage === 1 ? 0.9 : 0.2 
-               }} 
-             />
+             {[0, 1, 2].map((i) => (
+               <View 
+                 key={i}
+                 className="h-1.5 rounded-full" 
+                 style={{ 
+                   width: activePage === i ? 24 : 6,
+                   backgroundColor: 'white', 
+                   opacity: activePage === i ? 0.9 : 0.2 
+                 }} 
+               />
+             ))}
           </View>
 
           <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />

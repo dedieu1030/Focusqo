@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { ShieldAlert, Plus } from 'lucide-react-native';
+import { ShieldAlert, Plus, Pencil } from 'lucide-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore } from '../../store/useBlockedAppsStore';
 
@@ -20,21 +20,32 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
   const extraCount = Math.max(0, apps.length - MAX_VISIBLE);
 
   return (
-    <TouchableOpacity 
-      activeOpacity={0.85} 
-      onPress={onPress}
-      style={[styles.container, { backgroundColor: palette.timerBlock }]}
-    >
+    <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
       <View style={styles.header}>
-        <ShieldAlert size={16} color={palette.focusColor} strokeWidth={2.5} />
-        <Text style={[styles.headerTitle, { color: palette.timerText }]}>Restricted Apps</Text>
+        <View style={styles.headerLeft}>
+          <ShieldAlert size={16} color={palette.focusColor} strokeWidth={2.5} />
+          <Text style={[styles.headerTitle, { color: palette.timerText }]}>Restricted Apps</Text>
+        </View>
+        {apps.length > 0 && (
+          <TouchableOpacity 
+            onPress={onPress} 
+            style={[styles.editBtn, { backgroundColor: palette.timerText + '10' }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Pencil size={13} color={palette.timerText} opacity={0.6} strokeWidth={2.5} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.appsContainer}>
         {apps.length === 0 ? (
-          <View style={[styles.emptyAddBtn, { backgroundColor: palette.focusColor }]}>
+          <TouchableOpacity 
+            onPress={onPress} 
+            activeOpacity={0.8}
+            style={[styles.emptyAddBtn, { backgroundColor: palette.focusColor }]}
+          >
             <Plus size={22} color="#FFF" strokeWidth={3.5} />
-          </View>
+          </TouchableOpacity>
         ) : (
           visibleApps.map((app) => (
             <View key={app.id} style={styles.appIconWrapper}>
@@ -57,7 +68,7 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
           </View>
         )}
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -73,13 +84,25 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
     marginBottom: 4,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   headerTitle: {
     fontSize: 13,
     fontWeight: '700',
     opacity: 0.8,
+  },
+  editBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   appsContainer: {
     flex: 1,
