@@ -155,8 +155,6 @@ export function InsightsScreen({ onOpenRewards }: InsightsScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
   },
   content: {
     paddingTop: 60,

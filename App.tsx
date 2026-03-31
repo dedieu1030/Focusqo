@@ -78,7 +78,7 @@ export default function App() {
         <StatusBar style={palette.id === 'midnight' ? 'light' : 'dark'} />
         
         {/* The main white/light card that stacks above */}
-        <View style={styles.cardContainer}>
+        <View style={[styles.cardContainer, { backgroundColor: palette.background }]}>
           {showRewards ? (
             <RewardsScreen onBack={() => setShowRewards(false)} />
           ) : (
@@ -147,6 +147,9 @@ const styles = StyleSheet.create({
   cardContainer: {
     flex: 1,
     zIndex: 10,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    overflow: 'hidden',
   },
   bottomSection: {
     zIndex: 1,

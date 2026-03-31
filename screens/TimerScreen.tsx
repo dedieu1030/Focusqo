@@ -179,8 +179,6 @@ export function TimerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
     paddingTop: 60,
   },
   header: {

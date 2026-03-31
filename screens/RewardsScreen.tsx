@@ -264,8 +264,6 @@ export function RewardsScreen({ onBack }: RewardsScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
   },
   header: {
     flexDirection: 'row',
