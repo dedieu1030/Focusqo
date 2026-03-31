@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { ShieldAlert } from 'lucide-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 32;
 
-const BLOCKED_APPS = [
+export const BLOCKED_APPS = [
   { id: '1', name: 'Instagram', icon: require('../../assets/app-logos/instagram.png') },
   { id: '2', name: 'YouTube', icon: require('../../assets/app-logos/youtube.png') },
   { id: '3', name: 'TikTok', icon: require('../../assets/app-logos/tiktok.png') },
@@ -17,11 +17,19 @@ const BLOCKED_APPS = [
   { id: '8', name: 'LinkedIn', icon: require('../../assets/app-logos/linkedin.png') },
 ];
 
-export function BlockedApps() {
+interface BlockedAppsProps {
+  onPress?: () => void;
+}
+
+export function BlockedApps({ onPress }: BlockedAppsProps) {
   const { palette } = useThemeStore();
 
   return (
-    <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
+    <TouchableOpacity 
+      activeOpacity={0.85} 
+      onPress={onPress}
+      style={[styles.container, { backgroundColor: palette.timerBlock }]}
+    >
       <View style={styles.header}>
         <ShieldAlert size={16} color={palette.focusColor} strokeWidth={2.5} />
         <Text style={[styles.headerTitle, { color: palette.timerText }]}>Restricted Apps</Text>
@@ -41,9 +49,9 @@ export function BlockedApps() {
       </View>
 
       <View style={styles.footer}>
-        <Text style={[styles.footerStatus, { color: palette.timerText }]}>Blocked durante Focus</Text>
+        <Text style={[styles.footerStatus, { color: palette.timerText }]}>Blocked during Focus</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

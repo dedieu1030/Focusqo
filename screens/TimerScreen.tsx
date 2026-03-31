@@ -93,7 +93,8 @@ export function TimerScreen() {
   return (
     <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); handleSubmitEdit(); }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, { backgroundColor: palette.background }]}>
-        <View style={styles.timerContent}>          <Text style={[
+        <View style={styles.timerContent}>
+          <Text style={[
             styles.modeTitle, 
             { color: mode === 'focus' ? palette.primaryText : palette.breakColor }
           ]}>
