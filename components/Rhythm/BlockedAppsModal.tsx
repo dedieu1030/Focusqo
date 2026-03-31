@@ -87,14 +87,10 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
       {/* Sheet */}
       <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.sheet, animatedSheet]}>
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={{ flex: 1 }}
-          >
-            {/* Drag Handle */}
-            <View style={styles.handleContainer}>
-              <View style={styles.handle} />
-            </View>
+          {/* Drag Handle */}
+          <View style={styles.handleContainer}>
+            <View style={styles.handle} />
+          </View>
 
             {/* Header */}
             <View style={styles.header}>
@@ -144,7 +140,6 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
                 </View>
               ))}
             </ScrollView>
-          </KeyboardAvoidingView>
         </Animated.View>
       </GestureDetector>
 
@@ -167,7 +162,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     height: SHEET_HEIGHT,
-    paddingBottom: 36,
   },
   handleContainer: {
     alignItems: 'center',
@@ -221,7 +215,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   scrollContent: {
-    paddingBottom: 12,
+    paddingBottom: 40,
   },
   appRow: {
     flexDirection: 'row',
