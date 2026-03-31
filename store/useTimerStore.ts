@@ -39,6 +39,7 @@ interface TimerState extends TimerSettings {
   timerState: TimerStateEnum;
   timeLeft: number; 
   expectedEndTime: number | null;
+  history: SessionRecord[];
   todayHistory: SessionRecord[];
   
   currentCycleCount: number;
@@ -94,6 +95,7 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   timerState: 'idle',
   timeLeft: defaultSettings.focusDurationMin * 60,
   expectedEndTime: null,
+  history: [],
   todayHistory: [],
   currentCycleCount: 0,
   labels: [],
@@ -204,7 +206,7 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   _completeSession: async () => {
     const { 
       mode, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, 
-      todayHistory, currentCycleCount, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, selectedLabelId
+      history, todayHistory, currentCycleCount, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, selectedLabelId
     } = get();
     
     if (hapticEnabled) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -223,7 +225,9 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       labelId: selectedLabelId
     };
 
-    const newHistory = [...todayHistory, newRecord];
+    const newFullHistory = [...history, newRecord];
+    const newHistoryToday = [...todayHistory, newRecord];
+
     let nextMode: SessionMode = 'break';
     let nextCycleCount = currentCycleCount;
 
@@ -249,7 +253,8 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       timerState: 'finished',
       timeLeft: nextTotalSec > 0 ? nextTotalSec : 60,
       expectedEndTime: null,
-      todayHistory: newHistory,
+      history: newFullHistory,
+      todayHistory: newHistoryToday,
       currentCycleCount: nextCycleCount
     });
 
@@ -285,7 +290,7 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   },
   
   _persistHistory: async () => {
-    await AsyncStorage.setItem(STORAGE_KEY + '_history', JSON.stringify(get().todayHistory));
+    await AsyncStorage.setItem(STORAGE_KEY + '_history', JSON.stringify(get().history));
   },
 
   loadState: async () => {
@@ -307,11 +312,11 @@ export const useTimerStore = create<TimerState>((set, get) => ({
 
       const historyStr = await AsyncStorage.getItem(STORAGE_KEY + '_history');
       if (historyStr) {
-        const history: SessionRecord[] = JSON.parse(historyStr);
+        const fullHistory: SessionRecord[] = JSON.parse(historyStr);
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
-        const todayHistory = history.filter(r => r.timestamp >= startOfToday.getTime());
-        set({ todayHistory });
+        const todayHistory = fullHistory.filter(r => r.timestamp >= startOfToday.getTime());
+        set({ history: fullHistory, todayHistory });
       }
       
       const { mode, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec } = get();

@@ -12,9 +12,8 @@ import { YearlyActivityChart } from '../components/Insights/YearlyActivityChart'
 type InsightsView = 'day' | 'week' | 'month' | 'year';
 
 export function InsightsScreen() {
-  const { labels } = useTimerStore();
+  const { labels, history } = useTimerStore();
   const { palette } = useThemeStore();
-  const [history, setHistory] = useState<SessionRecord[]>([]);
   const [activeView, setActiveView] = useState<InsightsView>('day');
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(new Date().getDay());
 
@@ -30,56 +29,6 @@ export function InsightsScreen() {
   const selectedDate = new Date(displaySundayOffset);
   selectedDate.setDate(displaySundayOffset.getDate() + selectedDayIndex);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const str = await AsyncStorage.getItem('@focusqo_timer_state_v2_history');
-        let parsed: SessionRecord[] = [];
-        if (str) {
-          parsed = JSON.parse(str);
-        }
-
-        // INJECT DUMMY DATA FOR 365 DAYS (Seasonal Variance)
-        const now = Date.now();
-        const dummyRecords: SessionRecord[] = [];
-        
-        for (let i = 0; i < 365; i++) {
-          const dayStart = now - (i * 86400000);
-          const monthIndex = new Date(dayStart).getMonth();
-          
-          // Seasonal variance: busier in Spring (March-May) and Autumn (Sept-Nov)
-          let intensity = 1.0;
-          if (monthIndex >= 2 && monthIndex <= 4) intensity = 1.4; // Spring burst
-          if (monthIndex >= 8 && monthIndex <= 10) intensity = 1.2; // Autumn focus
-          if (monthIndex === 7 || monthIndex === 11) intensity = 0.6; // Holiday dips
-
-          const sessions = Math.floor((3 + Math.floor(Math.random() * 4)) * intensity);
-          for (let s = 0; s < sessions; s++) {
-            dummyRecords.push({
-              id: `dummy-${i}-${s}`,
-              mode: 'focus',
-              durationInSeconds: (1200 + Math.floor(Math.random() * 2400)) * intensity,
-              timestamp: dayStart - (s * 3600000 * 3), // Spaced by 3h
-              labelId: labels.length > 0 ? labels[s % labels.length].id : 'default'
-            });
-          }
-          // Random break
-          if (sessions > 0) {
-            dummyRecords.push({
-              id: `dummy-break-${i}`,
-              mode: 'break',
-              durationInSeconds: (600 + Math.floor(Math.random() * 1200)) * intensity,
-              timestamp: dayStart - 3600000,
-              labelId: 'break'
-            });
-          }
-        }
-        
-        setHistory([...parsed, ...dummyRecords]);
-      } catch (e) {}
-    };
-    fetchHistory();
-  }, [labels]);
 
   const focusHistory = history.filter(r => r.mode === 'focus');
   const totalFocusSeconds = focusHistory.reduce((acc, r) => acc + r.durationInSeconds, 0);
