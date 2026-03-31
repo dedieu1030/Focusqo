@@ -37,13 +37,6 @@ export function TimerScreen() {
     return 'Long Break';
   };
 
-  const getHeaderModeText = () => {
-    const m = mode === 'focus' ? focusDurationMin : (mode === 'break' ? breakDurationMin : longBreakDurationMin);
-    const s = mode === 'focus' ? focusDurationSec : (mode === 'break' ? breakDurationSec : longBreakDurationSec);
-    const label = mode === 'focus' ? 'Focus' : (mode === 'break' ? 'Break' : 'Long Brk');
-    return `${label} ${m}m${s > 0 ? ` ${s}s` : ''}`;
-  };
-
   const handleCreateLabel = () => {
     if (newLabelText.trim().length > 0) {
       addLabel(newLabelText.trim());
@@ -100,22 +93,7 @@ export function TimerScreen() {
   return (
     <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); handleSubmitEdit(); }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, { backgroundColor: palette.background }]}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.headerLeft} onPress={() => setLabelModalVisible(true)}>
-            <Tag size={16} color={palette.secondaryText} style={{ marginRight: 6 }} />
-            <Text style={[styles.headerLabelText, { color: palette.secondaryText }]}>
-              {selectedLabel ? selectedLabel.name : 'No Label'}
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.headerRight}>
-            <Text style={[styles.headerModeText, { color: mode === 'focus' ? palette.secondaryText : palette.breakColor }]}>
-              {getHeaderModeText()}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.timerContent}>
-          <Text style={[
+        <View style={styles.timerContent}>          <Text style={[
             styles.modeTitle, 
             { color: mode === 'focus' ? palette.primaryText : palette.breakColor }
           ]}>
@@ -233,9 +211,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modeTitle: {
-    fontSize: 22,
-    fontWeight: '500',
+    fontSize: 32,
+    fontWeight: '700',
     marginBottom: 50,
+    letterSpacing: 1,
   },
   modalOverlay: {
     flex: 1,
