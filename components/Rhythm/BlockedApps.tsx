@@ -47,7 +47,7 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
             style={styles.emptyAddBtn}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Add size={36} color={palette.timerText} variant="Bold" />
+            <Add size={45} color={palette.timerText} variant="Bold" />
           </TouchableOpacity>
         ) : (
           visibleApps.map((app) => (
