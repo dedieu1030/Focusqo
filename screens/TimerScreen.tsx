@@ -211,10 +211,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modeTitle: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: '700',
     marginBottom: 50,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   modalOverlay: {
     flex: 1,
