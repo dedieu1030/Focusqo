@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12, // Still need touch area, but absolute won't push layout
+    paddingVertical: 22, // Larger hit area for easier dragging
     zIndex: 100,
   },
   handleBar: {
