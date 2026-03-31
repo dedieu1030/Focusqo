@@ -28,9 +28,9 @@ export function TimerControls({ timerState, mode, onStart, onPause, onToggleMode
         onPress={isRunning ? onPause : onStart}
       >
         {isRunning ? (
-          <Pause size={56} color={palette.primaryText} variant="Bold" />
+          <Pause size={60} color={palette.primaryText} variant="Bold" />
         ) : (
-          <PlayCircle size={56} color={palette.primaryText} variant="Bold" />
+          <PlayCircle size={60} color={palette.primaryText} variant="Bold" />
         )}
       </TouchableOpacity>
       
@@ -62,8 +62,8 @@ const styles = StyleSheet.create({
     width: 84, // 40 gap + 44 button width = matches modeWrapper
   },
   primaryButton: {
-    width: 60,
-    height: 60,
+    width: 66,
+    height: 66,
     justifyContent: 'center',
     alignItems: 'center',
   },
