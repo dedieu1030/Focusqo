@@ -7,10 +7,10 @@ import Animated, {
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
-import { ShieldCheck, X, ChevronDown } from 'lucide-react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { ShieldCheck, X, ChevronDown, Plus } from 'lucide-react-native';
+import { Gesture, GestureDetector, ScrollView as GScrollView } from 'react-native-gesture-handler';
 import { useThemeStore } from '../../store/useThemeStore';
-import { BLOCKED_APPS } from './BlockedApps';
+import { useAppsStore, APP_CATALOG, AppData } from '../../store/useAppsStore';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -28,6 +28,11 @@ const SPRING_CONFIG = {
 
 export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
   const { palette } = useThemeStore();
+  const { restrictedAppIds, addApp, removeApp, getRestrictedApps } = useAppsStore();
+  const restrictedApps = getRestrictedApps();
+  
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [showCatalog, setShowCatalog] = React.useState(false);
   
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const backdropOpacity = useSharedValue(0);
@@ -36,9 +41,11 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
     if (visible) {
       translateY.value = withSpring(0, SPRING_CONFIG);
       backdropOpacity.value = withTiming(1, { duration: 300 });
+      setIsEditing(false); // Reset editing mode when opening
     } else {
       translateY.value = withSpring(SCREEN_HEIGHT, { ...SPRING_CONFIG, damping: 40 });
       backdropOpacity.value = withTiming(0, { duration: 200 });
+      setShowCatalog(false);
     }
   }, [visible]);
 
@@ -53,25 +60,27 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
   const handleClose = () => {
     translateY.value = withSpring(SCREEN_HEIGHT, { ...SPRING_CONFIG, damping: 40 });
     backdropOpacity.value = withTiming(0, { duration: 200 });
-    // Delay the actual close to let the animation play
     setTimeout(onClose, 300);
   };
 
   const panGesture = Gesture.Pan()
     .onChange((event) => {
+      // Don't drag down if we are looking at the catalog
+      if (showCatalog) return; 
       if (event.translationY > 0) {
         translateY.value = event.translationY;
       }
     })
     .onEnd((event) => {
+      if (showCatalog) return; 
       if (event.translationY > 150 || event.velocityY > 500) {
-        // swipe down hard enough or far enough -> dismiss
         runOnJS(handleClose)();
       } else {
-        // bounce back up
         translateY.value = withSpring(0, SPRING_CONFIG);
       }
     });
+
+  const availableApps = APP_CATALOG.filter(a => !restrictedAppIds.includes(a.id));
 
   return (
     <Modal visible={visible} transparent animationType="none" statusBarTranslucent>
@@ -94,6 +103,11 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
             <ShieldCheck size={24} color={palette.focusColor} strokeWidth={2} />
             <Text style={styles.headerTitle}>Restricted Apps</Text>
           </View>
+          <TouchableOpacity onPress={() => setIsEditing(!isEditing)} style={styles.editBtn}>
+            <Text style={[styles.editBtnText, { color: isEditing ? palette.breakColor : palette.focusColor }]}>
+              {isEditing ? 'Done' : 'Edit'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.subtitle}>
@@ -102,21 +116,43 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
 
         {/* Apps Grid */}
         <View style={styles.grid}>
-          {BLOCKED_APPS.map((app) => (
+          {restrictedApps.map((app) => (
             <View key={app.id} style={styles.gridItem}>
-              <View style={styles.gridIcon}>
-                <Image source={app.icon} style={styles.gridIconImg} />
+              <View style={[styles.gridIcon, isEditing && styles.gridIconEditing]}>
+                <Image source={app.iconRef} style={styles.gridIconImg} />
+                {isEditing && (
+                  <TouchableOpacity 
+                    style={styles.deleteBadge} 
+                    onPress={() => removeApp(app.id)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <View style={styles.deleteBadgeInner} />
+                  </TouchableOpacity>
+                )}
               </View>
               <Text style={styles.gridLabel} numberOfLines={1}>{app.name}</Text>
             </View>
           ))}
+          
+          {/* Add App Button (only visible in edit mode) */}
+          {isEditing && availableApps.length > 0 && (
+            <TouchableOpacity 
+              style={styles.gridItem}
+              onPress={() => setShowCatalog(true)}
+            >
+              <View style={[styles.gridIcon, styles.addBtn]}>
+                <Plus size={24} color="#888" strokeWidth={3} />
+              </View>
+              <Text style={styles.gridLabel}>Add</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Stats */}
         <View style={styles.statsCard}>
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Total Blocked</Text>
-            <Text style={[styles.statValue, { color: palette.focusColor }]}>{BLOCKED_APPS.length} apps</Text>
+            <Text style={[styles.statValue, { color: palette.focusColor }]}>{restrictedApps.length} apps</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statRow}>
@@ -129,6 +165,31 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
         </View>
       </Animated.View>
     </GestureDetector>
+
+    {showCatalog && (
+        <View style={styles.catalogOverlay}>
+          <View style={styles.catalogHeader}>
+            <Text style={styles.catalogTitle}>App Catalog</Text>
+            <TouchableOpacity onPress={() => setShowCatalog(false)} style={styles.catalogClose}>
+              <Text style={[styles.catalogCloseText, { color: palette.focusColor }]}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          <GScrollView style={styles.catalogList}>
+            {availableApps.map(app => (
+              <View key={app.id} style={styles.catalogItem}>
+                <Image source={app.iconRef} style={styles.catalogItemIcon} />
+                <Text style={styles.catalogItemName}>{app.name}</Text>
+                <TouchableOpacity 
+                  style={[styles.catalogAddBtn, { backgroundColor: palette.focusColor + '20' }]} 
+                  onPress={() => addApp(app.id)}
+                >
+                  <Plus size={16} color={palette.focusColor} strokeWidth={3} />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </GScrollView>
+        </View>
+      )}
     </Modal>
   );
 }
@@ -178,13 +239,15 @@ const styles = StyleSheet.create({
     color: '#FFF',
     letterSpacing: -0.3,
   },
-  closeBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#2A2A2A',
-    alignItems: 'center',
-    justifyContent: 'center',
+  editBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#333',
+  },
+  editBtnText: {
+    fontWeight: '700',
+    fontSize: 14,
   },
   subtitle: {
     fontSize: 14,
@@ -260,5 +323,91 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#4ADE80',
+  },
+  gridIconEditing: {
+    transform: [{ scale: 0.95 }],
+    opacity: 0.8,
+  },
+  deleteBadge: {
+    position: 'absolute',
+    top: -4,
+    left: -4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FA233B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#1A1A1A',
+  },
+  deleteBadgeInner: {
+    width: 8,
+    height: 2,
+    backgroundColor: 'white',
+    borderRadius: 1,
+  },
+  addBtn: {
+    backgroundColor: '#2A2A2A',
+    borderWidth: 2,
+    borderColor: '#444',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catalogOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#111',
+    zIndex: 100,
+    paddingTop: 60,
+  },
+  catalogHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    marginBottom: 20,
+  },
+  catalogTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: 'white',
+  },
+  catalogClose: {
+    padding: 8,
+  },
+  catalogCloseText: {
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  catalogList: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  catalogItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#222',
+  },
+  catalogItemIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    marginRight: 16,
+  },
+  catalogItemName: {
+    flex: 1,
+    fontSize: 16,
+    color: 'white',
+    fontWeight: '600',
+  },
+  catalogAddBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

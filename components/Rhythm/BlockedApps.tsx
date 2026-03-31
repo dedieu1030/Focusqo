@@ -2,20 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { ShieldAlert } from 'lucide-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
+import { useAppsStore } from '../../store/useAppsStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 32;
-
-export const BLOCKED_APPS = [
-  { id: '1', name: 'Instagram', icon: require('../../assets/app-logos/instagram.png') },
-  { id: '2', name: 'YouTube', icon: require('../../assets/app-logos/youtube.png') },
-  { id: '3', name: 'TikTok', icon: require('../../assets/app-logos/tiktok.png') },
-  { id: '4', name: 'Reddit', icon: require('../../assets/app-logos/reddit.png') },
-  { id: '5', name: 'X', icon: require('../../assets/app-logos/x.png') },
-  { id: '6', name: 'Pinterest', icon: require('../../assets/app-logos/pinterest.png') },
-  { id: '7', name: 'Facebook', icon: require('../../assets/app-logos/facebook.png') },
-  { id: '8', name: 'LinkedIn', icon: require('../../assets/app-logos/linkedin.png') },
-];
 
 interface BlockedAppsProps {
   onPress?: () => void;
@@ -23,6 +13,11 @@ interface BlockedAppsProps {
 
 export function BlockedApps({ onPress }: BlockedAppsProps) {
   const { palette } = useThemeStore();
+  const { getRestrictedApps } = useAppsStore();
+  
+  const restrictedApps = getRestrictedApps();
+  const displayApps = restrictedApps.slice(0, 8);
+  const overflowCount = Math.max(0, restrictedApps.length - 8);
 
   return (
     <TouchableOpacity 
@@ -36,16 +31,18 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
       </View>
 
       <View style={styles.appsContainer}>
-        {BLOCKED_APPS.map((app) => (
+        {displayApps.map((app) => (
           <View key={app.id} style={styles.appIconWrapper}>
-            <Image source={app.icon} style={styles.appIcon} />
+            <Image source={app.iconRef} style={styles.appIcon} />
           </View>
         ))}
         
         {/* Overflow Indicator */}
-        <View style={[styles.overflowCircle, { backgroundColor: palette.secondaryText + '20' }]}>
-          <Text style={[styles.overflowText, { color: palette.timerText }]}>+5</Text>
-        </View>
+        {overflowCount > 0 && (
+          <View style={[styles.overflowCircle, { backgroundColor: palette.secondaryText + '20' }]}>
+            <Text style={[styles.overflowText, { color: palette.timerText }]}>+{overflowCount}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.footer}>
