@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TimerScreen } from './screens/TimerScreen';
 import { InsightsScreen } from './screens/InsightsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { RewardsScreen } from './screens/RewardsScreen';
 import { TodayRhythm } from './components/Rhythm/TodayRhythm';
 import { BlockedApps } from './components/Rhythm/BlockedApps';
 import { BlockedAppsModal } from './components/Rhythm/BlockedAppsModal';
@@ -14,17 +15,20 @@ import { BottomNav, ScreenName } from './components/Navigation/BottomNav';
 import { useThemeStore } from './store/useThemeStore';
 import { useTimerStore } from './store/useTimerStore';
 import { useBlockedAppsStore } from './store/useBlockedAppsStore';
+import { useAchievementsStore } from './store/useAchievementsStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('timer');
+  const [showRewards, setShowRewards] = useState(false);
   const [activePage, setActivePage] = useState(0);
   const [showAppsModal, setShowAppsModal] = useState(false);
   const [deepWorkEnabled, setDeepWorkEnabled] = useState(false);
   const { palette, loadPalette } = useThemeStore();
-  const { loadState, tick, syncBackgroundTime } = useTimerStore();
+  const { loadState, tick, syncBackgroundTime, history, labels } = useTimerStore();
   const { loadApps } = useBlockedAppsStore();
+  const { loadAchievements, checkAchievements } = useAchievementsStore();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -32,6 +36,7 @@ export default function App() {
       await loadPalette();
       await loadState();
       await loadApps();
+      await loadAchievements();
       setIsLoaded(true);
     };
     init();
@@ -74,9 +79,17 @@ export default function App() {
         
         {/* The main white/light card that stacks above */}
         <View style={styles.cardContainer}>
-          {currentScreen === 'timer' && <TimerScreen />}
-          {currentScreen === 'insights' && <InsightsScreen />}
-          {currentScreen === 'settings' && <SettingsScreen />}
+          {showRewards ? (
+            <RewardsScreen onBack={() => setShowRewards(false)} />
+          ) : (
+            <>
+              {currentScreen === 'timer' && <TimerScreen />}
+              {currentScreen === 'insights' && (
+                <InsightsScreen onOpenRewards={() => setShowRewards(true)} />
+              )}
+              {currentScreen === 'settings' && <SettingsScreen />}
+            </>
+          )}
         </View>
         
         {/* The dark bottom section that stays fixed */}
