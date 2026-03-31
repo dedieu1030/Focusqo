@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // Position the handle bar fixed relative to the bottom so it doesn't move
     paddingBottom: 15, 
-    paddingTop: 60, // Expand touch area ONLY upwards
+    paddingTop: 100, // Expand touch area EVEN MORE upwards
     zIndex: 100,
   },
   handleBar: {
