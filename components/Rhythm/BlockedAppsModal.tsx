@@ -105,7 +105,7 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
                 style={styles.headerAddBtn}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
-                <Add size={30} color={BRAND_COLORS.danger} variant="Bold" />
+                <Add size={30} color={palette.focusColor} variant="Bold" />
               </TouchableOpacity>
             </View>
 

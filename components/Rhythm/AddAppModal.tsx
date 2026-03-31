@@ -195,7 +195,7 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
                     style={styles.addBtn}
                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                   >
-                    <Add size={26} color={BRAND_COLORS.danger} variant="Bold" />
+                    <Add size={26} color={palette.focusColor} variant="Bold" />
                   </TouchableOpacity>
                 )}
               </View>
