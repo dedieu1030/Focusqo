@@ -12,6 +12,7 @@ import { BlockedAppsModal } from './components/Rhythm/BlockedAppsModal';
 import { BottomNav, ScreenName } from './components/Navigation/BottomNav';
 import { useThemeStore } from './store/useThemeStore';
 import { useTimerStore } from './store/useTimerStore';
+import { useBlockedAppsStore } from './store/useBlockedAppsStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -21,12 +22,14 @@ export default function App() {
   const [showAppsModal, setShowAppsModal] = useState(false);
   const { palette, loadPalette } = useThemeStore();
   const { loadState, tick, syncBackgroundTime } = useTimerStore();
+  const { loadApps } = useBlockedAppsStore();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const init = async () => {
       await loadPalette();
       await loadState();
+      await loadApps();
       setIsLoaded(true);
     };
     init();

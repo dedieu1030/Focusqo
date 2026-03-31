@@ -2,10 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { ShieldAlert } from 'lucide-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
-import { useAppsStore } from '../../store/useAppsStore';
+import { useBlockedAppsStore } from '../../store/useBlockedAppsStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 32;
+
+const MAX_VISIBLE = 8;
 
 interface BlockedAppsProps {
   onPress?: () => void;
@@ -13,11 +14,10 @@ interface BlockedAppsProps {
 
 export function BlockedApps({ onPress }: BlockedAppsProps) {
   const { palette } = useThemeStore();
-  const { getRestrictedApps } = useAppsStore();
-  
-  const restrictedApps = getRestrictedApps();
-  const displayApps = restrictedApps.slice(0, 8);
-  const overflowCount = Math.max(0, restrictedApps.length - 8);
+  const { apps } = useBlockedAppsStore();
+
+  const visibleApps = apps.slice(0, MAX_VISIBLE);
+  const extraCount = Math.max(0, apps.length - MAX_VISIBLE);
 
   return (
     <TouchableOpacity 
@@ -31,16 +31,23 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
       </View>
 
       <View style={styles.appsContainer}>
-        {displayApps.map((app) => (
+        {visibleApps.map((app) => (
           <View key={app.id} style={styles.appIconWrapper}>
-            <Image source={app.iconRef} style={styles.appIcon} />
+            {app.icon ? (
+              <Image source={app.icon} style={styles.appIcon} />
+            ) : (
+              <View style={[styles.appIconPlaceholder, { backgroundColor: palette.focusColor + '30' }]}>
+                <Text style={[styles.appIconLetter, { color: palette.focusColor }]}>
+                  {app.name.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
           </View>
         ))}
         
-        {/* Overflow Indicator */}
-        {overflowCount > 0 && (
+        {extraCount > 0 && (
           <View style={[styles.overflowCircle, { backgroundColor: palette.secondaryText + '20' }]}>
-            <Text style={[styles.overflowText, { color: palette.timerText }]}>+{overflowCount}</Text>
+            <Text style={[styles.overflowText, { color: palette.timerText }]}>+{extraCount}</Text>
           </View>
         )}
       </View>
@@ -55,11 +62,11 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    paddingHorizontal: 12, // More air for 8 icons
+    paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 28,
     marginTop: 16,
-    minHeight: 108, // Standardized height for pagination
+    minHeight: 108,
     justifyContent: 'space-between',
   },
   header: {
@@ -77,7 +84,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 52,
-    gap: 4, // Optimized for 8 icons at 36px
+    gap: 4,
     justifyContent: 'center',
   },
   appIconWrapper: {
@@ -90,6 +97,16 @@ const styles = StyleSheet.create({
   appIcon: {
     width: '100%',
     height: '100%',
+  },
+  appIconPlaceholder: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  appIconLetter: {
+    fontSize: 16,
+    fontWeight: '800',
   },
   overflowCircle: {
     width: 36,
