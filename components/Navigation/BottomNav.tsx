@@ -62,8 +62,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 4,
-    paddingBottom: 16, 
+    paddingTop: 12,
+    paddingBottom: 4, 
     gap: 12,
   },
   navItem: {
