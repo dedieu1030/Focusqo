@@ -70,10 +70,10 @@ export default function App() {
       dragStartProgress.value = progress.value;
     })
     .onUpdate((e) => {
-      // Map vertical drag to progress
-      // Dragging down from open (positive translationY) increases progress toward 1 (closed)
-      // Dragging up from closed (negative translationY) decreases progress toward 0 (open)
-      const dragFraction = e.translationY / (measuredHeight || 180);
+      // 1:1 feel but requires ~1.8x the block height to fully close
+      // This makes the drag feel heavier/more intentional (iOS standard feel)
+      const dragDistance = (measuredHeight || 180) * 1.8;
+      const dragFraction = e.translationY / dragDistance;
       const newProgress = dragStartProgress.value + dragFraction;
       progress.value = Math.max(0, Math.min(1, newProgress));
     })
