@@ -52,6 +52,7 @@ interface TimerState extends TimerSettings {
   pauseTimer: () => void;
   skipSession: () => void;
   resetTimer: () => void;
+  toggleMode: () => void;
   tick: () => void;
   syncBackgroundTime: () => void;
   loadState: () => Promise<void>;
@@ -176,6 +177,33 @@ export const useTimerStore = create<TimerState>((set, get) => ({
     if (hapticEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await Notifications.cancelAllScheduledNotificationsAsync();
     _completeSession();
+  },
+
+  toggleMode: () => {
+    const { timerState, mode, hapticEnabled, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec } = get();
+    // Only allow toggle when not running
+    if (timerState === 'running') return;
+
+    if (hapticEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    let nextMode: SessionMode;
+    if (mode === 'focus') {
+      nextMode = 'break';
+    } else {
+      nextMode = 'focus';
+    }
+
+    let durMin = focusDurationMin; let durSec = focusDurationSec;
+    if (nextMode === 'break') { durMin = breakDurationMin; durSec = breakDurationSec; }
+    const totalSec = durMin * 60 + durSec;
+
+    set({
+      mode: nextMode,
+      timerState: 'idle',
+      timeLeft: totalSec > 0 ? totalSec : 60,
+      expectedEndTime: null,
+    });
+    Notifications.cancelAllScheduledNotificationsAsync();
   },
 
   tick: () => {

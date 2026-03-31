@@ -1,46 +1,45 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Play, Pause, Next, Stop } from 'iconsax-react-native';
+import { PlayCircle, Pause, Coffee, LampOn } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
-import { TimerStateEnum } from '../../store/useTimerStore';
+import { TimerStateEnum, SessionMode } from '../../store/useTimerStore';
 
 interface TimerControlsProps {
   timerState: TimerStateEnum;
+  mode: SessionMode;
   onStart: () => void;
   onPause: () => void;
-  onSkip: () => void;
-  onReset: () => void;
+  onToggleMode: () => void;
 }
 
-export function TimerControls({ timerState, onStart, onPause, onSkip, onReset }: TimerControlsProps) {
+export function TimerControls({ timerState, mode, onStart, onPause, onToggleMode }: TimerControlsProps) {
   const { palette } = useThemeStore();
 
   const isRunning = timerState === 'running';
-  const isFinished = timerState === 'finished';
 
   return (
     <View style={styles.container}>
-      {/* Primary Action Button */}
+      {/* Primary Action Button — Start / Pause */}
       <TouchableOpacity 
         style={[styles.button, { backgroundColor: palette.accentColor + '33' }]}
         onPress={isRunning ? onPause : onStart}
       >
         {isRunning ? (
-          <Pause size={28} color={palette.primaryText} variant="Bold" />
+          <Pause size={32} color={palette.primaryText} variant="Bold" />
         ) : (
-          <Play size={28} color={palette.primaryText} variant="Bold" style={{ marginLeft: 4 }} />
+          <PlayCircle size={36} color={palette.primaryText} variant="Bold" />
         )}
       </TouchableOpacity>
       
-      {/* Secondary Action Button (Skip / Reset) */}
+      {/* Mode Toggle Button — Focus ↔ Break */}
       <TouchableOpacity 
         style={[styles.button, { backgroundColor: palette.accentColor + '33' }]}
-        onPress={isFinished ? onReset : onSkip}
+        onPress={onToggleMode}
       >
-        {isFinished ? (
-          <Stop size={24} color={palette.primaryText} variant="Bold" />
+        {mode === 'focus' ? (
+          <Coffee size={30} color={palette.breakColor} variant="Bold" />
         ) : (
-          <Next size={28} color={palette.primaryText} variant="Bold" />
+          <LampOn size={30} color={palette.focusColor} variant="Bold" />
         )}
       </TouchableOpacity>
     </View>

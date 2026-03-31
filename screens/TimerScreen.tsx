@@ -9,7 +9,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 export function TimerScreen() {
   const { 
-    mode, timerState, timeLeft, startTimer, pauseTimer, skipSession, resetTimer,
+    mode, timerState, timeLeft, startTimer, pauseTimer, skipSession, resetTimer, toggleMode,
     labels, selectedLabelId, selectLabel, addLabel,
     focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, updateSettings
   } = useTimerStore();
@@ -113,11 +113,11 @@ export function TimerScreen() {
           />
           
           <TimerControls 
-            timerState={timerState} 
+            timerState={timerState}
+            mode={mode}
             onStart={startTimer}
             onPause={pauseTimer}
-            onSkip={skipSession} 
-            onReset={resetTimer}
+            onToggleMode={toggleMode}
           />
         </View>
 
