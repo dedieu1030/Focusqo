@@ -161,10 +161,11 @@ export function TimerScreen() {
                   onSubmitEditing={handleCreateLabel}
                 />
                 <TouchableOpacity 
-                  style={[styles.createBtn, { backgroundColor: palette.timerBlock }]}
+                  style={styles.createBtn}
                   onPress={handleCreateLabel}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                  <Add color={palette.timerText} size={20} variant="Linear" />
+                  <Add color={palette.timerText} size={28} variant="Bold" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   createBtn: {
-    padding: 12,
-    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

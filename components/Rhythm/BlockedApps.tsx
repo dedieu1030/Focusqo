@@ -41,10 +41,11 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
         {apps.length === 0 ? (
           <TouchableOpacity 
             onPress={onPress} 
-            activeOpacity={0.8}
-            style={[styles.emptyAddBtn, { backgroundColor: palette.focusColor }]}
+            activeOpacity={0.7}
+            style={styles.emptyAddBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Add size={24} color="#FFF" variant="Bold" />
+            <Add size={36} color={palette.focusColor} variant="Bold" />
           </TouchableOpacity>
         ) : (
           visibleApps.map((app) => (
@@ -144,9 +145,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   emptyAddBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -191,11 +191,10 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
                 ) : (
                   <TouchableOpacity 
                     onPress={() => handleAdd(item.name)} 
-                    style={[styles.addBtn, { backgroundColor: palette.focusColor + '20' }]}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={styles.addBtn}
+                    hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                   >
-                    <Add size={18} color={palette.focusColor} variant="Linear" />
-                    <Text style={[styles.addBtnText, { color: palette.focusColor }]}>Add</Text>
+                    <Add size={26} color={palette.focusColor} variant="Bold" />
                   </TouchableOpacity>
                 )}
               </View>
@@ -318,12 +317,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   addBtn: {
-    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
   },
   addBtnText: {
     fontSize: 14,

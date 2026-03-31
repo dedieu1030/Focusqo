@@ -101,9 +101,10 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
               </View>
               <TouchableOpacity 
                 onPress={() => setShowAddModal(true)} 
-                style={[styles.headerAddBtn, { backgroundColor: palette.focusColor }]}
+                style={styles.headerAddBtn}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
-                <Add size={20} color="#FFF" variant="Bold" />
+                <Add size={30} color={palette.focusColor} variant="Bold" />
               </TouchableOpacity>
             </View>
 
@@ -204,9 +205,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   headerAddBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
