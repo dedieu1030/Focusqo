@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import "./global.css";
 import { View, StyleSheet, SafeAreaView, AppState, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
   withTiming,
   interpolate,
   Easing,
   runOnJS
 } from 'react-native-reanimated';
-import { 
-  Gesture, 
-  GestureDetector, 
-  GestureHandlerRootView 
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView
 } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import * as Haptics from 'expo-haptics';
@@ -160,7 +160,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <StatusBar style={palette.id === 'midnight' ? 'light' : 'dark'} />
-        
+
         {/* Screen content */}
         <View style={[styles.cardContainer, { backgroundColor: palette.background }]}>
           {showRewards ? (
@@ -182,7 +182,7 @@ export default function App() {
             </Animated.View>
           </GestureDetector>
         </View>
-        
+
         {/* Dark bottom section */}
         <SafeAreaView style={[styles.bottomSection, { backgroundColor: '#111111' }]}>
 
@@ -211,20 +211,20 @@ export default function App() {
                   <DeepWorkBlock enabled={deepWorkEnabled} onToggle={() => setDeepWorkEnabled(!deepWorkEnabled)} />
                 </View>
               </ScrollView>
-              
+
               {/* Pagination Dots */}
               <View className="flex-row justify-center gap-2 mt-4 mb-4">
-                 {[0, 1, 2].map((i) => (
-                   <View 
-                     key={i}
-                     className="h-1.5 rounded-full" 
-                     style={{ 
-                       width: activePage === i ? 24 : 6,
-                       backgroundColor: 'white', 
-                       opacity: activePage === i ? 0.9 : 0.2 
-                     }} 
-                   />
-                 ))}
+                {[0, 1, 2].map((i) => (
+                  <View
+                    key={i}
+                    className="h-1.5 rounded-full"
+                    style={{
+                      width: activePage === i ? 24 : 6,
+                      backgroundColor: 'white',
+                      opacity: activePage === i ? 0.9 : 0.2
+                    }}
+                  />
+                ))}
               </View>
             </View>
           </Animated.View>
@@ -241,7 +241,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111111', 
+    backgroundColor: '#111111',
   },
   cardContainer: {
     flex: 1,
@@ -260,8 +260,8 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     // Position the handle bar fixed relative to the bottom so it doesn't move
-    paddingBottom: 15, 
-    paddingTop: 100, // Expand touch area EVEN MORE upwards
+    paddingBottom: 15,
+    paddingTop: 54, // Decreased for a more natural feel
     zIndex: 100,
   },
   handleBar: {
