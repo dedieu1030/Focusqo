@@ -212,9 +212,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modeTitle: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '700',
-    marginBottom: 50,
+    marginBottom: 70,
     letterSpacing: 0.5,
   },
   modalOverlay: {
