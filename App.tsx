@@ -172,20 +172,17 @@ export default function App() {
               {currentScreen === 'settings' && <SettingsScreen />}
             </>
           )}
-        </View>
-        
-        {/* Dark bottom section */}
-        <SafeAreaView style={[styles.bottomSection, { backgroundColor: '#111111' }]}>
-          
-          {/* 
-            HANDLE — GestureDetector wraps ONLY this element.
-            The ScrollView below is completely separate, so no gesture conflict.
-          */}
+
+          {/* HANDLE — inside the screen card, visually above the dark nav */}
           <GestureDetector gesture={panGesture}>
             <Animated.View style={styles.handleTouchArea}>
               <Animated.View style={[styles.handleBar, handleBarAnimatedStyle]} />
             </Animated.View>
           </GestureDetector>
+        </View>
+        
+        {/* Dark bottom section */}
+        <SafeAreaView style={[styles.bottomSection, { backgroundColor: '#111111' }]}>
 
           {/* 
             BLOCKS — wrapped in Animated.View for height + opacity animation.
