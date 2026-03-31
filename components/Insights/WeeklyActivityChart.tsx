@@ -3,7 +3,7 @@ import { View, Text, Dimensions, GestureResponderEvent } from 'react-native';
 import Svg, { Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Line, Path } from 'react-native-svg';
 import { SessionRecord } from '../../store/useTimerStore';
 import { ColorPalette } from '../../constants/Palettes';
-import { TrendingUp, TrendingDown } from 'lucide-react-native';
+import { TrendUp, TrendDown } from 'iconsax-react-native';
 
 interface WeeklyActivityChartProps {
   history: SessionRecord[];
@@ -162,9 +162,9 @@ export function WeeklyActivityChart({ history, palette, selectedDayIndex, onSele
         {diffPercent !== 0 && (
           <View className="flex-row items-center px-2 py-1 rounded-full mt-1" style={{ backgroundColor: palette.secondaryText + '15' }}>
             {diffPercent > 0 ? (
-              <TrendingUp size={14} color="#4ADE80" />
+              <TrendUp size={14} color="#4ADE80" variant="Linear" />
             ) : (
-              <TrendingDown size={14} color="#F87171" />
+              <TrendDown size={14} color="#F87171" variant="Linear" />
             )}
             <Text style={{ color: palette.timerText }} className="text-[12px] font-bold ml-1 opacity-70">
               {Math.abs(diffPercent)}% <Text className="font-normal opacity-60">from last week</Text>

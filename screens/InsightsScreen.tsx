@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimerStore, SessionRecord } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Clock, Flame, Target, Tag } from 'lucide-react-native';
+import { Timer1, Flash, Direct, Tag } from 'iconsax-react-native';
 import { WeeklyActivityChart } from '../components/Insights/WeeklyActivityChart';
 import { DailyActivityChart } from '../components/Insights/DailyActivityChart';
 import { MonthlyActivityChart } from '../components/Insights/MonthlyActivityChart';

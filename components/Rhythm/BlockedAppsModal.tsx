@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
-import { ShieldCheck, Minus, Plus } from 'lucide-react-native';
+import { ShieldSecurity, Minus, Add } from 'iconsax-react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore } from '../../store/useBlockedAppsStore';
@@ -95,7 +95,7 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.headerTitleRow}>
-                <ShieldCheck size={22} color={palette.focusColor} strokeWidth={2} />
+                <ShieldSecurity size={24} color={palette.focusColor} variant="Bold" />
                 <Text style={styles.headerTitle}>Restricted Apps</Text>
                 <Text style={styles.headerCount}>{apps.length}</Text>
               </View>
@@ -103,7 +103,7 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
                 onPress={() => setShowAddModal(true)} 
                 style={[styles.headerAddBtn, { backgroundColor: palette.focusColor }]}
               >
-                <Plus size={20} color="#FFF" strokeWidth={3} />
+                <Add size={20} color="#FFF" variant="Bold" />
               </TouchableOpacity>
             </View>
 
@@ -135,7 +135,7 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
                     style={styles.removeBtn}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Minus size={16} color="#FF6B6B" strokeWidth={3} />
+                    <Minus size={18} color="#FF6B6B" variant="Linear" />
                   </TouchableOpacity>
                 </View>
               ))}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Play, Pause, SkipForward, Square } from 'lucide-react-native';
+import { Play, Pause, Next, Stop } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { TimerStateEnum } from '../../store/useTimerStore';
 
@@ -26,9 +26,9 @@ export function TimerControls({ timerState, onStart, onPause, onSkip, onReset }:
         onPress={isRunning ? onPause : onStart}
       >
         {isRunning ? (
-          <Pause size={28} color={palette.primaryText} fill={palette.primaryText} />
+          <Pause size={28} color={palette.primaryText} variant="Bold" />
         ) : (
-          <Play size={28} color={palette.primaryText} fill={palette.primaryText} style={{ marginLeft: 4 }} />
+          <Play size={28} color={palette.primaryText} variant="Bold" style={{ marginLeft: 4 }} />
         )}
       </TouchableOpacity>
       
@@ -38,9 +38,9 @@ export function TimerControls({ timerState, onStart, onPause, onSkip, onReset }:
         onPress={isFinished ? onReset : onSkip}
       >
         {isFinished ? (
-          <Square size={24} color={palette.primaryText} fill={palette.primaryText} />
+          <Stop size={24} color={palette.primaryText} variant="Bold" />
         ) : (
-          <SkipForward size={28} color={palette.primaryText} fill={palette.primaryText} />
+          <Next size={28} color={palette.primaryText} variant="Bold" />
         )}
       </TouchableOpacity>
     </View>

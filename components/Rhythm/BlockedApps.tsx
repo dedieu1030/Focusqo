@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { ShieldAlert, Plus, Pencil } from 'lucide-react-native';
+import { ShieldSecurity, Add, Edit2 } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore } from '../../store/useBlockedAppsStore';
 
@@ -23,7 +23,7 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
     <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <ShieldAlert size={16} color={palette.focusColor} strokeWidth={2.5} />
+          <ShieldSecurity size={18} color={palette.focusColor} variant="Bold" />
           <Text style={[styles.headerTitle, { color: palette.timerText }]}>Restricted Apps</Text>
         </View>
         {apps.length > 0 && (
@@ -32,7 +32,7 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
             style={[styles.editBtn, { backgroundColor: palette.timerText + '10' }]}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Pencil size={13} color={palette.timerText} opacity={0.6} strokeWidth={2.5} />
+            <Edit2 size={13} color={palette.timerText} opacity={0.6} variant="Linear" />
           </TouchableOpacity>
         )}
       </View>
@@ -44,7 +44,7 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
             activeOpacity={0.8}
             style={[styles.emptyAddBtn, { backgroundColor: palette.focusColor }]}
           >
-            <Plus size={22} color="#FFF" strokeWidth={3.5} />
+            <Add size={24} color="#FFF" variant="Bold" />
           </TouchableOpacity>
         ) : (
           visibleApps.map((app) => (

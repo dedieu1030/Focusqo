@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Switch, Platform } from 'react-native';
-import { Lock } from 'lucide-react-native';
+import { Lock } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 
 interface DeepWorkBlockProps {
@@ -16,7 +16,7 @@ export function DeepWorkBlock({ enabled, onToggle }: DeepWorkBlockProps) {
       <View style={styles.contentRow}>
         <View style={styles.labelGroup}>
           <View style={styles.titleRow}>
-            <Lock size={18} color={palette.focusColor} strokeWidth={2.5} />
+            <Lock size={18} color={palette.focusColor} variant="Bold" />
             <Text style={[styles.title, { color: palette.timerText }]}>Deep Work</Text>
           </View>
           <Text style={[styles.description, { color: palette.timerText }]} numberOfLines={2}>
@@ -30,9 +30,9 @@ export function DeepWorkBlock({ enabled, onToggle }: DeepWorkBlockProps) {
             onValueChange={onToggle}
             trackColor={{ 
               false: palette.timerText + '20', 
-              true: palette.focusColor + '80' 
+              true: palette.focusColor 
             }}
-            thumbColor={enabled ? palette.focusColor : palette.timerText + '60'}
+            thumbColor={'#FFFFFF'}
             ios_backgroundColor={palette.timerText + '20'}
             style={Platform.OS === 'ios' ? styles.switchIOS : undefined}
           />

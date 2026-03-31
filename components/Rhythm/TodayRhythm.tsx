@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Settings, Pause } from 'lucide-react-native';
+import { Setting2, Pause } from 'iconsax-react-native';
 import { useTimerStore } from '../../store/useTimerStore';
 import { useThemeStore } from '../../store/useThemeStore';
 
@@ -49,7 +49,7 @@ export function TodayRhythm() {
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Settings size={14} color={palette.focusColor} strokeWidth={3} />
+          <Setting2 size={14} color={palette.focusColor} variant="Bold" />
           <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalFocusSec)}</Text>
         </View>
 
@@ -58,7 +58,7 @@ export function TodayRhythm() {
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: palette.timerText }]}>{formatMins(totalBreakSec)}</Text>
           <View style={[styles.iconContainer, { backgroundColor: palette.breakColor }]}>
-            <Pause size={10} color="white" strokeWidth={4} />
+            <Pause size={10} color="white" variant="Bold" />
           </View>
         </View>
       </View>

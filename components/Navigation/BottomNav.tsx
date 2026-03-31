@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { BarChart2, Settings, Timer } from 'lucide-react-native';
+import { Chart, Setting2, Timer1 } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 
 export type ScreenName = 'timer' | 'insights' | 'settings';
@@ -19,7 +19,11 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
         style={[styles.navItem, currentScreen === 'insights' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('insights')}
       >
-        <BarChart2 size={24} color={currentScreen === 'insights' ? palette.timerText : palette.secondaryText} />
+        <Chart 
+          size={24} 
+          color={currentScreen === 'insights' ? palette.timerText : palette.secondaryText} 
+          variant={currentScreen === 'insights' ? 'Bold' : 'Linear'}
+        />
         <Text style={[styles.navText, { color: currentScreen === 'insights' ? palette.timerText : palette.secondaryText }]}>Insights</Text>
       </TouchableOpacity>
 
@@ -30,14 +34,22 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
         ]} 
         onPress={() => onNavigate('timer')}
       >
-        <Timer size={32} color={currentScreen === 'timer' ? palette.timerText : palette.secondaryText} />
+        <Timer1 
+          size={32} 
+          color={currentScreen === 'timer' ? palette.timerText : palette.secondaryText} 
+          variant={currentScreen === 'timer' ? 'Bold' : 'Linear'}
+        />
       </TouchableOpacity>
 
       <TouchableOpacity 
         style={[styles.navItem, currentScreen === 'settings' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('settings')}
       >
-        <Settings size={24} color={currentScreen === 'settings' ? palette.timerText : palette.secondaryText} />
+        <Setting2 
+          size={24} 
+          color={currentScreen === 'settings' ? palette.timerText : palette.secondaryText} 
+          variant={currentScreen === 'settings' ? 'Bold' : 'Linear'}
+        />
         <Text style={[styles.navText, { color: currentScreen === 'settings' ? palette.timerText : palette.secondaryText }]}>Settings</Text>
       </TouchableOpacity>
     </View>

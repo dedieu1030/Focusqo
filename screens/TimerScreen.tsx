@@ -4,7 +4,7 @@ import { TimerDisplay } from '../components/Timer/TimerDisplay';
 import { TimerControls } from '../components/Timer/TimerControls';
 import { useTimerStore } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Tag, X, Plus } from 'lucide-react-native';
+import { CloseCircle, Add, Tag } from 'iconsax-react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 export function TimerScreen() {
@@ -128,7 +128,7 @@ export function TimerScreen() {
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: palette.primaryText }]}>Select Label</Text>
                 <TouchableOpacity onPress={() => setLabelModalVisible(false)}>
-                  <X color={palette.secondaryText} />
+                  <CloseCircle size={24} color={palette.secondaryText} variant="Linear" />
                 </TouchableOpacity>
               </View>
               
@@ -164,7 +164,7 @@ export function TimerScreen() {
                   style={[styles.createBtn, { backgroundColor: palette.timerBlock }]}
                   onPress={handleCreateLabel}
                 >
-                  <Plus color={palette.timerText} size={20} />
+                  <Add color={palette.timerText} size={20} variant="Linear" />
                 </TouchableOpacity>
               </View>
             </View>

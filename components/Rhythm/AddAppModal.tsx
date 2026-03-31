@@ -11,7 +11,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { Search, Plus, Check } from 'lucide-react-native';
+import { SearchNormal1, Add, TickCircle } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore, KNOWN_ICONS } from '../../store/useBlockedAppsStore';
 
@@ -140,7 +140,7 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
         {/* Search Bar */}
         <View style={styles.searchSection}>
           <View style={styles.inputWrapper}>
-            <Search size={18} color="#777" style={{ marginLeft: 14 }} />
+            <SearchNormal1 size={18} color="#777" style={{ marginLeft: 14 }} variant="Linear" />
             <TextInput
               style={styles.textInput}
               placeholder="Search or add custom app..."
@@ -185,7 +185,7 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
                 
                 {added ? (
                   <View style={styles.addedBadge}>
-                    <Check size={16} color="#4ADE80" strokeWidth={3} />
+                    <TickCircle size={18} color="#4ADE80" variant="Bold" />
                     <Text style={styles.addedText}>Added</Text>
                   </View>
                 ) : (
@@ -194,7 +194,7 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
                     style={[styles.addBtn, { backgroundColor: palette.focusColor + '20' }]}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Plus size={18} color={palette.focusColor} strokeWidth={2.5} />
+                    <Add size={18} color={palette.focusColor} variant="Linear" />
                     <Text style={[styles.addBtnText, { color: palette.focusColor }]}>Add</Text>
                   </TouchableOpacity>
                 )}
