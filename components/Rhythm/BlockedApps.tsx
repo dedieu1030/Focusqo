@@ -4,6 +4,8 @@ import { ShieldSecurity, Add, Edit2 } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore } from '../../store/useBlockedAppsStore';
 
+import { BRAND_COLORS } from '../../constants/Palettes';
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const MAX_VISIBLE = 8;
@@ -23,7 +25,7 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
     <View style={[styles.container, { backgroundColor: palette.timerBlock }]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <ShieldSecurity size={18} color={palette.focusColor} variant="Bold" />
+          <ShieldSecurity size={18} color={BRAND_COLORS.danger} variant="Bold" />
           <Text style={[styles.headerTitle, { color: palette.timerText }]}>Restricted Apps</Text>
         </View>
         {apps.length > 0 && (

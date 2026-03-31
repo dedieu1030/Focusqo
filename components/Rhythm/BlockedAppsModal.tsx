@@ -15,6 +15,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore } from '../../store/useBlockedAppsStore';
 import { AddAppModal } from './AddAppModal';
+import { BRAND_COLORS } from '../../constants/Palettes';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.75;
@@ -95,7 +96,7 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.headerTitleRow}>
-                <ShieldSecurity size={24} color={palette.focusColor} variant="Bold" />
+                <ShieldSecurity size={24} color={BRAND_COLORS.danger} variant="Bold" />
                 <Text style={styles.headerTitle}>Restricted Apps</Text>
                 <Text style={styles.headerCount}>{apps.length}</Text>
               </View>
@@ -104,7 +105,7 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
                 style={styles.headerAddBtn}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
-                <Add size={30} color={palette.focusColor} variant="Bold" />
+                <Add size={30} color={BRAND_COLORS.danger} variant="Bold" />
               </TouchableOpacity>
             </View>
 
@@ -136,7 +137,7 @@ export function BlockedAppsModal({ visible, onClose }: BlockedAppsModalProps) {
                     style={styles.removeBtn}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Minus size={18} color="#FF6B6B" variant="Linear" />
+                    <Minus size={20} color={BRAND_COLORS.danger} variant="Bold" />
                   </TouchableOpacity>
                 </View>
               ))}

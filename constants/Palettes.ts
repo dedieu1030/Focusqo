@@ -1,6 +1,8 @@
 export const BRAND_COLORS = {
   focus: '#0A84FF', // Midnight Blue
   break: '#FF9F0A', // Midnight Orange
+  danger: '#FF453A', // System Red
+  deep: '#5E5CE6',   // System Indigo
 };
 
 export type ColorPalette = {

@@ -14,6 +14,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { SearchNormal1, Add, TickCircle } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore, KNOWN_ICONS } from '../../store/useBlockedAppsStore';
+import { BRAND_COLORS } from '../../constants/Palettes';
 
 interface AddAppModalProps {
   visible: boolean;
@@ -194,7 +195,7 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
                     style={styles.addBtn}
                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                   >
-                    <Add size={26} color={palette.focusColor} variant="Bold" />
+                    <Add size={26} color={BRAND_COLORS.danger} variant="Bold" />
                   </TouchableOpacity>
                 )}
               </View>

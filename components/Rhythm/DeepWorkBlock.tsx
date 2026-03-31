@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Switch, Platform } from 'react-native';
 import { Lock } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
+import { BRAND_COLORS } from '../../constants/Palettes';
 
 interface DeepWorkBlockProps {
   enabled: boolean;
@@ -16,7 +17,7 @@ export function DeepWorkBlock({ enabled, onToggle }: DeepWorkBlockProps) {
       <View style={styles.contentRow}>
         <View style={styles.labelGroup}>
           <View style={styles.titleRow}>
-            <Lock size={18} color={palette.focusColor} variant="Bold" />
+            <Lock size={18} color={BRAND_COLORS.deep} variant="Bold" />
             <Text style={[styles.title, { color: palette.timerText }]}>Deep Work</Text>
           </View>
           <Text style={[styles.description, { color: palette.timerText }]} numberOfLines={2}>
@@ -30,7 +31,7 @@ export function DeepWorkBlock({ enabled, onToggle }: DeepWorkBlockProps) {
             onValueChange={onToggle}
             trackColor={{ 
               false: palette.timerText + '20', 
-              true: palette.focusColor 
+              true: BRAND_COLORS.deep 
             }}
             thumbColor={'#FFFFFF'}
             ios_backgroundColor={palette.timerText + '20'}
