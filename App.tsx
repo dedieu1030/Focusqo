@@ -254,13 +254,19 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   handleTouchArea: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 12, // Still need touch area, but absolute won't push layout
+    zIndex: 100,
   },
   handleBar: {
-    height: 5,
-    borderRadius: 3,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: '#888888',
+    opacity: 0.5,
   },
 });
