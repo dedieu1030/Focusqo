@@ -92,12 +92,14 @@ export default function App() {
       }
     });
 
-  // Animated style: opacity dissolve + height collapse
+  // Animated style: opacity dissolves FIRST, then height collapses
   const blocksContainerStyle = useAnimatedStyle(() => {
     const targetHeight = measuredHeight || 180;
     return {
-      height: interpolate(progress.value, [0, 1], [targetHeight, 0], 'clamp'),
-      opacity: interpolate(progress.value, [0, 0.6], [1, 0], 'clamp'),
+      // Height: stays full until progress 0.3, then collapses from 0.3→1
+      height: interpolate(progress.value, [0, 0.3, 1], [targetHeight, targetHeight, 0], 'clamp'),
+      // Opacity: fades out quickly from progress 0→0.35
+      opacity: interpolate(progress.value, [0, 0.35], [1, 0], 'clamp'),
       overflow: 'hidden' as const,
     };
   });
