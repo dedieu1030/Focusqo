@@ -1,25 +1,130 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, TouchableOpacity, 
   Image, Dimensions 
 } from 'react-native';
+import Animated, { 
+  useSharedValue, useAnimatedStyle, 
+  withSpring, withDelay, withSequence, withTiming,
+  FadeInUp, FadeIn,
+} from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 import { ArrowLeft2, Lock1, Cup } from 'iconsax-react-native';
 import { useThemeStore } from '../store/useThemeStore';
 import { useTimerStore } from '../store/useTimerStore';
 import { useAchievementsStore, ACHIEVEMENTS_CATALOG } from '../store/useAchievementsStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const NODE_SIZE = 80;
-const PATH_WIDTH = SCREEN_WIDTH - 48;
+const CARD_WIDTH = SCREEN_WIDTH - 48;
+const IMAGE_SIZE = 120;
 
 // Map achievement IDs to their reward images
-// For now only guardian_1 has an image; rest will show a placeholder
 const REWARD_IMAGES: Record<number, any> = {
   1: require('../assets/rewards/guardian_1.png'),
 };
 
 interface RewardsScreenProps {
   onBack: () => void;
+}
+
+// Curved connector component
+function CurvedConnector({ color, direction }: { color: string; direction: 'left' | 'right' }) {
+  const w = CARD_WIDTH * 0.5;
+  const h = 48;
+  
+  const path = direction === 'right' 
+    ? `M ${w * 0.3} 0 C ${w * 0.3} ${h * 0.6}, ${w * 0.7} ${h * 0.4}, ${w * 0.7} ${h}`
+    : `M ${w * 0.7} 0 C ${w * 0.7} ${h * 0.6}, ${w * 0.3} ${h * 0.4}, ${w * 0.3} ${h}`;
+
+  return (
+    <View style={{ width: w, height: h, alignSelf: 'center' }}>
+      <Svg width={w} height={h}>
+        <Path
+          d={path}
+          stroke={color}
+          strokeWidth={2.5}
+          fill="none"
+          strokeDasharray="6,4"
+          strokeLinecap="round"
+        />
+      </Svg>
+    </View>
+  );
+}
+
+// Single achievement node
+function AchievementNode({ 
+  achievement, 
+  isUnlocked, 
+  eraColor, 
+  index,
+  palette,
+}: { 
+  achievement: typeof ACHIEVEMENTS_CATALOG[0];
+  isUnlocked: boolean;
+  eraColor: string;
+  index: number;
+  palette: any;
+}) {
+  const hasImage = REWARD_IMAGES[achievement.id];
+  const animDelay = index * 80;
+
+  if (isUnlocked) {
+    return (
+      <Animated.View 
+        entering={FadeInUp.delay(animDelay).springify().damping(14)}
+        style={[styles.nodeCard, { backgroundColor: palette.timerBlock }]}
+      >
+        {/* Image or Icon */}
+        <View style={[styles.nodeImageContainer, { borderColor: eraColor + '40' }]}>
+          {hasImage ? (
+            <Image 
+              source={REWARD_IMAGES[achievement.id]} 
+              style={styles.nodeImageFull} 
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.nodeIconFallback, { backgroundColor: eraColor + '15' }]}>
+              <Cup size={36} color={eraColor} variant="Bold" />
+            </View>
+          )}
+        </View>
+
+        {/* Info */}
+        <View style={styles.nodeInfo}>
+          <View style={[styles.unlockedBadge, { backgroundColor: eraColor + '20' }]}>
+            <Text style={[styles.unlockedText, { color: eraColor }]}>Unlocked</Text>
+          </View>
+          <Text style={[styles.nodeName, { color: palette.timerText }]}>
+            {achievement.title}
+          </Text>
+          <Text style={[styles.nodeDesc, { color: palette.timerText }]}>
+            {achievement.description}
+          </Text>
+        </View>
+      </Animated.View>
+    );
+  }
+
+  // Locked state
+  return (
+    <Animated.View 
+      entering={FadeIn.delay(animDelay).duration(300)}
+      style={[styles.lockedNode, { backgroundColor: palette.secondaryText + '08' }]}
+    >
+      <View style={[styles.lockedCircle, { backgroundColor: palette.secondaryText + '10' }]}>
+        <Lock1 size={20} color={palette.secondaryText + '40'} variant="Bold" />
+      </View>
+      <View style={styles.lockedInfo}>
+        <Text style={[styles.lockedName, { color: palette.secondaryText + '60' }]}>
+          {achievement.title}
+        </Text>
+        <Text style={[styles.lockedDesc, { color: palette.secondaryText + '40' }]} numberOfLines={1}>
+          {achievement.description}
+        </Text>
+      </View>
+    </Animated.View>
+  );
 }
 
 export function RewardsScreen({ onBack }: RewardsScreenProps) {
@@ -48,7 +153,6 @@ export function RewardsScreen({ onBack }: RewardsScreenProps) {
   const totalUnlocked = unlockedIds.length;
   const progressPercent = Math.round((totalUnlocked / 50) * 100);
 
-  // Group achievements by era
   const eras = ['wisp', 'guardian', 'sage', 'deity'] as const;
 
   return (
@@ -92,7 +196,7 @@ export function RewardsScreen({ onBack }: RewardsScreenProps) {
         </View>
       </View>
 
-      {/* Achievement Path */}
+      {/* Achievement Journey */}
       <ScrollView 
         contentContainerStyle={styles.scrollContent} 
         showsVerticalScrollIndicator={false}
@@ -115,91 +219,39 @@ export function RewardsScreen({ onBack }: RewardsScreenProps) {
                 </Text>
               </View>
 
-              {/* Achievement Nodes — S-curve layout */}
-              <View style={styles.nodesContainer}>
-                {eraAchievements.map((achievement, index) => {
-                  const isUnlocked = unlockedIds.includes(achievement.id);
-                  const hasImage = REWARD_IMAGES[achievement.id];
-                  
-                  // S-curve: alternate left and right
-                  const isLeft = index % 2 === 0;
-                  const nodeOffset = isLeft ? 0 : PATH_WIDTH - NODE_SIZE;
+              {/* Achievement Nodes */}
+              {eraAchievements.map((achievement, index) => {
+                const isUnlocked = unlockedIds.includes(achievement.id);
+                const nextIsUnlocked = index < eraAchievements.length - 1 
+                  && unlockedIds.includes(eraAchievements[index + 1].id);
+                const showConnector = index < eraAchievements.length - 1;
+                const connectorColor = isUnlocked && nextIsUnlocked 
+                  ? eraColor 
+                  : palette.secondaryText + '20';
+                const direction = index % 2 === 0 ? 'right' : 'left';
 
-                  return (
-                    <View key={achievement.id}>
-                      {/* Connecting line */}
-                      {index > 0 && (
-                        <View style={[styles.connectorLine, { 
-                          backgroundColor: isUnlocked ? eraColor + '40' : palette.secondaryText + '15',
-                          left: PATH_WIDTH / 2 - 1,
-                        }]} />
-                      )}
-
-                      {/* Node */}
-                      <View style={[styles.nodeRow, { marginLeft: nodeOffset }]}>
-                        <View style={[
-                          styles.nodeCircle, 
-                          { 
-                            borderColor: isUnlocked ? eraColor : palette.secondaryText + '30',
-                            backgroundColor: isUnlocked 
-                              ? eraColor + '15' 
-                              : palette.secondaryText + '08',
-                          }
-                        ]}>
-                          {isUnlocked && hasImage ? (
-                            <Image 
-                              source={REWARD_IMAGES[achievement.id]} 
-                              style={styles.nodeImage} 
-                            />
-                          ) : isUnlocked ? (
-                            <Cup size={28} color={eraColor} variant="Bold" />
-                          ) : (
-                            <Lock1 size={24} color={palette.secondaryText + '50'} variant="Bold" />
-                          )}
-                        </View>
-
-                        {/* Label */}
-                        <View style={[
-                          styles.nodeLabel, 
-                          isLeft ? { marginLeft: 12 } : { marginRight: 12, alignItems: 'flex-end' },
-                          !isLeft && { flexDirection: 'row-reverse' }
-                        ]}>
-                          <View>
-                            <Text 
-                              style={[
-                                styles.nodeName, 
-                                { color: isUnlocked ? palette.primaryText : palette.secondaryText + '80' }
-                              ]}
-                              numberOfLines={1}
-                            >
-                              {achievement.title}
-                            </Text>
-                            <Text 
-                              style={[
-                                styles.nodeDesc, 
-                                { 
-                                  color: palette.secondaryText,
-                                  textAlign: isLeft ? 'left' : 'right',
-                                }
-                              ]}
-                              numberOfLines={2}
-                            >
-                              {achievement.description}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
+                return (
+                  <View key={achievement.id}>
+                    <AchievementNode
+                      achievement={achievement}
+                      isUnlocked={isUnlocked}
+                      eraColor={eraColor}
+                      index={index}
+                      palette={palette}
+                    />
+                    {showConnector && (
+                      <CurvedConnector color={connectorColor} direction={direction} />
+                    )}
+                  </View>
+                );
+              })}
             </View>
           );
         })}
 
         {/* Final message */}
         <View style={styles.finalMessage}>
-          <Text style={[styles.finalEmoji]}>🌟</Text>
+          <Text style={styles.finalEmoji}>🌟</Text>
           <Text style={[styles.finalText, { color: palette.secondaryText }]}>
             The journey of a year begins with a single session.
           </Text>
@@ -221,7 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 60,
     paddingHorizontal: 24,
-    paddingBottom: 16,
+    paddingBottom: 12,
   },
   backBtn: {
     width: 40,
@@ -247,7 +299,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     padding: 16,
     borderRadius: 20,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   progressRow: {
     flexDirection: 'row',
@@ -275,16 +327,17 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 60,
   },
   eraSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   eraHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   eraDot: {
     width: 10,
@@ -300,50 +353,91 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  nodesContainer: {
-    paddingLeft: 0,
-  },
-  connectorLine: {
-    position: 'absolute',
-    width: 2,
-    height: 40,
-    top: -20,
-  },
-  nodeRow: {
+
+  // -- Unlocked Card --
+  nodeCard: {
+    borderRadius: 20,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    width: NODE_SIZE + 160,
+    gap: 14,
   },
-  nodeCircle: {
-    width: NODE_SIZE,
-    height: NODE_SIZE,
-    borderRadius: NODE_SIZE / 2,
-    borderWidth: 2.5,
-    alignItems: 'center',
-    justifyContent: 'center',
+  nodeImageContainer: {
+    width: IMAGE_SIZE,
+    height: IMAGE_SIZE,
+    borderRadius: 16,
+    borderWidth: 2,
     overflow: 'hidden',
   },
-  nodeImage: {
-    width: NODE_SIZE - 6,
-    height: NODE_SIZE - 6,
-    borderRadius: (NODE_SIZE - 6) / 2,
+  nodeImageFull: {
+    width: '100%',
+    height: '100%',
   },
-  nodeLabel: {
+  nodeIconFallback: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+  },
+  nodeInfo: {
     flex: 1,
+    gap: 4,
+  },
+  unlockedBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginBottom: 2,
+  },
+  unlockedText: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   nodeName: {
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: '700',
     letterSpacing: -0.3,
   },
   nodeDesc: {
+    fontSize: 13,
+    fontWeight: '500',
+    opacity: 0.5,
+    lineHeight: 18,
+  },
+
+  // -- Locked Node --
+  lockedNode: {
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  lockedCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockedInfo: {
+    flex: 1,
+  },
+  lockedName: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  lockedDesc: {
     fontSize: 12,
     fontWeight: '500',
     marginTop: 2,
-    opacity: 0.7,
-    lineHeight: 16,
   },
+
+  // -- Final --
   finalMessage: {
     alignItems: 'center',
     paddingVertical: 40,
