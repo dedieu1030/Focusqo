@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { ShieldAlert } from 'lucide-react-native';
+import { ShieldAlert, Plus } from 'lucide-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore } from '../../store/useBlockedAppsStore';
 
@@ -31,29 +31,31 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
       </View>
 
       <View style={styles.appsContainer}>
-        {visibleApps.map((app) => (
-          <View key={app.id} style={styles.appIconWrapper}>
-            {app.icon ? (
-              <Image source={app.icon} style={styles.appIcon} />
-            ) : (
-              <View style={[styles.appIconPlaceholder, { backgroundColor: palette.focusColor + '30' }]}>
-                <Text style={[styles.appIconLetter, { color: palette.focusColor }]}>
-                  {app.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-            )}
+        {apps.length === 0 ? (
+          <View style={[styles.emptyAddBtn, { backgroundColor: palette.focusColor }]}>
+            <Plus size={22} color="#FFF" strokeWidth={3.5} />
           </View>
-        ))}
+        ) : (
+          visibleApps.map((app) => (
+            <View key={app.id} style={styles.appIconWrapper}>
+              {app.icon ? (
+                <Image source={app.icon} style={styles.appIcon} />
+              ) : (
+                <View style={[styles.appIconPlaceholder, { backgroundColor: palette.focusColor + '30' }]}>
+                  <Text style={[styles.appIconLetter, { color: palette.focusColor }]}>
+                    {app.name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ))
+        )}
         
         {extraCount > 0 && (
           <View style={[styles.overflowCircle, { backgroundColor: palette.secondaryText + '20' }]}>
             <Text style={[styles.overflowText, { color: palette.timerText }]}>+{extraCount}</Text>
           </View>
         )}
-      </View>
-
-      <View style={styles.footer}>
-        <Text style={[styles.footerStatus, { color: palette.timerText }]}>Blocked during Focus</Text>
       </View>
     </TouchableOpacity>
   );
@@ -62,12 +64,11 @@ export function BlockedApps({ onPress }: BlockedAppsProps) {
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 28,
     marginTop: 16,
     minHeight: 108,
-    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
@@ -81,9 +82,9 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   appsContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    height: 52,
     gap: 4,
     justifyContent: 'center',
   },
@@ -119,14 +120,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
   },
-  footer: {
+  emptyAddBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
-  },
-  footerStatus: {
-    fontSize: 12,
-    fontWeight: '800',
-    opacity: 0.5,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    justifyContent: 'center',
   },
 });
