@@ -1,9 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { 
   View, Text, StyleSheet, Modal, TouchableOpacity, 
-  TextInput, FlatList, KeyboardAvoidingView, Platform, Image 
+  TextInput, FlatList, KeyboardAvoidingView, Platform, Image, Dimensions
 } from 'react-native';
-import { ChevronLeft, Search, Plus, Check } from 'lucide-react-native';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring, 
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Search, Plus, Check } from 'lucide-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useBlockedAppsStore, KNOWN_ICONS } from '../../store/useBlockedAppsStore';
 
@@ -12,21 +20,57 @@ interface AddAppModalProps {
   onClose: () => void;
 }
 
-// Convert KNOWN_ICONS to an array of objects for the catalog
 const CATALOG_APPS = Object.keys(KNOWN_ICONS).map((key) => ({
   id: key,
   name: key.charAt(0).toUpperCase() + key.slice(1),
   icon: KNOWN_ICONS[key],
 }));
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const SPRING_CONFIG = {
+  damping: 28,
+  stiffness: 220,
+  mass: 1,
+  overshootClamping: false,
+};
+
 export function AddAppModal({ visible, onClose }: AddAppModalProps) {
   const { palette } = useThemeStore();
   const { apps, addApp } = useBlockedAppsStore();
   const [searchQuery, setSearchQuery] = useState('');
 
+  const translateY = useSharedValue(SCREEN_HEIGHT);
+  const backdropOpacity = useSharedValue(0);
+
+  React.useEffect(() => {
+    if (visible) {
+      translateY.value = withSpring(0, SPRING_CONFIG);
+      backdropOpacity.value = withTiming(1, { duration: 300 });
+    } else {
+      translateY.value = withSpring(SCREEN_HEIGHT, { ...SPRING_CONFIG, damping: 40 });
+      backdropOpacity.value = withTiming(0, { duration: 200 });
+    }
+  }, [visible]);
+
+  const animatedSheet = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const animatedBackdrop = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
+
+  const handleClose = () => {
+    translateY.value = withSpring(SCREEN_HEIGHT, { ...SPRING_CONFIG, damping: 40 });
+    backdropOpacity.value = withTiming(0, { duration: 200 });
+    setTimeout(onClose, 300);
+  };
+
   // Filter catalog based on search
   const filteredCatalog = useMemo(() => {
     if (!searchQuery.trim()) return CATALOG_APPS;
+
     
     const query = searchQuery.trim().toLowerCase();
     const matches = CATALOG_APPS.filter((app) => 
@@ -56,21 +100,42 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
     return apps.some(a => a.name.toLowerCase() === appName.toLowerCase());
   };
 
+  const panGesture = Gesture.Pan()
+    .onChange((event) => {
+      if (event.translationY > 0) {
+        translateY.value = event.translationY;
+      }
+    })
+    .onEnd((event) => {
+      if (event.translationY > 150 || event.velocityY > 500) {
+        runOnJS(handleClose)();
+      } else {
+        translateY.value = withSpring(0, SPRING_CONFIG);
+      }
+    });
+
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={[styles.container, { backgroundColor: '#111' }]}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <ChevronLeft size={28} color="#FFF" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add App</Text>
-          <View style={{ width: 44 }} />
-          {/* Balance for back button */}
-        </View>
+    <Modal visible={visible} transparent animationType="none" statusBarTranslucent>
+      {/* Backdrop */}
+      <Animated.View style={[styles.backdrop, animatedBackdrop]}>
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={handleClose} />
+      </Animated.View>
+
+      <GestureDetector gesture={panGesture}>
+        <Animated.View style={[styles.sheet, animatedSheet]}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.keyboardInner}
+          >
+            {/* Drag Handle */}
+            <View style={styles.handleContainer}>
+              <View style={styles.handle} />
+            </View>
+
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>Add App</Text>
+            </View>
 
         {/* Search Bar */}
         <View style={styles.searchSection}>
@@ -137,30 +202,48 @@ export function AddAppModal({ visible, onClose }: AddAppModalProps) {
             );
           }}
         />
-      </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </Animated.View>
+      </GestureDetector>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#111',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    height: SCREEN_HEIGHT * 0.9,
+  },
+  keyboardInner: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
+  handleContainer: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 16 : 24,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  handle: {
+    width: 40,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: '#333',
+  },
+  header: {
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#222',
-  },
-  backBtn: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 18,
