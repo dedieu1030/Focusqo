@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import "./global.css";
-import { View, StyleSheet, SafeAreaView, AppState, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, StyleSheet, SafeAreaView, AppState, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent, Modal } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -19,14 +19,17 @@ import * as Haptics from 'expo-haptics';
 import { TimerScreen } from './screens/TimerScreen';
 import { InsightsScreen } from './screens/InsightsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { SleepScreen } from './screens/SleepScreen';
 import { TodayRhythm } from './components/Rhythm/TodayRhythm';
 import { BlockedApps } from './components/Rhythm/BlockedApps';
 import { BlockedAppsModal } from './components/Rhythm/BlockedAppsModal';
 import { DeepWorkBlock } from './components/Rhythm/DeepWorkBlock';
+import { FrictionModal } from './components/FrictionModal';
 import { BottomNav, ScreenName } from './components/Navigation/BottomNav';
 import { useThemeStore } from './store/useThemeStore';
 import { useTimerStore } from './store/useTimerStore';
 import { useBlockedAppsStore } from './store/useBlockedAppsStore';
+import { useSleepStore } from './store/useSleepStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -37,6 +40,7 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('timer');
   const [activePage, setActivePage] = useState(0);
   const [showAppsModal, setShowAppsModal] = useState(false);
+  const [showFrictionModal, setShowFrictionModal] = useState(false);
   const [deepWorkEnabled, setDeepWorkEnabled] = useState(false);
 
   // ---------- Collapsible blocks logic ----------
@@ -111,13 +115,17 @@ export default function App() {
   const { palette, loadPalette } = useThemeStore();
   const { loadState, tick, syncBackgroundTime } = useTimerStore();
   const { loadApps } = useBlockedAppsStore();
+  const { loadSleepSettings, sleepTime, wakeTime, isOnboarded } = useSleepStore();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const init = async () => {
-      await loadPalette();
-      await loadState();
-      await loadApps();
+      await Promise.all([
+        loadPalette(),
+        loadState(),
+        loadApps(),
+        loadSleepSettings()
+      ]);
       setIsLoaded(true);
     };
     init();
@@ -128,6 +136,34 @@ export default function App() {
     const interval = setInterval(() => { tick(); }, 1000);
     return () => clearInterval(interval);
   }, [isLoaded, tick]);
+
+  useEffect(() => {
+    if (!isLoaded || !isOnboarded) return;
+    
+    // Check sleep status every 30s
+    const checkSleep = () => {
+      const now = new Date();
+      const currentMins = now.getHours() * 60 + now.getMinutes();
+      
+      const [sH, sM] = sleepTime.split(':').map(Number);
+      const [wH, wM] = wakeTime.split(':').map(Number);
+      
+      const sleepByMins = sH * 60 + sM;
+      let wakeByMins = wH * 60 + wM;
+      if (wakeByMins < sleepByMins) wakeByMins += 24 * 60;
+      
+      // Determine if we are in the "Forbidden Scroll Zone"
+      const isPastBedtime = currentMins >= sleepByMins && currentMins < wakeByMins;
+      
+      if (isPastBedtime && !showFrictionModal) {
+        setShowFrictionModal(true);
+      }
+    };
+
+    checkSleep();
+    const interval = setInterval(checkSleep, 30000);
+    return () => clearInterval(interval);
+  }, [isLoaded, isOnboarded, sleepTime, wakeTime, showFrictionModal]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState) => {
@@ -160,6 +196,7 @@ export default function App() {
         <View style={[styles.cardContainer, { backgroundColor: palette.background }]}>
           {currentScreen === 'timer' && <TimerScreen />}
           {currentScreen === 'insights' && <InsightsScreen />}
+          {currentScreen === 'sleep' && <SleepScreen />}
           {currentScreen === 'settings' && <SettingsScreen />}
 
           {/* HANDLE — inside the screen card, visually above the dark nav */}
@@ -216,11 +253,13 @@ export default function App() {
             </View>
           </Animated.View>
 
+          {/* Bottom Navigation */}
           <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />
         </SafeAreaView>
       </View>
 
       <BlockedAppsModal visible={showAppsModal} onClose={() => setShowAppsModal(false)} />
+      <FrictionModal visible={showFrictionModal} onClose={() => setShowFrictionModal(false)} />
     </GestureHandlerRootView>
   );
 }

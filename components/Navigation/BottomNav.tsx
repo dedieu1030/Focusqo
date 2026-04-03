@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Chart, Setting2, Timer1 } from 'iconsax-react-native';
+import { Chart, Setting2, Timer1, Moon } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 
-export type ScreenName = 'timer' | 'insights' | 'settings';
+export type ScreenName = 'timer' | 'insights' | 'settings' | 'sleep';
 
 interface BottomNavProps {
   currentScreen: ScreenName;
@@ -15,6 +15,7 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
 
   return (
     <View style={styles.container}>
+      {/* INSIGHTS */}
       <TouchableOpacity 
         style={[styles.navItem, currentScreen === 'insights' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('insights')}
@@ -24,23 +25,39 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
           color={currentScreen === 'insights' ? palette.timerText : palette.secondaryText} 
           variant={currentScreen === 'insights' ? 'Bold' : 'Linear'}
         />
-        <Text style={[styles.navText, { color: currentScreen === 'insights' ? palette.timerText : palette.secondaryText }]}>Insights</Text>
       </TouchableOpacity>
 
+      {/* SLEEP (HERO) */}
       <TouchableOpacity 
         style={[
-          styles.centerItem, 
+          styles.heroItem, 
+          currentScreen === 'sleep' && { backgroundColor: palette.focusColor }
+        ]} 
+        onPress={() => onNavigate('sleep')}
+      >
+        <Moon 
+          size={28} 
+          color={currentScreen === 'sleep' ? '#FFFFFF' : palette.secondaryText} 
+          variant={currentScreen === 'sleep' ? 'Bold' : 'Linear'}
+        />
+      </TouchableOpacity>
+
+      {/* TIMER (HERO) */}
+      <TouchableOpacity 
+        style={[
+          styles.heroItem, 
           currentScreen === 'timer' && { backgroundColor: palette.timerBlock }
         ]} 
         onPress={() => onNavigate('timer')}
       >
         <Timer1 
-          size={32} 
+          size={28} 
           color={currentScreen === 'timer' ? palette.timerText : palette.secondaryText} 
           variant={currentScreen === 'timer' ? 'Bold' : 'Linear'}
         />
       </TouchableOpacity>
 
+      {/* SETTINGS */}
       <TouchableOpacity 
         style={[styles.navItem, currentScreen === 'settings' && { backgroundColor: palette.timerBlock }]} 
         onPress={() => onNavigate('settings')}
@@ -50,7 +67,6 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
           color={currentScreen === 'settings' ? palette.timerText : palette.secondaryText} 
           variant={currentScreen === 'settings' ? 'Bold' : 'Linear'}
         />
-        <Text style={[styles.navText, { color: currentScreen === 'settings' ? palette.timerText : palette.secondaryText }]}>Settings</Text>
       </TouchableOpacity>
     </View>
   );
@@ -59,33 +75,28 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
     paddingTop: 18,
-    paddingBottom: 0, 
-    gap: 12,
+    paddingBottom: 8, 
   },
   navItem: {
-    flexDirection: 'row',
+    width: 48,
+    height: 48,
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    justifyContent: 'center',
     borderRadius: 24,
-    gap: 8,
-    justifyContent: 'center',
   },
-  centerItem: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  heroItem: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 8,
+    backgroundColor: 'rgba(255,255,255,0.03)',
   },
   navText: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: -0.3,
+    display: 'none',
   },
 });
