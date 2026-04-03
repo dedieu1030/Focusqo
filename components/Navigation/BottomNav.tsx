@@ -31,13 +31,13 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
       <TouchableOpacity 
         style={[
           styles.heroItem, 
-          currentScreen === 'sleep' && { backgroundColor: palette.focusColor }
+          currentScreen === 'sleep' && { backgroundColor: palette.timerBlock }
         ]} 
         onPress={() => onNavigate('sleep')}
       >
         <Moon 
           size={28} 
-          color={currentScreen === 'sleep' ? '#FFFFFF' : palette.secondaryText} 
+          color={currentScreen === 'sleep' ? palette.timerText : palette.secondaryText} 
           variant={currentScreen === 'sleep' ? 'Bold' : 'Linear'}
         />
       </TouchableOpacity>
