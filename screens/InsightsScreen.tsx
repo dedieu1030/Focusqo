@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimerStore, SessionRecord } from '../store/useTimerStore';
 import { useThemeStore } from '../store/useThemeStore';
-import { Timer1, Flash, Direct, Tag, Cup } from 'iconsax-react-native';
-import { useAchievementsStore } from '../store/useAchievementsStore';
+import { Timer1, Flash, Direct, Tag } from 'iconsax-react-native';
 import { WeeklyActivityChart } from '../components/Insights/WeeklyActivityChart';
 import { DailyActivityChart } from '../components/Insights/DailyActivityChart';
 import { MonthlyActivityChart } from '../components/Insights/MonthlyActivityChart';
@@ -12,14 +11,9 @@ import { YearlyActivityChart } from '../components/Insights/YearlyActivityChart'
 
 type InsightsView = 'day' | 'week' | 'month' | 'year';
 
-interface InsightsScreenProps {
-  onOpenRewards?: () => void;
-}
-
-export function InsightsScreen({ onOpenRewards }: InsightsScreenProps) {
+export function InsightsScreen() {
   const { labels, history } = useTimerStore();
   const { palette } = useThemeStore();
-  const { unlockedIds } = useAchievementsStore();
   const [activeView, setActiveView] = useState<InsightsView>('day');
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(new Date().getDay());
 
@@ -95,22 +89,8 @@ export function InsightsScreen({ onOpenRewards }: InsightsScreenProps) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header with title and rewards button */}
       <View style={styles.headerRow}>
-        <View style={{ width: 40 }} />
         <Text style={[styles.screenTitle, { color: palette.primaryText }]}>Insights</Text>
-        <TouchableOpacity
-          onPress={onOpenRewards}
-          style={styles.rewardsBtn}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Cup size={22} color={palette.focusColor} variant="Bold" />
-          {unlockedIds.length > 0 && (
-            <View style={[styles.rewardsBadge, { backgroundColor: palette.focusColor }]}>
-              <Text style={styles.rewardsBadgeText}>{unlockedIds.length}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
       </View>
 
       {/* Unified Navigation Toggles */}
@@ -170,29 +150,8 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 24,
     fontWeight: '600',
+    flex: 1,
     textAlign: 'center',
-  },
-  rewardsBtn: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rewardsBadge: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  rewardsBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '900',
   },
   chartContainer: {
     borderRadius: 28,

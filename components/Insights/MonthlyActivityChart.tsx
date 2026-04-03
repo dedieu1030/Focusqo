@@ -46,16 +46,9 @@ export function MonthlyActivityChart({ history, palette }: MonthlyActivityChartP
     let breakSecs = 0;
 
     relevantHistory.forEach(r => {
-      const sessionStart = r.timestamp;
-      const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
-
-      const overlapStart = Math.max(start, sessionStart);
-      const overlapEnd = Math.min(end, sessionEnd);
-
-      if (overlapEnd > overlapStart) {
-        const durationSec = (overlapEnd - overlapStart) / 1000;
-        if (r.mode === 'focus') focusSecs += durationSec;
-        else breakSecs += durationSec;
+      if (r.timestamp >= start && r.timestamp < end) {
+        if (r.mode === 'focus') focusSecs += r.durationInSeconds;
+        else breakSecs += r.durationInSeconds;
       }
     });
 

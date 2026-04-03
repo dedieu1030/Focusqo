@@ -233,9 +233,12 @@ export const useTimerStore = create<TimerState>((set, get) => ({
 
   _completeSession: async () => {
     const { 
-      mode, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, 
+      timerState, mode, focusDurationMin, focusDurationSec, breakDurationMin, breakDurationSec, longBreakDurationMin, longBreakDurationSec, 
       history, todayHistory, currentCycleCount, cyclesBeforeLongBreak, soundEnabled, hapticEnabled, selectedLabelId
     } = get();
+
+    // Safety guard to prevent double completion
+    if (timerState !== 'running') return;
     
     if (hapticEnabled) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (soundEnabled) playChime();
@@ -340,7 +343,17 @@ export const useTimerStore = create<TimerState>((set, get) => ({
 
       const historyStr = await AsyncStorage.getItem(STORAGE_KEY + '_history');
       if (historyStr) {
-        const fullHistory: SessionRecord[] = JSON.parse(historyStr);
+        let fullHistory: SessionRecord[] = JSON.parse(historyStr);
+        
+        // DE-DUPLICATION & CLEANUP
+        // Remove duplicates and entries with impossible durations (e.g. > 24h)
+        const seenIds = new Set();
+        fullHistory = fullHistory.filter(r => {
+          if (!r.id || seenIds.has(r.id) || r.durationInSeconds > 86400 || r.durationInSeconds <= 0) return false;
+          seenIds.add(r.id);
+          return true;
+        });
+
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
         const todayHistory = fullHistory.filter(r => r.timestamp >= startOfToday.getTime());

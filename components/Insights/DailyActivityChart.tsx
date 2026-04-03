@@ -46,18 +46,11 @@ export function DailyActivityChart({ history, palette, date }: DailyActivityChar
     let focusMins = 0;
     let breakMins = 0;
 
-    // Filter and compute overlap for each session to properly attribute time to the right hour slot
+    // Direct attribution by start time (much more robust)
     relevantDayHistory.forEach(r => {
-      const sessionStart = r.timestamp;
-      const sessionEnd = r.timestamp + r.durationInSeconds * 1000;
-
-      const overlapStart = Math.max(start, sessionStart);
-      const overlapEnd = Math.min(end, sessionEnd);
-
-      if (overlapEnd > overlapStart) {
-        const durationSec = (overlapEnd - overlapStart) / 1000;
-        if (r.mode === 'focus') focusMins += durationSec / 60;
-        else breakMins += durationSec / 60;
+      if (r.timestamp >= start && r.timestamp < end) {
+        if (r.mode === 'focus') focusMins += r.durationInSeconds / 60;
+        else breakMins += r.durationInSeconds / 60;
       }
     });
 
