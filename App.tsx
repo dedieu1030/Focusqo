@@ -19,6 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { TimerScreen } from './screens/TimerScreen';
 import { InsightsScreen } from './screens/InsightsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { SleepScreen } from './screens/SleepScreen';
 import { TodayRhythm } from './components/Rhythm/TodayRhythm';
 import { BlockedApps } from './components/Rhythm/BlockedApps';
 import { BlockedAppsModal } from './components/Rhythm/BlockedAppsModal';
@@ -27,6 +28,7 @@ import { BottomNav, ScreenName } from './components/Navigation/BottomNav';
 import { useThemeStore } from './store/useThemeStore';
 import { useTimerStore } from './store/useTimerStore';
 import { useBlockedAppsStore } from './store/useBlockedAppsStore';
+import { useSleepStore } from './store/useSleepStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -118,6 +120,7 @@ export default function App() {
       await loadPalette();
       await loadState();
       await loadApps();
+      await useSleepStore.getState().loadSettings();
       setIsLoaded(true);
     };
     init();
@@ -161,6 +164,7 @@ export default function App() {
           {currentScreen === 'timer' && <TimerScreen />}
           {currentScreen === 'insights' && <InsightsScreen />}
           {currentScreen === 'settings' && <SettingsScreen />}
+          {currentScreen === 'sleep' && <SleepScreen />}
 
           {/* HANDLE — inside the screen card, visually above the dark nav */}
           <GestureDetector gesture={panGesture}>

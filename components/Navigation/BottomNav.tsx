@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Chart, Setting2, Timer1 } from 'iconsax-react-native';
+import { Chart, Setting2, Timer1, Moon } from 'iconsax-react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 
-export type ScreenName = 'timer' | 'insights' | 'settings';
+export type ScreenName = 'timer' | 'insights' | 'settings' | 'sleep';
 
 interface BottomNavProps {
   currentScreen: ScreenName;
@@ -25,6 +25,18 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
           variant={currentScreen === 'insights' ? 'Bold' : 'Linear'}
         />
         <Text style={[styles.navText, { color: currentScreen === 'insights' ? palette.timerText : palette.secondaryText }]}>Insights</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={[styles.navItem, currentScreen === 'sleep' && { backgroundColor: palette.timerBlock }]} 
+        onPress={() => onNavigate('sleep')}
+      >
+        <Moon 
+          size={24} 
+          color={currentScreen === 'sleep' ? palette.timerText : palette.secondaryText} 
+          variant={currentScreen === 'sleep' ? 'Bold' : 'Linear'}
+        />
+        <Text style={[styles.navText, { color: currentScreen === 'sleep' ? palette.timerText : palette.secondaryText }]}>Sleep</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
